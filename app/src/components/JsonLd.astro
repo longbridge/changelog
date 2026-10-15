@@ -1,0 +1,61 @@
+---
+/**
+ * 结构化数据。按标准用 @graph 数组把多个 schema 装在一个 script 里。
+ * WebSite 刻意不带 SearchAction——站点没有搜索页。
+ */
+import { siteConfig } from '@config/site.config'
+import { localePath, type Locale } from '@lib/i18n'
+
+interface Crumb {
+  name: string
+  /** 站内路径，留空表示当前页（面包屑最后一节不给 item） */
+  path?: string
+}
+
+interface Props {
+  locale: Locale
+  /** 面包屑，从「全部产品」开始，不含站点根 */
+  breadcrumbs?: Crumb[]
+}
+
+const { locale, breadcrumbs = [] } = Astro.props
+const origin = (Astro.site ?? new URL(Astro.url.origin)).origin
+const abs = (path: string) => new URL(path, origin).href
+
+const graph: Record<string, unknown>[] = [
+  {
+    '@type': 'Organization',
+    '@id': `${origin}#organization`,
+    name: 'Longbridge',
+    url: siteConfig.brandUrl,
+    logo: siteConfig.logo,
+    sameAs: [siteConfig.brandUrl],
+  },
+  {
+    '@type': 'WebSite',
+    '@id': `${origin}#website`,
+    name: siteConfig.name[locale],
+    url: abs(localePath(locale)),
+    inLanguage: locale,
+    publisher: { '@id': `${origin}#organization` },
+  },
+]
+
+if (breadcrumbs.length > 0) {
+  graph.push({
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbs.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.name,
+      ...(crumb.path ? { item: abs(crumb.path) } : {}),
+    })),
+  })
+}
+---
+
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}
+/>

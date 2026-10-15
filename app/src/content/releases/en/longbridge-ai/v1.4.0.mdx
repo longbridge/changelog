@@ -1,0 +1,84 @@
+---
+product: longbridge-ai
+version: 1.4.0
+tag: v1.4.0
+locale: en
+title: "AI Collaborative Online Documents"
+summary: "Ask for a document, and the AI creates and edits an online collaborative document. Stock and option codes in answers appear as quote links"
+highlights:
+  - "AI Collaborative Online Documents"
+  - "Quote Links in Answers"
+  - "Asset and P&L Analysis Cards"
+  - "Thinking Summaries"
+topics:
+  - LongbridgeAI
+  - My Agents and Workflow Building
+releasedAt: 2026-10-09T11:28:07.379Z
+platforms:
+  - Web
+status: published
+source:
+  provider: release-api
+  repo: m.lbkrs.com/api/forward/v1/babbage/public/release-notes
+  url: https://m.lbkrs.com/api/forward/v1/babbage/public/release-notes
+---
+
+## LongbridgeAI
+
+Unless otherwise noted, the following feature updates are available on the LongbridgeAI web and mobile web versions, and the AI built into the Longbridge App will roll out with upcoming App updates. Performance improvements are in effect on all versions.
+
+### New Features
+
+- **AI Collaborative Online Documents**: Ask for a document in a conversation, and the AI can create and edit an online collaborative document directly. The document is saved to My Artifacts automatically, and you can view it in the conversation or open it from My Artifacts. Leave a comment in the document and the AI will handle it in the background, without your having to ask again in the conversation. Removing a document from My Artifacts also deletes the online document permanently.
+- **Image Formats for Artifacts**: AI-generated artifacts now support five image formats: PNG, JPG, GIF, WebP, and SVG. Image artifacts are currently available as downloads and cannot yet be previewed in the artifact panel. File types are checked when an artifact is created, and unsupported types are rejected so that no unopenable files are produced.
+- **Quote Links in Answers**: Stock and option codes in AI answers (such as NVDA.US and 700.HK) appear as quote links once verified, so you can open the quote directly. Codes that cannot be verified stay as plain text to avoid linking to the wrong security.
+- **Asset and P&L Analysis Cards**: When you ask about your assets or profit and loss in a conversation, the analysis appears as a structured card, making it easier to review your account's assets and P&L.
+- **Plan Upgrade and Risk Assessment Entry Points**: In a conversation, the AI can show entry points for upgrading your plan or taking the risk assessment. The plan list shows the specific allowance of each feature by tier, so you can compare tiers item by item.
+- **Thinking Summaries**: In conversations with Agents that have thinking summaries enabled, the model's long-form reasoning appears as a title and summary, so you can quickly follow its progress.
+
+### Improvements
+
+- **Subtask Duration**: Subtask rows in a conversation show elapsed time on the right, updated in real time while running, so you can track the progress of each subtask.
+- **Artifact Cards and Previews**: Artifact cards show a distinct icon and background color for each file type. In dark mode, artifact previews keep the file's own colors, and switching themes no longer leaves the preview blank.
+- **Original News Sources**: Republished news shows the original publisher's name and site icon, helping you judge where the information comes from.
+- **Unlimited Plan Usage Display**: The usage panel for unlimited plans shows Unlimited instead of a number that could be mistaken for a cap.
+
+### Performance Improvements
+
+- **Sandbox Execution Speed**: Common operations in the AI sandbox now run faster.
+- **Switching When a Model Service Stops Responding**: When a model service returns nothing for a long time, the system now retries and switches to an available service within 5 minutes instead of waiting 10 minutes, reducing long periods without a response.
+- **Tool List Loading**: Agent tool lists are now read from a cache and refreshed automatically when tools change, instead of reloading the full list every time.
+- **Chart Service Stability**: Fixed memory growth in the chart service during long-running operation, preventing charts from failing to generate because memory runs out.
+
+### Bug Fixes
+
+- **Trading Password Verification for Delegated Tasks**: When an Agent delegates a task to an Agent or workflow that requires a trading password, it now asks you to enter your trading password and pauses the current answer, then continues after verification instead of returning an error. This fix is available on all versions.
+- **Currency Symbols on Quote Cards**: Quote cards show the currency symbol of each security's market, fixing Hong Kong stock and China A-share prices being shown with a dollar sign.
+
+### Usage Changes
+
+- **Page Position While Answers Generate**: After you send a question, the page stays at your question and the answer unfolds below it; the page no longer scrolls to the bottom automatically. When an answer runs past the screen, click Back to Bottom to see the latest content. Currently available on the web version only.
+
+## My Agents and Workflow Building
+
+### New Features
+
+- **New Models**: The model list now includes `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5`, `gpt-6-sol`, `gpt-6-luna`, `gpt-6.1-sol`, `grok-4.7`, `deepseek-flash`, and `deepseek-v4.1-flash` via Bailian, giving you more options for your Agents. `gpt-6.1-sol` is available through both direct OpenAI access and OpenRouter. Prices vary by model; see each model card for details.
+- **Thinking Summary Setting**: On the Agent configuration page, you can choose whether the model's long-form reasoning is turned into a title and summary shown to users. Generating summaries makes additional model calls.
+- **Question Classifier Model Selection**: Choose the decision model in the question classifier to configure the model used for classification tasks.
+- **JEV Judgment Node**: Workflows now include a judgment node based on JEV capabilities, so you can use JEV to make judgments within a workflow.
+
+### Bug Fixes
+
+- **Tool Call Retries**: Tool calls are retried after temporary failures instead of being marked as failed right away, reducing interruptions to Agent runs. Retries may add a small amount of usage.
+- **Workflow Invocation and Billing Settings**: After you create a workflow or chatflow, its invocation and billing settings appear without refreshing the page.
+- **Structured Output Node**: The structured output node no longer returns an error when using `deepseek-v4.1-flash` via Bailian.
+- **Claude Model Calls**: Fixed request failures caused by sampling parameters when calling Claude, reducing interruptions to Agent runs caused by this issue.
+- **Tool Parameter Parsing**: Fixed request failures caused by parameter processing when a tool's parameters contain `$defs` references, reducing interruptions to these tool calls.
+- **Knowledge Base Retrieval Labels**: Retrieval options in the knowledge base now display readable labels instead of localization keys, making the settings easier to understand.
+- **Calls to Paused Agents**: Fixed an issue where calling a paused Agent returned an empty success result, preventing these empty results from being mistaken for successful calls.
+- **Result Citation Retention**: Fixed citation evidence being lost when tool results were truncated, helping you check the sources behind the results.
+
+### Usage Changes
+
+- **Skill File Paths**: Files read by a skill must be inside that skill's directory; reading across directories is no longer supported. If your skill depends on it, switch to relative paths within the skill directory.

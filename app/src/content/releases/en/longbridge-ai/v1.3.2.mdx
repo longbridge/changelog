@@ -1,0 +1,45 @@
+---
+product: longbridge-ai
+version: 1.3.2
+tag: v1.3.2
+locale: en
+title: "Resizable, full-screen artifact panel"
+summary: "Resize the artifact panel or view it full screen. Connector management is centralized in Settings → Connectors. The model list adds qwen3.8-flash and gemini-3.8-flash"
+highlights:
+  - "Artifact Panel and Mobile Menus"
+  - "Connector Management"
+  - "New Models"
+  - "Plugin Downloads"
+topics:
+  - LongbridgeAI
+  - My Agents and Workflow Building
+releasedAt: 2026-09-18T11:12:04.597Z
+platforms:
+  - Web
+status: published
+source:
+  provider: release-api
+  repo: m.lbkrs.com/api/forward/v1/babbage/public/release-notes
+  url: https://m.lbkrs.com/api/forward/v1/babbage/public/release-notes
+---
+
+## LongbridgeAI
+
+### Improvements
+
+- **Artifact Panel and Mobile Menus**: Resize the LongbridgeAI artifact panel or view it full screen to read research more comfortably. Some mobile “⋮” menus now open as bottom sheets for easier tapping.
+- **Connector Management**: LongbridgeAI connector management is now centralized in **Settings → Connectors**. The previous entries in the input field and menu have been removed. Your selected connectors are unaffected, with no reconfiguration needed.
+- **Memory System Update**: LongbridgeAI now uses a single updated memory system.
+
+## My Agents and Workflow Building
+
+### New Features
+
+- **New Models**: The model list now includes `qwen3.8-flash` and `gemini-3.8-flash`, giving you more options for your Agents.
+- **Plugin Downloads**: Use the download button on the plugin configuration page to export a plugin package locally, making it easier to keep and manage copies.
+
+### Bug Fixes
+
+- **Tool Result Retrieval**: Fixed a loop in which retrieved tool results were truncated again, triggering repeated retrieval by the Agent. This reduces redundant reads within the same response.
+- **Loop Node Configuration**: Fixed false incomplete-configuration warnings caused by missing variable type definitions in workflow loop nodes, reducing misleading alerts during setup.
+- **Workflow Editing**: Fixed a page crash caused by rich-text tags when a workflow node had no title, preventing this issue from interrupting editing.

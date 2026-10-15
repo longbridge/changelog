@@ -1,0 +1,14 @@
+---
+// 根路径在线上属于主站，nginx 不会转过来；这页只为本地 dev 与 MR 预览打开根地址时有个落点。
+// 不用 astro.config 的 redirects：它不给目标补 base，MR 预览（/mr-<iid>/）下会跳到 Pages 根上
+import { SITE_SEGMENT } from '@config/site.config'
+
+const target = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/${SITE_SEGMENT}`
+---
+
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex" />
+<meta http-equiv="refresh" content={`0; url=${target}`} />
+<title>Longbridge Release Notes</title>
+<a href={target}>Longbridge Release Notes</a>

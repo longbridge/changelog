@@ -1,0 +1,23 @@
+---
+import { formatDate, type Locale } from '@lib/i18n'
+
+interface Props {
+  locale: Locale
+  releasedAt: Date
+  isDraft?: boolean
+  draftLabel?: string
+}
+
+const { locale, releasedAt, isDraft, draftLabel } = Astro.props
+---
+
+<div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[0.8125rem] text-ink-soft">
+  <time datetime={releasedAt.toISOString()} class="tnum">{formatDate(releasedAt, locale)}</time>
+  {
+    isDraft && (
+      <span class="draft-badge rounded-md border px-1.5 py-0.5 text-[0.75rem]">
+        {draftLabel}
+      </span>
+    )
+  }
+</div>

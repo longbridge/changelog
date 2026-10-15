@@ -1,0 +1,27 @@
+---
+product: longbridge-pro
+version: 0.20.1
+tag: v0.20.1
+locale: zh-CN
+title: 跟价下单不再滞后，图表更流畅
+summary: 修复了下单价格跟随「中间价 / 买一 / 卖一」时，只在有新成交时才刷新的问题；成交稀少的期权限价单不再因价格滞后而追不
+highlights: []
+topics: []
+releasedAt: 2026-09-24T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/v0.20.1.md
+---
+
+## 优化
+
+- 修复了下单价格跟随「中间价 / 买一 / 卖一」时，只在有新成交时才刷新的问题；成交稀少的期权限价单不再因价格滞后而追不上盘口。
+- 修复了改单未触发的全仓止盈止损单时，确认框中预估金额始终显示为 0 的问题。
+- 优化图表指标的计算性能，行情推送引起的图表重建耗时降低约 60%，多图表布局下盘中操作更流畅。
+- 修复了打开多个副图指标时，只有最上方的分隔线可以拖动的问题。

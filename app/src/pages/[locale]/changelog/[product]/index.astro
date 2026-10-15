@@ -1,0 +1,90 @@
+---
+import type { GetStaticPaths } from 'astro'
+import BaseLayout from '@layouts/BaseLayout.astro'
+import { LOCALES, localePath, t, type Locale } from '@lib/i18n'
+import { homepageUrl, visibleProducts } from '@config/products.config'
+import MajorCard from '@components/MajorCard.astro'
+import ProductTabs from '@components/ProductTabs.astro'
+import { listProductMajors } from '@lib/majors'
+import { hasDrafts, productTitleId } from '@lib/releases'
+
+export const getStaticPaths = (() =>
+  LOCALES.flatMap((locale) =>
+    visibleProducts(hasDrafts).map((product) => ({
+      params: { locale, product: product.id },
+      props: { product },
+    })),
+  )) satisfies GetStaticPaths
+
+const locale = Astro.params.locale as Locale
+const { product } = Astro.props
+// 列表这一层只到大版本，小版本收在大版本页里
+const majors = await listProductMajors(locale, product.id)
+
+// 最新一个大版本占头条位，其余两列排开；日期每张卡片自己带
+const [featured, ...rest] = majors
+const alternates = Object.fromEntries(
+  LOCALES.map((item) => [item, localePath(item, product.id)]),
+)
+---
+
+<BaseLayout
+  locale={locale}
+  title={product.name[locale]}
+  description={product.summary[locale]}
+  alternates={alternates}
+  accent={product.accent}
+  activeProduct={product.id}
+  breadcrumbs={[
+    { name: t.allProducts[locale], path: localePath(locale) },
+    { name: product.name[locale] },
+  ]}
+>
+  <header class="mb-10">
+    {/* 回「全部产品」的入口在下面的切换条里，这里不再重复一条面包屑。
+        下载按钮靠右对齐到正文右边界，这一栏的宽度才看得出来 */}
+    <div class="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
+      <div class="max-w-2xl">
+        <h1
+          class="text-[1.875rem] leading-tight font-semibold tracking-tight sm:text-[2.25rem]"
+          transition:name={productTitleId(product.id)}
+        >
+          {product.name[locale]}
+        </h1>
+        <p class="mt-2.5 text-[1rem] leading-relaxed text-ink-soft">
+          {product.summary[locale]}
+        </p>
+      </div>
+      {
+        product.homepage && (
+          <a
+            href={homepageUrl(product, locale)}
+            class="mt-1 inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
+            style="background:var(--accent)"
+          >
+            {t[product.homepageAction ?? 'download'][locale]}
+            <span aria-hidden="true">↗</span>
+          </a>
+        )
+      }
+    </div>
+    <ProductTabs locale={locale} activeProduct={product.id} />
+  </header>
+
+  {
+    majors.length === 0 ? (
+      <p class="rounded-card border border-dashed border-rule px-5 py-10 text-center text-[0.9rem] text-ink-soft">
+        {t.empty[locale]}
+      </p>
+    ) : (
+      <>
+        <MajorCard locale={locale} group={featured} featured />
+        <div class="major-grid">
+          {rest.map((major) => (
+            <MajorCard locale={locale} group={major} />
+          ))}
+        </div>
+      </>
+    )
+  }
+</BaseLayout>

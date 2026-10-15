@@ -1,0 +1,80 @@
+---
+product: longbridge-pro
+version: 0.11.0
+tag: v0.11.0
+locale: zh-HK
+title: 圖表畫線與自選分組上線
+summary: 圖表：：新增「畫線」功能。
+highlights: []
+topics:
+  - 圖表：
+  - 自選列表：
+  - 瀏覽器視窗：
+  - 個股：
+  - 持倉：
+releasedAt: 2026-01-12T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-HK/release-notes/v0.11.0.md
+---
+
+## 新增
+
+- **圖表：** 新增「畫線」功能。
+<Video src="https://assets.lbctrl.com/uploads/9fca6447-7213-40fe-8618-cff42a7629b4/01.mp4" label="圖表：：新增「畫線」功能。" />
+
+- **自選列表：** 支持自定義分組。
+<Video src="https://assets.lbctrl.com/uploads/fb87118e-6a2e-4233-ae6d-d8507c3579ff/02.mp4" label="自選列表：：支持自定義分組。" />
+
+- **瀏覽器視窗：** 新增獨立的瀏覽器窗口來打開各類網頁實現的功能模塊，並增加多標籤頁支持。
+<Video src="https://assets.lbctrl.com/uploads/a92f57e2-0d02-41d1-9ad1-f90ae837da5b/03.mp4" label="瀏覽器視窗：：新增獨立的瀏覽器窗口來打開各類網頁實現的功能模塊，並增加多標籤頁支持。" />
+
+- **個股：** 新增分析師觀點。
+<Figure src="https://assets.lbctrl.com/uploads/d4f3bf09-8e1c-40b9-817f-def10c72f617/scr-20260112-obug.png" alt="SCR-20260112-ocay" width={1792} height={1162} />
+
+- **個股：** 「財務」支持查看更多歷史數據。
+<Video src="https://assets.lbctrl.com/uploads/bd75bf0c-99c5-4c10-81bb-dfb48f6cb438/04.mp4" label="個股：：「財務」支持查看更多歷史數據。" />
+
+- **持倉：** 新增持倉詳情介面。
+<Video src="https://assets.lbctrl.com/uploads/97211baa-94f0-4e13-94d9-e48b43caff92/05.mp4" label="持倉：：新增持倉詳情介面。" />
+
+## 優化
+
+#### 交易
+
+- 佈局優化，支持單列、多列自適應佈局。
+<Video src="https://assets.lbctrl.com/uploads/0e7b3cf2-480f-4f8c-a729-f7706deda04d/06.mp4" label="佈局優化，支持單列、多列自適應佈局。" />
+
+- 下單支持切換「數量」和「金額」選項。
+- 調整「二次確認」和「金額預覽」模態框尺寸。
+
+#### 資產
+
+- 表格自定義設置優化交互和同步機制。
+- 「持倉」表格點擊買入或賣出時呼出「快捷交易」視窗。
+- 優化「融資狀態」介面細節。
+- 優化未開戶/未入金/未輸入交易密碼等賬戶狀態下的交互和插畫細節。
+<Figure src="https://assets.lbctrl.com/uploads/620b272f-26aa-4781-baa6-be40b6a0a88a/scr-20260112-obws.png" alt="SCR-20260112-obws" width={1792} height={1162} />
+
+#### 行情
+
+- 行情等級變化時刷新行情數據。
+- 補充在網絡恢復時刷新行情數據的機制。
+- 持久化「漲跌顏色」設置，避免啟動時可能出現的閃爍。
+- 優化「買賣盤」、「經紀席位」檔位選擇功能。
+
+#### 其他
+
+- 使用等寬數字字體。
+
+## 修復
+
+- 修復啟動時標籤頁初始化異常導致的崩潰問題。
+- 修復日期篩選器意外的文本換行問題。
+- 修復「自動更新」可能出現的更新狀態異常。

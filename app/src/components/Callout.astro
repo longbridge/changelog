@@ -1,0 +1,26 @@
+---
+// MDX 正文里用来强调需要用户注意的事项
+interface Props {
+  type?: 'info' | 'warning' | 'success'
+}
+
+const { type = 'info' } = Astro.props
+
+/**
+ * 底色与描边取设计系统的状态色，文字仍用一级字色：
+ * 状态色本身在白底上达不到正文对比度要求，只适合做描边与浅底。
+ */
+const tone = {
+  info: 'var(--color-info)',
+  warning: 'var(--color-warning)',
+  success: 'var(--color-success)',
+} as const
+---
+
+<div
+  class="my-4 rounded-xl border px-4 py-3 text-[0.9rem] leading-relaxed text-ink"
+  style={`border-color: color-mix(in srgb, ${tone[type]} 35%, transparent);
+          background: color-mix(in srgb, ${tone[type]} 8%, white);`}
+>
+  <slot />
+</div>

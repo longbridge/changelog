@@ -1,0 +1,71 @@
+---
+product: longbridge-pro
+version: 0.12.0
+tag: v0.12.0
+locale: en
+title: New brand logo and custom indicators
+summary: New brand logo.
+highlights: []
+topics:
+  - Indicators
+  - Chart
+  - Assets
+releasedAt: 2026-02-05T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/release-notes/v0.12.0.md
+---
+
+## New Features
+
+- New brand logo.
+
+  <Figure src="https://assets.lbctrl.com/uploads/80ab481b-d840-488a-beb8-d424bdc85d75/new-logo.png" alt="new-logo" width={402} height={396} />
+  <Figure src="https://assets.lbctrl.com/uploads/423cb07b-8b1e-424f-b3d8-3210147ce108/new-logo-dark.png" alt="new-logo-dark" width={402} height={396} />
+
+- **Indicators**: Support for custom technical indicator configuration and editing.
+<Video src="https://assets.lbctrl.com/uploads/791d53d7-a5c4-40da-b796-609bf67183c2/indicators.mp4" label="Indicators：Support for custom technical indicator configurat" />
+
+- **Chart**: Optimized indicator loader with support for "Parameter" and "Style" settings.
+<Video src="https://assets.lbctrl.com/uploads/e1c1966c-fba3-4091-9500-eba451ad8a25/setting.mp4" label="Chart：Optimized indicator loader with support for 'Parameter" />
+
+- **Assets**: Added "Cash Balance" panel.
+<Video src="https://assets.lbctrl.com/uploads/bd62adf4-8339-4b59-b318-b51394a8539e/cash.mp4" label="Assets：Added 'Cash Balance' panel." />
+
+- Added export functionality for "Orders" and "Holdings".
+<Video src="https://assets.lbctrl.com/uploads/24c11665-d661-433a-bd2a-14fa2bb920d0/export.mp4" label="Added export functionality for 'Orders' and 'Holdings'." />
+
+## Improvements
+
+#### Trading
+
+- Enhanced trading keyboard operation experience with support for keyboard shortcuts.
+- Improved trade notification experience - notifications now only push to the currently active window to avoid duplicates.
+- Added auto-refresh functionality for "Today's Orders" to prevent possible delays in order updates caused by push anomalies.
+- Added default status filter for "Historical Orders", defaulting to "Filled" status.
+- Fixed incorrect display of estimated trade amount information.
+
+#### Quotes
+
+- Fixed issue where option chart prices might not update when prices change.
+- Removed current account order filter option from portfolio panel.
+
+#### Portfolio
+
+- Adjusted minimum width of assets sidebar.
+
+#### Other
+
+- Optimized network exception handling to prevent unexpected logouts.
+- Fixed issue where table settings reset functionality was not working.
+- Unified neutral color display in analysis module.
+- Heatmap optimization with adjustments to some style details and hover border styles.
+- Auto-update optimization now uses progress circle to display download progress.
+- Fixed issues with retrieving some system configurations.
+- Fixed incorrect color display for special trading status price changes.

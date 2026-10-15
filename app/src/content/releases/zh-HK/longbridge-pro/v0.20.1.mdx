@@ -1,0 +1,27 @@
+---
+product: longbridge-pro
+version: 0.20.1
+tag: v0.20.1
+locale: zh-HK
+title: 跟價下單不再滯後，圖表更流暢
+summary: 修復了下單價格跟隨「中間價 / 買一 / 賣一」時，只在有新成交時才重新整理的問題；成交稀少的期權限價單不再因價格滯後而
+highlights: []
+topics: []
+releasedAt: 2026-09-24T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-HK/release-notes/v0.20.1.md
+---
+
+## 優化
+
+- 修復了下單價格跟隨「中間價 / 買一 / 賣一」時，只在有新成交時才重新整理的問題；成交稀少的期權限價單不再因價格滯後而追不上盤口。
+- 修復了改單未觸發的全倉止盈止損單時，確認框中預估金額始終顯示為 0 的問題。
+- 優化圖表指標的計算效能，行情推送引起的圖表重建耗時降低約 60%，多圖表佈局下盤中操作更流暢。
+- 修復了開啟多個副圖指標時，只有最上方的分隔線可以拖動的問題。

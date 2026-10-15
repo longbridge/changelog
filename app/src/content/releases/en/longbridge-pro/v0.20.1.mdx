@@ -1,0 +1,27 @@
+---
+product: longbridge-pro
+version: 0.20.1
+tag: v0.20.1
+locale: en
+title: Order prices keep up with the market, smoother charts
+summary: Fixed an issue where an order price tracking Mid / Bid1 / As
+highlights: []
+topics: []
+releasedAt: 2026-09-24T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/release-notes/v0.20.1.md
+---
+
+## Improvements
+
+- Fixed an issue where an order price tracking Mid / Bid1 / Ask1 only refreshed when a new trade printed; limit orders on thinly traded options no longer fall behind the market because of a stale price.
+- Fixed the estimated amount always showing 0 in the confirmation dialog when replacing an untriggered all-position take-profit / stop-loss order.
+- Optimized chart indicator calculation, cutting the chart rebuild time caused by quote pushes by about 60% for smoother intraday use in multi-chart layouts.
+- Fixed an issue where only the topmost divider could be dragged when multiple sub-chart indicators were open.

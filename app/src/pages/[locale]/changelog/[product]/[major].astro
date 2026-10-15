@@ -1,0 +1,278 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { render } from 'astro:content'
+import BaseLayout from '@layouts/BaseLayout.astro'
+import Meta from '@components/Meta.astro'
+import VersionRail from '@components/VersionRail.astro'
+import type { RailItem } from '@components/VersionRail.astro'
+import Callout from '@components/Callout.astro'
+import Figure from '@components/release/Figure.astro'
+import Video from '@components/release/Video.astro'
+import Compare from '@components/release/Compare.astro'
+import Steps from '@components/release/Steps.astro'
+import Step from '@components/release/Step.astro'
+import Demo from '@components/release/Demo.astro'
+import Kbd from '@components/release/Kbd.astro'
+import LinkPreview from '@components/release/LinkPreview.astro'
+
+/** MDX 正文里可以直接使用这些组件，无需在每篇里 import */
+/** 正文里的 Markdown 链接也走 LinkPreview，不用每条外链都手写标签 */
+const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd, LinkPreview, a: LinkPreview }
+import { LOCALES, formatDate, localePath, t, type Locale } from '@lib/i18n'
+import { getProduct } from '@config/products.config'
+import { listMajors, majorSlugOf, type MajorGroup } from '@lib/majors'
+import { majorTitleId, slugOf } from '@lib/releases'
+
+export const getStaticPaths = (async () => {
+  const byLocale = new Map<Locale, MajorGroup[]>()
+  for (const locale of LOCALES) byLocale.set(locale, await listMajors(locale))
+
+  return LOCALES.flatMap((locale) => {
+    const groups = byLocale.get(locale) ?? []
+    return groups.map((group) => {
+      const siblings = groups.filter((item) => item.product.id === group.product.id)
+      const position = siblings.indexOf(group)
+      const major = majorSlugOf(group.entry)
+      return {
+        params: { locale, product: group.product.id, major },
+        props: {
+          group,
+          siblings,
+          // 时间倒序：前一项是更新的大版本
+          newer: siblings[position - 1],
+          older: siblings[position + 1],
+          // 哪些语言有这个大版本，决定语言切换跳哪里
+          translated: LOCALES.filter((item) =>
+            (byLocale.get(item) ?? []).some(
+              (candidate) =>
+                candidate.product.id === group.product.id && majorSlugOf(candidate.entry) === major,
+            ),
+          ),
+        },
+      }
+    })
+  })
+}) satisfies GetStaticPaths
+
+const locale = Astro.params.locale as Locale
+const { group, siblings, newer, older, translated } = Astro.props as {
+  group: MajorGroup
+  siblings: MajorGroup[]
+  newer?: MajorGroup
+  older?: MajorGroup
+  translated: Locale[]
+}
+const product = getProduct(group.product.id)
+const major = group.entry.data.major
+
+// 大版本总结的正文与每个小版本的正文都要渲染，一页里从上到下排开
+const { Content: Overview } = await render(group.entry)
+const sections = await Promise.all(
+  group.releases.map(async (release) => ({
+    release,
+    slug: slugOf(release),
+    Content: (await render(release)).Content,
+  })),
+)
+
+// 侧边栏：所有大版本，当前这个展开它的小版本
+const rail: RailItem[] = siblings.flatMap((item) => {
+  const slug = majorSlugOf(item.entry)
+  const isCurrent = item.entry.id === group.entry.id
+  const head: RailItem = {
+    label: item.entry.data.major,
+    date: item.releasedAt.toISOString().slice(0, 10),
+    href: localePath(locale, item.product.id, slug),
+    title: `${item.entry.data.title} · ${formatDate(item.releasedAt, locale)}`,
+    isCurrent,
+    isDraft: item.entry.data.status === 'draft',
+  }
+  if (!isCurrent) return [head]
+  return [
+    head,
+    ...item.releases.map((release) => ({
+      label: release.data.version,
+      date: release.data.releasedAt.toISOString().slice(0, 10),
+      href: `#${slugOf(release)}`,
+      title: `${release.data.title} · ${formatDate(release.data.releasedAt, locale)}`,
+      isChild: true,
+      isDraft: release.data.status === 'draft',
+    })),
+  ]
+})
+
+// 页签与分享卡片要能认出是哪一版
+const seoTitle = `${product?.name[locale] ?? group.product.id} ${major} · ${group.entry.data.title}`
+
+// 缺某个语言时回落到产品页，而不是指向一个不存在的页面
+const alternates = Object.fromEntries(
+  LOCALES.map((item) => [
+    item,
+    translated.includes(item)
+      ? localePath(item, group.product.id, majorSlugOf(group.entry))
+      : localePath(item, group.product.id),
+  ]),
+)
+
+---
+
+<BaseLayout
+  locale={locale}
+  title={seoTitle}
+  description={group.entry.data.summary || product?.summary[locale]}
+  alternates={alternates}
+  accent={product?.accent}
+  activeProduct={group.product.id}
+  breadcrumbs={[
+    { name: t.allProducts[locale], path: localePath(locale) },
+    { name: product?.name[locale] ?? group.product.id, path: localePath(locale, group.product.id) },
+    { name: group.entry.data.title },
+  ]}
+>
+  {/* 默认回产品页（直接进来或搜索引擎抓到的就是这个）；
+      如果读者是从「全部产品」列表点进来的，下面的脚本会把它改回那一页 */}
+  <a
+    href={localePath(locale, group.product.id)}
+    data-back-to-list
+    data-home-href={localePath(locale)}
+    data-home-label={t.allProducts[locale]}
+    class="mb-4 inline-block text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
+    >← {product?.name[locale]}</a
+  >
+
+  <div class="detail-grid">
+    <article>
+      <h1
+        class="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-[2rem]"
+        transition:name={majorTitleId(group.product.id, majorSlugOf(group.entry))}
+      >
+        {group.entry.data.title}
+      </h1>
+
+      {
+        group.entry.data.status === 'draft' && (
+          <div class="mt-3">
+            <span class="draft-badge rounded-md border px-1.5 py-0.5 text-[0.75rem]">
+              {t.draftBadge[locale]}
+            </span>
+          </div>
+        )
+      }
+
+      {
+        group.entry.data.summary && (
+          <p class="mt-5 text-[1.0625rem] leading-relaxed text-ink-soft">
+            {group.entry.data.summary}
+          </p>
+        )
+      }
+
+      <div class="prose mt-8">
+        <Overview components={mdxComponents} />
+      </div>
+
+      {/* 小版本按时间倒序排在总结下面，侧边栏点哪个跳哪个 */}
+      {/* data-rail-* 是给侧边栏浮层用的：它跨页保留，换页后要靠这几个属性
+          把「当前大版本」这一层条目重建出来 */}
+      {
+        sections.map(({ release, slug, Content }) => (
+          <section
+            id={slug}
+            class="release-section"
+            data-release-section
+            data-rail-version={release.data.version}
+            data-rail-date={release.data.releasedAt.toISOString().slice(0, 10)}
+            data-rail-title={`${release.data.title} · ${formatDate(release.data.releasedAt, locale)}`}
+            data-rail-draft={release.data.status === 'draft' ? t.draftBadge[locale] : undefined}
+          >
+            <h2 class="text-[1.25rem] font-semibold tracking-tight">{release.data.title}</h2>
+            <div class="mt-2">
+              <Meta
+                locale={locale}
+                releasedAt={release.data.releasedAt}
+                isDraft={release.data.status === 'draft'}
+                draftLabel={t.draftBadge[locale]}
+              />
+            </div>
+            {release.data.summary && (
+              <p class="mt-3 text-[0.9375rem] leading-relaxed text-ink-soft">
+                {release.data.summary}
+              </p>
+            )}
+            <div class="prose mt-5">
+              <Content components={mdxComponents} />
+            </div>
+          </section>
+        ))
+      }
+    </article>
+
+    {/* 第二列：本身撑满行高，浮层在里面 sticky，因此最高不超过正文 */}
+    <div class="detail-grid__aside" data-rail-anchor>
+      <VersionRail
+        locale={locale}
+        productId={group.product.id}
+        items={rail}
+      />
+    </div>
+  </div>
+
+  <nav
+    class="mt-12 flex flex-col gap-3 border-t border-rule pt-6 sm:flex-row sm:justify-between"
+  >
+    {
+      newer ? (
+        <a
+          href={localePath(locale, newer.product.id, majorSlugOf(newer.entry))}
+          class="group text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
+        >
+          <span class="block text-[0.75rem]">← {t.newer[locale]}</span>
+          <span class="tnum font-medium">
+            {newer.entry.data.major} · {newer.entry.data.title}
+          </span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      older && (
+        <a
+          href={localePath(locale, older.product.id, majorSlugOf(older.entry))}
+          class="group text-[0.8125rem] text-ink-soft transition-colors hover:text-ink sm:text-right"
+        >
+          <span class="block text-[0.75rem]">{t.older[locale]} →</span>
+          <span class="tnum font-medium">
+            {older.entry.data.major} · {older.entry.data.title}
+          </span>
+        </a>
+      )
+    }
+  </nav>
+</BaseLayout>
+
+<script>
+  /** 从哪个列表页进来的，就退回哪一页 */
+  function applyBackTarget() {
+    const link = document.querySelector<HTMLAnchorElement>('[data-back-to-list]')
+    const home = link?.dataset.homeHref
+    const label = link?.dataset.homeLabel
+    if (!link || !home || !label) return
+
+    let from: string | null = null
+    // 隐私模式下 sessionStorage 会直接抛，读不到就保持默认的产品页
+    try {
+      from = sessionStorage.getItem('lb:list')
+    } catch {}
+    if (!from) return
+
+    const trim = (path: string) => path.replace(/\/+$/, '')
+    if (trim(from) !== trim(home)) return
+
+    link.href = home
+    link.textContent = `← ${label}`
+  }
+
+  applyBackTarget()
+  document.addEventListener('astro:page-load', applyBackTarget)
+</script>

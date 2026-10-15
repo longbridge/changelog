@@ -1,6 +1,7 @@
-.vitepress/dist
-.vitepress/cache
-node_modules
-dist
-docs
-docs.json
+node_modules/
+dist/
+.astro/
+.DS_Store
+*.log
+
+# 抓取的原文与产品手写稿都在 releases/<product>/，全部提交：来源都是公开的。

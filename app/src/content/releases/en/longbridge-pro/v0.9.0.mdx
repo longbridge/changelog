@@ -1,0 +1,64 @@
+---
+product: longbridge-pro
+version: 0.9.0
+tag: v0.9.0
+locale: en
+title: Trade directly from the chart
+summary: Trading：Supported trading directly from charts, including or
+highlights: []
+topics:
+  - Trading
+  - Stock Wiki
+  - Quote Subscription
+releasedAt: 2025-11-17T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/release-notes/v0.9.0.md
+---
+
+## New Features
+
+- **Trading**: Supported trading directly from charts, including order placement and adjustments, improving efficiency and precision.
+  <Video src="https://assets.lbctrl.com/uploads/85a18365-8fcf-47ef-a121-cb841414b7ee/chart-trading.mp4" label="Trading：Supported trading directly from charts, including or" />
+- **Stock Wiki**: Added a new stock wiki tab, offering quick access to company information and key metrics.
+  <Video src="https://assets.lbctrl.com/uploads/9f7a71ad-8d31-45be-b3fc-4498b5a411bf/stock_wiki.mp4" label="Stock Wiki：Added a new stock wiki tab, offering quick access" />
+- **Quote Subscription**: Supported subscribing to real-time quote data directly within the application, simplifying access without leaving the platform.
+  <Video src="https://assets.lbctrl.com/uploads/a21b16db-b3d5-4cc8-ab6c-946e11d657b7/quote_subscribe.mp4" label="Quote Subscription：Supported subscribing to real-time quote " />
+
+## Optimizations
+
+- Fixed an issue where pinned news failed to appear at the top of the list.
+- Improved handling of after-hours order types, resolved an issue where replacing appended orders for Hong Kong stocks could fail.
+- Optimized the reception order of order push notifications to ensure accurate chronological display.
+- Refined English phrasing in the option strategy menu for clarity and conciseness.
+- Improved adaptive column width for watchlists in custom pages.
+- Enhanced display of market data fields for digital assets, allowing access to proprietary metrics.
+- Ensured automatic reload of market index details after network reconnection for up-to-date data.
+- Fixed issue where clearing stock symbols in the order filter did not work.
+- Resolved clipping issue of stock names in custom search.
+- Corrected estimated amount calculation error during options trading.
+- Fixed missing currency information during options trading.
+- Restored missing trading session options when duplicating orders.
+- Fixed inaccurate calculation of estimated limit buy amount.
+- Resolved issue where entry points were displayed for suspended stocks.
+- Fixed incorrect trading session when copying orders.
+- Fixed abnormal estimated amount calculation in chart-based trading.
+- Removed unnecessary password reset prompts during verification code input.
+- Corrected default order validity for Singapore market.
+- Fixed erroneous timestamp display in market data.
+- Centered the time picker in appended order dialog.
+- Fixed incorrect display of position details.
+- Resolved issue where double-clicking options table failed to switch to the chart tab.
+- Fixed scrolling issues in custom workspace guide on smaller screens.
+- Fixed active tab loss when closing other tabs in custom workspace.
+- Corrected missing overview data in depth quotes after quote level changes.
+- Fixed missing fields in order details when replacing orders.
+- Fixed incorrect checkbox state rendering in table settings.
+- Fixed auto-fill failure of market price in price input fields.
+- Fixed app exception exit by input fields in specific cases.

@@ -1,0 +1,41 @@
+---
+product: longbridge-pro
+version: 0.17.0
+tag: v0.17.0
+locale: en
+title: Shareholders panel and macOS menu bar quotes
+summary: Quotes：Added a "Shareholders" panel showing major shareholde
+highlights: []
+topics:
+  - Quotes
+  - Tray
+  - Login
+releasedAt: 2026-06-09T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/release-notes/v0.17.0.md
+---
+
+## New Features
+
+- **Quotes**: Added a "Shareholders" panel showing major shareholders and ownership hierarchy, making it easier to analyze changes in the ownership structure.
+<Video src="https://assets.lbctrl.com/uploads/e3746211-3449-4bdd-a7f5-fc7abdabef99/shareholder.mp4" label="Quotes：Added a 'Shareholders' panel showing major shareholde" />
+- **Tray**: Added a macOS menu-bar feature to view real-time watchlist quotes and today's P&L, switch groups, and quickly bring up the main window — all without opening the main window.
+<Video src="https://assets.lbctrl.com/uploads/9d2dfc41-a05e-49f3-b42b-4b876110d450/tray.mp4" label="Tray：Added a macOS menu-bar feature to view real-time watchl" />
+- **Login**: Added a region selector that dynamically switches between Longbridge HK/SG based on user preference.
+<Figure src="https://assets.lbctrl.com/uploads/c3790f3c-b367-4fa6-bd69-c089b8759ac9/login.png" alt="login" width={2324} height={1620} />
+
+## Improvements
+
+- **Tray**: Added a "Close to system tray" option on Windows, letting the app keep running in the background and restore anytime via the tray icon.
+- **Settings**: Added a "Sound" toggle to independently control sound notifications for price alerts, avoiding interruptions outside trading hours.
+- **Search**: Added a "Clear History" feature to wipe previous search records in one click.
+- Improved alert/cancellation notifications to show order details (direction, quantity, ticker, price), with trailing stop orders presented in pullback/rebound format.
+- Fixed a brief blank flash and color jump when switching heatmap tabs.
+- Fixed an issue where the option calculator did not recompute after input values were updated by the market feed or programmatically.

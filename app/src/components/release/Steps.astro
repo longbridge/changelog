@@ -1,0 +1,69 @@
+---
+interface Props {
+  /** 可选标题，例如「三步完成迁移」 */
+  title?: string
+}
+
+const { title } = Astro.props
+---
+
+{/* 子元素是若干 <Step>，脚本会按它们的 title 生成切换器 */}
+<div class="steps my-7" data-steps data-reveal>
+  {title && <p class="steps__title">{title}</p>}
+  <div class="steps__tabs" data-steps-tabs role="tablist"></div>
+  <div class="steps__panels">
+    <slot />
+  </div>
+</div>
+
+
+<script>
+  function initSteps() {
+    document.querySelectorAll<HTMLElement>('[data-steps]').forEach((root) => {
+      if (root.dataset.bound) return
+      root.dataset.bound = 'true'
+
+      const tabs = root.querySelector<HTMLElement>('[data-steps-tabs]')
+      const panels = [...root.querySelectorAll<HTMLElement>('[data-step]')]
+      if (!tabs || panels.length < 2) return
+
+      const select = (index: number) => {
+        panels.forEach((panel, i) => {
+          panel.hidden = i !== index
+          if (i === index) {
+            // 重新触发一次进场动画，切换时有"换页"的感觉
+            panel.classList.remove('is-in')
+            requestAnimationFrame(() => panel.classList.add('is-in'))
+          }
+        })
+        tabs.querySelectorAll('[role="tab"]').forEach((tab, i) => {
+          tab.setAttribute('aria-selected', String(i === index))
+          tab.setAttribute('tabindex', i === index ? '0' : '-1')
+        })
+      }
+
+      panels.forEach((panel, index) => {
+        const tab = document.createElement('button')
+        tab.type = 'button'
+        tab.className = 'steps__tab'
+        tab.setAttribute('role', 'tab')
+        tab.innerHTML = `<span class="steps__index">${index + 1}</span>${panel.dataset.step || ''}`
+        tab.addEventListener('click', () => select(index))
+        tab.addEventListener('keydown', (event) => {
+          const offset = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
+          if (!offset) return
+          event.preventDefault()
+          const next = (index + offset + panels.length) % panels.length
+          select(next)
+          ;(tabs.children[next] as HTMLElement).focus()
+        })
+        tabs.append(tab)
+      })
+
+      select(0)
+    })
+  }
+
+  initSteps()
+  document.addEventListener('astro:page-load', initSteps)
+</script>

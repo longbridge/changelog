@@ -1,0 +1,54 @@
+---
+product: longbridge-pro
+version: 0.16.0
+tag: v0.16.0
+locale: zh-HK
+title: K 線區間統計與右鍵選單上線
+summary: 圖表：新增 K 線「區間統計」功能，方便睇盤和覆盤。
+highlights: []
+topics:
+  - 圖表
+  - 交易
+  - 公告
+  - 股票提醒
+  - 行情
+releasedAt: 2026-05-21T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-HK/release-notes/v0.16.0.md
+---
+
+## 新增
+
+- **圖表**：新增 K 線「區間統計」功能，方便睇盤和覆盤。
+<Video src="https://assets.lbctrl.com/uploads/906372af-5c17-4ec6-8c20-f62ffdbba4f6/statics.mp4" label="圖表：新增 K 線「區間統計」功能，方便睇盤和覆盤。" />
+- **圖表**：新增右鍵選單，無需進入全域設定即可快速切換 K 線類型、複權類型，或打開交易視窗。
+<Video src="https://assets.lbctrl.com/uploads/34fa759e-7a3a-4876-a56b-134a047efe5e/9568b23eb47a8ac8b6e9081dd9f230eb.mp4" label="圖表：新增右鍵選單，無需進入全域設定即可快速切換 K 線類型、複權類型，或打開交易視窗。" />
+- **圖表**：新增 Y 軸縮放，可獨立調整價格軸比例，方便看清局部走勢細節。
+<Video src="https://assets.lbctrl.com/uploads/c1190b1c-66a4-47b4-b902-1f0e5b829708/y.mp4" label="圖表：新增 Y 軸縮放，可獨立調整價格軸比例，方便看清局部走勢細節。" />
+- **交易**：期權交易支援附加訂單（止盈止損）。
+- **公告**：新增系統公告通知支援，避免重要資訊被錯過。
+- **股票提醒**：新增推送通知支援，提醒觸發後可實時送達，避免錯過關鍵價位。
+- **行情**：新增活動標籤（業績、派息、新股、重要諮詢等），關鍵事件一目了然。
+<Figure src="https://assets.lbctrl.com/uploads/cc979902-e1ff-44af-841a-245f16be7958/activites.png" alt="activites" width={956} height={960} />
+- **期權鏈**：新增財報資料展示。
+<Video src="https://assets.lbctrl.com/uploads/237d3579-2b9c-456c-875c-0969ddc60a3a/options.mp4" label="期權鏈：新增財報資料展示。" />
+- **期權鏈**：買賣盤價格支援直接帶入下單表單，期權下單路徑更短。
+- **資產**：全新的「融資狀態」介面，支援更多融資相關資訊檢視和調額功能。
+<Figure src="https://assets.lbctrl.com/uploads/febd09fa-b1ab-41e8-8eca-36293656c829/portfolio.png" alt="portfolio" width={2196} height={1528} />
+- **登入**：新增忘記密碼的密碼重設流程，可直接在客戶端內完成。
+<Figure src="https://assets.lbctrl.com/uploads/a7470624-3760-4c0b-9caa-91702d437feb/pwd.png" alt="pwd" width={2324} height={1620} />
+
+## 優化
+
+- 訂單推送通知新增帳戶名稱展示，並對模擬帳戶靜音成交提示音，避免把模擬單誤認為實盤。
+- 修復了快捷改單多訂單快速改單時的狀態干擾。
+- 優化交易密碼流程，撤單等功能校驗成功後無需重複操作。
+- 修復平倉時，預估成交後持倉成本顯示錯誤的問題。
+- **登入**：優化登入流程，避免意外的登入狀態過期行為，優化圖形驗證碼網路異常提示，新增重試機制。

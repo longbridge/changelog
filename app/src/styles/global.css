@@ -1,0 +1,1234 @@
+@import 'tailwindcss';
+
+/* 色板全部来自 Longbridge UX 5.0 设计 token（浅色档），与官网同源，
+   本仓库不另造颜色 */
+@theme {
+  /* 品牌主色。注意：作为文字色时白底对比度约 2.44:1，低于 WCAG AA 4.5:1，
+     这是设计系统的已知问题，官网同样如此 */
+  --color-brand: #00b8b8;
+
+  /* 产品色。页面把产品的色值注入 --accent，强调元素统一读它。
+     嵌套作用域（首页一条流里多个产品）要加 .accent-scope 重新声明一次：
+     --accent 在 :root 上算完就随继承往下传 */
+  --accent-default: #00b8b8;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'PingFang SC', 'PingFang HK', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  /* 中性色（括号内是白底上的对比度，取自设计 token 文档） */
+  --color-paper: #ffffff; /* 主背景 */
+  --color-paper-raised: #f3f5f6; /* 次级背景 */
+  --color-ink: #0a0e19; /* 一级字：标题、正文、导航（14.5:1） */
+  --color-ink-soft: #6c6e75; /* 二级字：次级文字、日期、未选中态（5.7:1） */
+  --color-ink-faint: #a9abae; /* 三级字：仅限免责声明、条款与装饰符号，不可用于正文（3.5:1） */
+  --color-rule: #e6e7e8; /* 卡片描边 */
+  --color-divider: #dddddf; /* Feed 流分隔线 */
+
+  /* 状态色，浅深两档通用 */
+  --color-error: #f7415f;
+  --color-warning: #ff9728;
+  --color-success: #00cc92;
+  --color-info: #2a99fe;
+
+  --radius-card: 14px;
+}
+
+:root {
+  color-scheme: light;
+  --accent: var(--accent-default);
+  /* 设计 token 里品牌浅底是 #e5f8f8；这里按比例算，产品色换了也能跟上 */
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, white);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 版本号、日期等数字对齐 */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* MDX 正文排版：不引 typography 插件，规则少且完全可控。
+   字色按设计 token 的用途走：标题、正文都是一级字色，产品色只留给链接、圆点等强调元素 */
+.prose {
+  font-size: 0.975rem;
+  line-height: 1.75;
+  color: var(--color-ink);
+}
+
+.prose h2 {
+  margin: 2.25rem 0 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+.prose h2:first-child {
+  margin-top: 0;
+}
+.prose h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.prose p {
+  margin: 0.75rem 0;
+}
+.prose ul,
+.prose ol {
+  margin: 0.75rem 0;
+  padding-left: 0;
+  list-style: none;
+}
+.prose li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin: 0.4rem 0;
+}
+.prose ul > li::before {
+  content: '';
+  position: absolute;
+  left: 0.25rem;
+  top: 0.7em;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--accent);
+  opacity: 0.55;
+}
+.prose ol {
+  counter-reset: item;
+}
+.prose ol > li {
+  counter-increment: item;
+}
+.prose ol > li::before {
+  content: counter(item) '.';
+  position: absolute;
+  left: 0;
+  color: var(--color-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+  background: var(--color-rule);
+  color: var(--color-ink);
+}
+
+/* 键帽：<Kbd> 组件与 kbd-plugin共用（插件产出的元素拿不到组件的 scoped 样式） */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  margin-inline: 0.1em;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+/* 参照 Mintlify：无衬线、细边、轻投影，不像代码框那样整段灰底 */
+.kbd__key {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0.1em 0.45em;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: var(--color-paper-raised);
+  box-shadow: 0 1px 0 var(--color-rule);
+  font-family: inherit;
+  font-size: 0.8125em;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-ink);
+}
+
+.kbd__plus {
+  font-size: 0.875em;
+  color: var(--color-ink-faint);
+}
+
+.prose pre {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: var(--radius-card);
+  overflow-x: auto;
+  font-size: 0.85rem;
+  background: color-mix(in srgb, var(--color-ink) 4%, transparent);
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+}
+.prose blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent);
+  /* 三级字色设计规范禁止用于正文，引用块用二级字色 */
+  color: var(--color-ink-soft);
+}
+.prose img {
+  max-width: 100%;
+  border-radius: var(--radius-card);
+}
+.prose table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.prose th,
+.prose td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-rule);
+  text-align: left;
+}
+
+/* 内容进场：元素滚动到视口时轻微上浮淡入。
+   只在脚本就绪后才隐藏，没有 JS 时内容照常可见 */
+:root[data-reveal-ready] [data-reveal]:not(.is-in) {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+[data-reveal] {
+  transition:
+    opacity 460ms ease,
+    transform 560ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* 富媒体块的统一外观：图片、视频、对比、演示共用同一套边框与圆角 */
+.media-frame {
+  overflow: hidden;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--color-ink) 3%, transparent);
+}
+
+.media-caption {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+}
+
+/* 草稿标识：底色与描边用设计系统的预警色，文字保持一级字色以满足对比度 */
+.draft-badge {
+  border-color: color-mix(in srgb, var(--color-warning) 40%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 10%, white);
+  color: var(--color-ink);
+}
+
+/* 关掉这一次导航的共享元素过渡，理由见 BaseLayout 里的说明。
+   用 CSS 盖掉而不是摘 scope 属性——属性摘了页面落地后就再也长不回来 */
+html[data-no-shared-transition] [data-astro-transition-scope] {
+  view-transition-name: none !important;
+}
+
+/* 图片灯箱 */
+.lightbox {
+  /* 模态 dialog 的居中来自 UA 样式表的 margin:auto，
+     而 Tailwind 的 preflight 会把所有元素的 margin 清零，这里要补回来 */
+  margin: auto;
+  max-width: min(92vw, 1400px);
+  max-height: 92vh;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-card);
+  background: transparent;
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  background: rgb(12 12 11 / 0.82);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.lightbox[open]::backdrop {
+  opacity: 1;
+}
+
+.lightbox img {
+  display: block;
+  max-width: 100%;
+  max-height: 88vh;
+  border-radius: var(--radius-card);
+  box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.7);
+}
+
+.lightbox[open] {
+  animation: lightbox-in 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 产品切换条：全部 / 各产品，当前那个高亮。
+   产品多了不折行，改成横向滚动；两侧按「那边还有没有内容」渐隐 */
+.product-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.375rem;
+  margin-top: 1.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  /* 滚动条自己藏起来，靠渐隐提示还能划 */
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.product-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* 拖着划的时候别顺手把文字选中，也别触发链接/图片的原生拖拽 */
+.product-tabs {
+  user-select: none;
+}
+
+.product-tabs a,
+.product-tabs img {
+  -webkit-user-drag: none;
+}
+
+/* 有溢出时才给抓取光标，内容放得下就别误导 */
+.product-tabs[data-fade] {
+  cursor: grab;
+}
+
+.product-tabs[data-fade]:active {
+  cursor: grabbing;
+}
+
+.product-tabs[data-fade='end'] {
+  -webkit-mask-image: linear-gradient(to left, transparent, #000 2.5rem);
+  mask-image: linear-gradient(to left, transparent, #000 2.5rem);
+}
+
+.product-tabs[data-fade='start'] {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 2.5rem);
+  mask-image: linear-gradient(to right, transparent, #000 2.5rem);
+}
+
+.product-tabs[data-fade='both'] {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 2.5rem,
+    #000 calc(100% - 2.5rem),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 2.5rem,
+    #000 calc(100% - 2.5rem),
+    transparent
+  );
+}
+
+.product-tab {
+  display: inline-flex;
+  flex-shrink: 0;
+  white-space: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.4375rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink-soft);
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.product-tab img {
+  height: 1.125rem;
+  width: 1.125rem;
+  flex-shrink: 0;
+  /* 按比例给圆角，跟应用图标的圆角方块一致；写死 px 在 18px 的图上会显得太方 */
+  border-radius: 22.5%;
+  object-fit: contain;
+}
+
+.product-tab:hover {
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+}
+
+.product-tab[aria-current='page'] {
+  border-color: var(--color-rule);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+}
+
+/* 列表页的大版本卡片：一条头条 + 两列网格，虚线分隔 */
+/* 虚线的点长与间隔全站统一：CSS 的 `dashed` 点长由浏览器决定，
+   和我们自己用渐变画的中缝对不上，所以这几条线一律用渐变 */
+:root {
+  --dash-on: 3px;
+  --dash-off: 6px;
+}
+
+.major-card {
+  position: relative;
+  display: grid;
+  gap: 2rem;
+  padding: 2.25rem 0;
+  /* 顶边的横虚线 */
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-rule) 0 var(--dash-on),
+    transparent var(--dash-on) calc(var(--dash-on) + var(--dash-off))
+  );
+  background-position: 0 0;
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+}
+
+.major-card__date {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.major-card__title {
+  margin-top: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.major-card__title a {
+  transition: color 160ms ease;
+}
+
+.major-card:hover .major-card__title a {
+  color: var(--accent);
+}
+
+.major-card__summary {
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--color-ink-soft);
+}
+
+.major-card__highlights {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.375rem;
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+}
+
+.major-card__highlights li {
+  display: flex;
+  gap: 0.625rem;
+}
+
+.major-card__dot {
+  margin-top: 0.62em;
+  height: 0.25rem;
+  width: 0.25rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.major-card__meta {
+  margin-top: 1.125rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  /* 产品名只是归属标签，用次级字色；主题色留给标题悬停等可交互的地方 */
+  color: var(--color-ink-soft);
+}
+
+.major-card__meta:empty {
+  display: none;
+}
+
+.major-card__cover {
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper-raised);
+}
+
+.major-card__cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top center;
+}
+
+@media (min-width: 900px) {
+  /* 头条：文字在左，配图在右；没配图时文字自己占满 */
+  .major-card--featured:has(.major-card__cover) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    align-items: center;
+    gap: 3rem;
+  }
+
+  .major-card--featured .major-card__title--lg {
+    font-size: 1.875rem;
+  }
+}
+
+.major-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  /* 收口线：最后一行只有一张卡时，下边界也要连起来 */
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-rule) 0 var(--dash-on),
+    transparent var(--dash-on) calc(var(--dash-on) + var(--dash-off))
+  );
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+}
+
+@media (min-width: 900px) {
+  .major-grid {
+    grid-template-columns: 1fr 1fr;
+    /* 中缝画在容器上而不是卡片上：卡片数为奇数时最后一格是空的，
+       画在卡片上那条竖线就会半途断掉。第二层是底边的收口线 */
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        var(--color-rule) 0 var(--dash-on),
+        transparent var(--dash-on) calc(var(--dash-on) + var(--dash-off))
+      ),
+      repeating-linear-gradient(
+        to right,
+        var(--color-rule) 0 var(--dash-on),
+        transparent var(--dash-on) calc(var(--dash-on) + var(--dash-off))
+      );
+    background-position:
+      50% 0,
+      0 100%;
+    background-size:
+      1px 100%,
+      100% 1px;
+    background-repeat: no-repeat, no-repeat;
+  }
+
+  /* 两列各自往中缝让出一段留白 */
+  .major-grid .major-card {
+    padding-inline: 2.5rem;
+    /* 行分隔线改由左列那张卡画，横跨两列——画在每张卡上的话，
+       最后一行右边没有卡时那半截就是空的 */
+    background-image: none;
+  }
+
+  .major-grid .major-card:nth-child(odd) {
+    padding-inline-start: 0;
+  }
+
+  .major-grid .major-card:nth-child(even) {
+    padding-inline-end: 0;
+  }
+
+  .major-grid .major-card:nth-child(odd)::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    /* 卡片宽度就是一列，两倍即整个网格宽 */
+    width: 200%;
+    height: 1px;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--color-rule) 0 var(--dash-on),
+      transparent var(--dash-on) calc(var(--dash-on) + var(--dash-off))
+    );
+  }
+}
+
+[data-zoomable] {
+  cursor: zoom-in;
+}
+
+/* 视频：先按比例把高度占住，否则元数据到达前框是塌的，加载完整页重排 */
+[data-video-state] video,
+.media-frame > video {
+  aspect-ratio: var(--video-ratio, 16 / 9);
+  /* 有 poster 时用 contain 免得裁掉画面，没有就铺满 */
+  object-fit: cover;
+  background: var(--color-paper-raised);
+}
+
+/* 加载骨架，拿到第一帧就撤掉。动效与链接卡片保持同一套 */
+.video-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  background: var(--color-paper-raised);
+  overflow: hidden;
+}
+
+[data-video-state='loading'] .video-loading {
+  display: block;
+}
+
+.video-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in srgb, var(--accent) 14%, transparent) 50%,
+    transparent 80%
+  );
+  background-size: 220% 100%;
+  animation: link-preview-sweep 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-loading::after {
+    animation: none;
+  }
+}
+
+/* 视频进度条：原生 controls 那条和站点不搭，这里用 range 重画一条。
+   放在 global.css 是因为伪元素选择器拿不到 Astro 的 scoped 属性。 */
+.video-progress {
+  --played: 0%;
+  position: absolute;
+  inset-inline: 0.75rem;
+  bottom: 0.625rem;
+  z-index: 1;
+  width: auto;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+/* 播放中把它藏起来，鼠标移上去或暂停时才出现，静态画面里不多一条横杠 */
+.media-frame:hover .video-progress,
+.video-progress:focus-visible {
+  opacity: 1;
+}
+
+.video-progress::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #fff 0,
+    #fff var(--played),
+    rgb(255 255 255 / 0.3) var(--played),
+    rgb(255 255 255 / 0.3) 100%
+  );
+}
+
+.video-progress::-moz-range-track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.3);
+}
+
+.video-progress::-moz-range-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.video-progress::-webkit-slider-thumb {
+  width: 11px;
+  height: 11px;
+  margin-top: -4px;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+  appearance: none;
+}
+
+.video-progress::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+}
+
+.video-progress:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-progress {
+    opacity: 1;
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-reveal-ready] [data-reveal]:not(.is-in) {
+    opacity: 1;
+    transform: none;
+  }
+
+  .lightbox[open] {
+    animation: none;
+  }
+}
+
+.steps__title {
+  margin-bottom: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.steps__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.875rem;
+}
+
+.steps__tabs:empty {
+  display: none;
+}
+
+.steps__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.steps__tab:hover {
+  color: var(--color-ink);
+}
+
+.steps__tab[aria-selected='true'] {
+  border-color: transparent;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.steps__index {
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.steps__panels [data-step] {
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--color-ink-soft);
+}
+
+/* 大版本页里的小版本分节 */
+.release-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-rule);
+  /* 从侧边栏跳过来时别被吸顶的 header 盖住 */
+  scroll-margin-top: 5rem;
+}
+
+.accent-scope {
+  --accent: var(--accent-default);
+}
+
+/* 命中区扩到 44×44 而不放大视觉尺寸：header 只有 56px 高，
+   放两个 44px 的实心控件太重，但手指需要这个尺寸 */
+.tap-44 {
+  position: relative;
+}
+
+.tap-44::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+/* 详情页：正文一列，版本索引一列。窄屏只留正文，
+   没有容得下索引的空白，那里本来就有「返回版本列表」 */
+.detail-grid__aside {
+  display: none;
+}
+
+/* 版本索引常驻。高度由第二列的行高（也就是正文高度）兜住，
+   正文很短时不会一路溢出到页脚 */
+.version-rail {
+  position: sticky;
+  top: 5rem;
+  display: flex;
+  flex-direction: column;
+  /* 取三者中的小值：正文高度、视口余量、固定上限 32rem。
+     少了最后一条，内容一长列表就顶到快满屏，等于没有上限；
+     正文高度不能写 100%——它相对行高，而行高又被这份列表自己撑大，会绕成
+     死循环，所以由脚本量出来写进 --content-height，这里只做兜底 */
+  max-height: min(var(--content-height, 32rem), calc(100vh - 7rem), 32rem);
+}
+
+/* 窄屏浮层会压住正文，需要一层底；宽屏落在正文右侧的空白里，完全透明 */
+.version-rail__panel {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  padding: 0.25rem;
+  border-radius: var(--radius-card);
+  background: var(--color-paper-raised);
+  box-shadow: 0 10px 30px -14px rgb(0 0 0 / 0.25);
+}
+
+.version-rail__list {
+  /* 高度先由外层的 max-height 兜住，这里只负责在剩余空间里滚动 */
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rule) transparent;
+}
+
+/* 还能往下滚时底部渐隐，滚到底就取消 */
+.version-rail__list:not([data-at-end]) {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent 100%);
+}
+
+.version-rail__list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.version-rail__list::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--color-rule);
+}
+
+.version-rail__item {
+  --delay: 0ms;
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 7px;
+  color: var(--color-ink-soft);
+  opacity: 0;
+  transform: translateY(-3px);
+  transition:
+    color 140ms ease,
+    background-color 140ms ease,
+    opacity 170ms ease var(--delay),
+    transform 190ms cubic-bezier(0.32, 0.08, 0.24, 1) var(--delay);
+}
+
+/* 逐条落位：只错开前几条，长列表不会等太久 */
+.version-rail__item {
+  --delay: calc(min(var(--i), 8) * 22ms);
+  opacity: 1;
+  transform: none;
+}
+
+.version-rail__item:hover {
+  background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  color: var(--color-ink);
+}
+
+.version-rail__item[data-current] {
+  color: var(--accent);
+}
+
+.version-rail__item[data-current]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 0.875rem;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  transform: translateY(-50%);
+}
+
+.version-rail__version {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.version-rail__date {
+  /* 日期宽度一致，版本号自然成列 */
+  font-size: 0.6875rem;
+  white-space: nowrap;
+  color: var(--color-ink-soft);
+}
+
+.version-rail__draft {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* 小版本挂在大版本下面，缩进一层 */
+.version-rail__item[data-child] {
+  padding-left: 1.25rem;
+}
+
+.version-rail__item[data-child] .version-rail__version {
+  font-weight: 400;
+}
+
+/* 读到哪一节，侧边栏就跟到哪一条 */
+.version-rail__item[data-reading] {
+  color: var(--accent);
+}
+
+.version-rail__draft {
+  font-size: 0.625rem;
+  color: var(--color-ink-soft);
+  opacity: 0.7;
+}
+
+/* 宽屏：浮层固定在正文右侧的空白里，随页面滚动保持可见，且不需要任何底色 */
+@media (min-width: 1280px) {
+  .detail-grid {
+    display: grid;
+    /* 正文 48rem 与列表页同宽，剩下的给索引 */
+    grid-template-columns: minmax(0, 48rem) 13rem;
+    gap: 3rem;
+  }
+
+  .detail-grid__aside {
+    display: block;
+    /* 撑满行高，sticky 的百分比高度才有参照 */
+    height: 100%;
+  }
+
+  .version-rail__panel {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+}
+
+/* 链接悬停预览。卡片由脚本创建并插到 body 下，样式必须是全局的 */
+.link-preview-card {
+  position: fixed;
+  z-index: 60;
+  top: 0;
+  left: 0;
+  /* 只是「瞄一眼」，鼠标永远落在链接上，不会被卡片截走 */
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(var(--enter, -8px)) scale(0.97);
+  transform-origin: top center;
+  transition:
+    opacity 160ms ease,
+    transform 200ms cubic-bezier(0.32, 0.08, 0.24, 1),
+    visibility 0s linear 200ms;
+}
+
+.link-preview-card[data-placement='top'] {
+  --enter: 8px;
+  transform-origin: bottom center;
+}
+
+.link-preview-card.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 200ms ease,
+    transform 260ms cubic-bezier(0.32, 0.08, 0.24, 1),
+    visibility 0s;
+}
+
+.link-preview-card__panel {
+  overflow: hidden;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-raised);
+  box-shadow: 0 18px 44px -20px rgb(0 0 0 / 0.35);
+}
+
+.link-preview-card__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.4rem 0.7rem;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+}
+
+.link-preview-card__source {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-preview-card__go {
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.link-preview-card__go::after {
+  content: ' ↗';
+}
+
+.link-preview-card__stage {
+  position: relative;
+  aspect-ratio: var(--ratio, 16 / 10);
+  background: color-mix(in srgb, var(--color-ink) 3%, transparent);
+}
+
+/* 加载中的扫光。铺在最底层，iframe 就位后停掉 */
+.link-preview-card[data-state='loading'] .link-preview-card__stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in srgb, var(--accent) 14%, transparent) 50%,
+    transparent 80%
+  );
+  background-size: 220% 100%;
+  animation: link-preview-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes link-preview-sweep {
+  from {
+    background-position: 140% 0;
+  }
+  to {
+    background-position: -40% 0;
+  }
+}
+
+.link-preview-card__poster {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: opacity 400ms ease;
+}
+
+.link-preview-card[data-state='ready'] .link-preview-card__poster {
+  opacity: 0;
+}
+
+/* 目标页按桌面宽度渲染再缩放，预览里看到的才是真实版式 */
+.link-preview-card__frame {
+  --zoom: 0.5;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: calc(100% / var(--zoom));
+  width: calc(100% / var(--zoom));
+  border: 0;
+  transform: scale(var(--zoom));
+  transform-origin: 0 0;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.link-preview-card[data-state='ready'] .link-preview-card__frame {
+  opacity: 1;
+}
+
+/* 对方站点禁止内嵌时的兜底文案 */
+.link-preview-card__note {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--color-ink-soft);
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+.link-preview-card[data-state='blocked'] .link-preview-card__note {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 1;
+}
+
+.link-preview-card__caret {
+  position: absolute;
+  left: var(--caret-x, 50%);
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper-raised);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.link-preview-card[data-placement='bottom'] .link-preview-card__caret {
+  top: -5px;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.link-preview-card[data-placement='top'] .link-preview-card__caret {
+  bottom: -5px;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link-preview-card,
+  .link-preview-card__poster,
+  .link-preview-card__frame,
+  .link-preview-card__note {
+    transition: none !important;
+  }
+
+  .link-preview-card[data-state='loading'] .link-preview-card__stage::after {
+    animation: none;
+  }
+}
+
+/* 跨页过渡：标题在列表与详情之间平移缩放，其余内容淡入淡出 */
+::view-transition-group(*) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.32, 0.08, 0.24, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .version-rail__item {
+    transition: none !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 换页进度条（BaseLayout 里的 .nav-progress）。状态由脚本写在 data-state 上，
+   放在 global.css 跟其余脚本驱动的样式放一起 */
+.nav-progress {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 100;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-progress[data-state='loading'] {
+  opacity: 1;
+  transform: scaleX(0.8);
+  /* 先冲一段再放慢，慢回源时也一直在动 */
+  transition: transform 3s cubic-bezier(0.1, 0.7, 0.2, 1);
+}
+
+.nav-progress[data-state='done'] {
+  opacity: 0;
+  transform: scaleX(1);
+  transition:
+    transform 0.2s ease-out,
+    opacity 0.3s ease 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress[data-state='loading'],
+  .nav-progress[data-state='done'] {
+    transform: scaleX(1);
+    transition: none;
+  }
+}

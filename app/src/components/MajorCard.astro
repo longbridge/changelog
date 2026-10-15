@@ -1,0 +1,72 @@
+---
+import { formatDate, localePath, t, type Locale } from '@lib/i18n'
+import { majorSlugOf, type MajorGroup } from '@lib/majors'
+import { majorTitleId } from '@lib/releases'
+
+interface Props {
+  locale: Locale
+  group: MajorGroup
+  /** 多产品混排的首页要标出是哪个产品，产品页里不必重复 */
+  showProduct?: boolean
+  /** 头条位：整行占满，有配图就排在右边 */
+  featured?: boolean
+}
+
+const { locale, group, showProduct, featured } = Astro.props
+const product = group.product
+const slug = majorSlugOf(group.entry)
+const { title, summary, highlights = [], cover, coverAlt, status } = group.entry.data
+---
+
+<article
+  class:list={['major-card', 'accent-scope', featured && 'major-card--featured']}
+  style={`--accent-default:${product.accent}`}
+>
+  <div class="major-card__text">
+    <p class="major-card__date tnum">{formatDate(group.releasedAt, locale)}</p>
+
+    <h2
+      class:list={['major-card__title', featured ? 'major-card__title--lg' : '']}
+      transition:name={majorTitleId(product.id, slug)}
+    >
+      <a href={localePath(locale, product.id, slug)} class="after:absolute after:inset-0">
+        {title}
+      </a>
+    </h2>
+
+    {summary && <p class="major-card__summary">{summary}</p>}
+
+    {/* 头条有地方铺开，把亮点也列出来；网格里的卡片只留摘要，免得两列长短不一 */}
+    {
+      featured && highlights.length > 0 && (
+        <ul class="major-card__highlights">
+          {highlights.slice(0, 4).map((highlight) => (
+            <li>
+              <span class="major-card__dot" aria-hidden="true" />
+              <span>{highlight}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    <p class="major-card__meta">
+      {showProduct && <span>{product.name[locale]}</span>}
+      {
+        status === 'draft' && (
+          <span class="draft-badge rounded-md border px-1.5 py-0.5 text-[0.75rem]">
+            {t.draftBadge[locale]}
+          </span>
+        )
+      }
+    </p>
+  </div>
+
+  {
+    featured && cover && (
+      <div class="major-card__cover">
+        <img src={cover} alt={coverAlt ?? ''} loading="eager" decoding="async" />
+      </div>
+    )
+  }
+</article>

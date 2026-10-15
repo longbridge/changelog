@@ -1,0 +1,25 @@
+---
+product: longbridge-pro
+version: 0.19.1
+tag: v0.19.1
+locale: en
+title: Fixes for editor crashes and stray scrollbars
+summary: Fixed an issue where the editor could quit unexpectedly in c
+highlights: []
+topics: []
+releasedAt: 2026-08-20T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/release-notes/v0.19.1.md
+---
+
+## Improvements
+
+- Fixed an issue where the editor could quit unexpectedly in certain syntax highlighting cases — editing content with multi-byte characters such as Chinese is now more stable.
+- Fixed vertical lists occasionally showing an unnecessary horizontal scrollbar — overlong text now truncates correctly to the actual list width.

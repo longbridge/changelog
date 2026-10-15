@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+  <rect width="800" height="500" fill="#f4f2ee"/>
+  <rect x="0" y="0" width="800" height="44" fill="#ffffff"/>
+  <circle cx="24" cy="22" r="5" fill="#e0dcd4"/><circle cx="42" cy="22" r="5" fill="#e0dcd4"/><circle cx="60" cy="22" r="5" fill="#e0dcd4"/>
+  <rect x="100" y="14" width="120" height="16" rx="5" fill="#eeebe4"/>
+  <g font-family="ui-monospace, monospace" font-size="13" fill="#57544e">
+    <rect x="24" y="64" width="752" height="30" rx="6" fill="#ffffff"/>
+    <text x="40" y="84">700.HK   腾讯控股      368.40   +1.2%</text>
+    <rect x="24" y="102" width="752" height="30" rx="6" fill="#ffffff"/>
+    <text x="40" y="122">AAPL     Apple Inc.    229.87   -0.4%</text>
+    <rect x="24" y="140" width="752" height="30" rx="6" fill="#ffffff"/>
+    <text x="40" y="160">NVDA     NVIDIA        141.20   +2.8%</text>
+    <rect x="24" y="178" width="752" height="30" rx="6" fill="#ffffff"/>
+    <text x="40" y="198">9988.HK  阿里巴巴      84.55    +0.6%</text>
+    <rect x="24" y="216" width="752" height="30" rx="6" fill="#ffffff"/>
+    <text x="40" y="236">TSLA     Tesla         242.10   -1.1%</text>
+  </g>
+  <text x="24" y="470" font-family="system-ui" font-size="12" fill="#8a857d">示例素材 · 旧版列表</text>
+</svg>

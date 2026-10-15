@@ -1,0 +1,220 @@
+---
+/**
+ * 富媒体组件预览页：写 MDX 前来这里看每个组件长什么样、怎么写。
+ * 不进 sitemap、不被索引，也不出现在任何导航里。
+ */
+import type { GetStaticPaths } from 'astro'
+import BaseLayout from '@layouts/BaseLayout.astro'
+import Figure from '@components/release/Figure.astro'
+import Video from '@components/release/Video.astro'
+import Compare from '@components/release/Compare.astro'
+import Steps from '@components/release/Steps.astro'
+import Step from '@components/release/Step.astro'
+import Kbd from '@components/release/Kbd.astro'
+import LinkPreview from '@components/release/LinkPreview.astro'
+import Callout from '@components/Callout.astro'
+import { LOCALES, localePath, type Locale } from '@lib/i18n'
+
+export const getStaticPaths = (() =>
+  LOCALES.map((locale) => ({ params: { locale } }))) satisfies GetStaticPaths
+
+const locale = Astro.params.locale as Locale
+const asset = (name: string) => `/release-assets/_example/${name}`
+
+const sections = [
+  {
+    id: 'figure',
+    name: '<Figure>',
+    use: '新界面、新入口、结果截图。点击图片会放大。',
+    code: `<Figure
+  src="/release-assets/<product>/<version>/watchlist.png"
+  alt="自选列表现在直接显示当日走势"
+  caption="自选列表改版后的样子"
+  width={1600}
+  height={1000}
+/>`,
+  },
+  {
+    id: 'compare',
+    name: '<Compare>',
+    use: '改版、重排、视觉升级——有「以前长这样」的对照。拖分隔线，键盘左右键也能拖。',
+    code: `<Compare
+  before="/release-assets/<product>/<version>/before.png"
+  after="/release-assets/<product>/<version>/after.png"
+  alt="自选列表从纯数字改为带走势图的卡片"
+  caption="拖动分隔线对比改版前后"
+/>`,
+  },
+  {
+    id: 'steps',
+    name: '<Steps> + <Step>',
+    use: '需要用户跟着做的配置、迁移、开启步骤。自动生成切换器。',
+    code: `<Steps title="启用新版布局">
+  <Step title="打开偏好设置">
+    菜单栏选择「偏好设置」，或按 <Kbd keys="⌘+," />。
+  </Step>
+  <Step title="切换布局模式">
+    在「窗口」分页里选择「网格布局」。
+  </Step>
+</Steps>`,
+  },
+  {
+    id: 'video',
+    name: '<Video>',
+    use: '一段操作才讲得清的流程。进入视口自动静音播放，划走暂停。',
+    code: `<Video
+  src="/release-assets/<product>/<version>/drag-layout.mp4"
+  poster="/release-assets/<product>/<version>/drag-layout-poster.jpg"
+  label="把行情窗口拖到第二块屏幕并自动吸附对齐"
+  caption="窗口会自动吸附到网格"
+/>`,
+  },
+  {
+    id: 'demo',
+    name: '<Demo>',
+    use: '能在网页里直接玩的功能。点击后才加载 iframe，不拖慢页面。',
+    code: `<Demo
+  src="https://example.longbridge.com/embed/screener"
+  title="选股器体验"
+  poster="/release-assets/<product>/<version>/screener-poster.png"
+/>`,
+  },
+  {
+    id: 'link-preview',
+    name: '<LinkPreview>',
+    use: '正文里要把人送走的链接：帮助中心、官网、文档。悬停时链接下方浮出目标页面的实时预览，鼠标同时变成「前往」指针。普通 Markdown 链接会自动套上它，手写只为了补 poster / label。',
+    code: `在<LinkPreview href="https://longbridge.com/download" label="Longbridge 官网">下载页</LinkPreview>获取最新客户端。
+
+对方站点禁止内嵌时补一张兜底图：
+
+<LinkPreview
+  href="https://longbridge.com/download"
+  poster="/release-assets/<product>/<version>/download-page.png"
+/>`,
+  },
+  {
+    id: 'callout',
+    name: '<Callout> / <Kbd>',
+    use: '升级须知、破坏性变更、快捷键。',
+    code: `<Callout type="warning">升级后原有的自定义布局需要重新保存一次。</Callout>
+
+按 <Kbd keys="⌘+K" /> 唤起搜索。`,
+  },
+]
+---
+
+<BaseLayout
+  locale={locale}
+  title="富媒体组件预览"
+  description="Release Notes MDX 里可用的组件与写法"
+  noindex
+>
+  <div class="mx-auto max-w-2xl">
+    <p class="text-[0.8125rem] text-ink-faint">内部预览页 · 不对外索引</p>
+    <h1 class="mt-2 text-[1.875rem] leading-tight font-semibold tracking-tight">富媒体组件预览</h1>
+    <p class="mt-3 text-[1rem] leading-relaxed text-ink-soft">
+      这些组件在 Release Notes 的 MDX 正文里可以直接写，不需要 import。下面每一节左边是效果，
+      右边的代码块是写法。素材统一放在 <code>public/changelog/release-assets/&lt;product&gt;/&lt;version&gt;/</code>。
+    </p>
+
+    <nav class="mt-6 flex flex-wrap gap-2">
+      {
+        sections.map((section) => (
+          <a
+            href={`#${section.id}`}
+            class="rounded-full border border-rule px-3 py-1 text-[0.8125rem] text-ink-soft transition-colors hover:border-ink-faint hover:text-ink"
+          >
+            {section.name}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="prose mt-10">
+      <section id="figure">
+        <h2>{sections[0].name}</h2>
+        <p>{sections[0].use}</p>
+        <Figure
+          src={asset('shot.svg')}
+          alt="自选列表现在直接显示当日走势与市场状态"
+          caption="点击图片可以放大查看"
+          width={800}
+          height={500}
+        />
+        <pre><code>{sections[0].code}</code></pre>
+      </section>
+
+      <section id="compare">
+        <h2>{sections[1].name}</h2>
+        <p>{sections[1].use}</p>
+        <Compare
+          before={asset('before.svg')}
+          after={asset('after.svg')}
+          alt="自选列表从纯数字改为带走势图的卡片"
+          caption="拖动中间的分隔线对比改版前后"
+          width={800}
+          height={500}
+        />
+        <pre><code>{sections[1].code}</code></pre>
+      </section>
+
+      <section id="steps">
+        <h2>{sections[2].name}</h2>
+        <p>{sections[2].use}</p>
+        <Steps title="启用新版布局">
+          <Step title="打开偏好设置">
+            菜单栏选择「偏好设置」，或直接按 <Kbd keys="⌘+," />。
+          </Step>
+          <Step title="切换布局模式">在「窗口」分页里选择「网格布局」，拖动窗口即可自动吸附。</Step>
+          <Step title="保存布局">调整满意后点右上角「保存为默认布局」。</Step>
+        </Steps>
+        <pre><code>{sections[2].code}</code></pre>
+      </section>
+
+      <section id="video">
+        <h2>{sections[3].name}</h2>
+        <p>{sections[3].use}</p>
+        <Callout>
+          这一节没有放示例视频（仓库里不适合塞二进制素材）。把 mp4 放进 release-assets
+          后就能看到效果：进入视口自动播放，划走自动暂停，hover 出现播放/暂停按钮。
+        </Callout>
+        <pre><code>{sections[3].code}</code></pre>
+      </section>
+
+      <section id="demo">
+        <h2>{sections[4].name}</h2>
+        <p>{sections[4].use}</p>
+        <pre><code>{sections[4].code}</code></pre>
+      </section>
+
+      <section id="link-preview">
+        <h2>{sections[5].name}</h2>
+        <p>{sections[5].use}</p>
+        <p>
+          在 <LinkPreview href="https://longbridge.com/download" label="Longbridge 官网">下载页</LinkPreview>
+          获取最新客户端，或者看看 <LinkPreview href="https://longbridge.com/">官网首页</LinkPreview>
+          长什么样。站内链接<LinkPreview href={localePath(locale, 'longbridge-pro')}>版本列表</LinkPreview>
+          与页内锚点 <LinkPreview href="#figure">回到 Figure</LinkPreview> 都在当前页跳转，
+          后者没有页面可预览，退回成普通链接。
+        </p>
+        <Callout>
+          预览用 iframe 实时加载目标页面，按桌面宽度渲染后缩放，所以看到的就是真实版式。
+          目标站点如果设了 <code>X-Frame-Options</code> 之类的限制就内嵌不出来，给它补一张
+          <code>poster</code> 兜底。正文里的普通 Markdown 链接会自动套上这个组件，锚点、
+          <code>mailto:</code> 这类没有页面可预览的会退回成普通链接。触屏设备不触发预览，
+          「减少动态效果」下浮层直接出现、不做动画。
+        </Callout>
+        <pre><code>{sections[5].code}</code></pre>
+      </section>
+
+      <section id="callout">
+        <h2>{sections[6].name}</h2>
+        <p>{sections[6].use}</p>
+        <Callout type="warning">升级后原有的自定义布局需要重新保存一次。</Callout>
+        <Callout type="success">行情延迟已从 500ms 降到 120ms。</Callout>
+        <p>按 <Kbd keys="⌘+K" /> 唤起搜索，按 <Kbd keys="Ctrl+Shift+P" /> 打开命令面板。</p>
+        <pre><code>{sections[6].code}</code></pre>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,165 @@
+---
+import { assetPath } from '@lib/assets'
+import { t, type Locale } from '@lib/i18n'
+
+interface Props {
+  before: string
+  after: string
+  /** 两张图讲的是同一处界面，alt 说明改动内容 */
+  alt: string
+  beforeLabel?: string
+  afterLabel?: string
+  caption?: string
+  width?: number
+  height?: number
+}
+
+const { before, after, alt, beforeLabel, afterLabel, caption, width, height } = Astro.props
+const locale = (Astro.currentLocale ?? 'zh-CN') as Locale
+const labels = {
+  before: beforeLabel ?? t.before[locale],
+  after: afterLabel ?? t.after[locale],
+}
+---
+
+<figure class="my-7" data-reveal>
+  <div class="compare media-frame" data-compare style="--pos:50%">
+    <img src={assetPath(before)} alt={`${labels.before}：${alt}`} width={width} height={height} loading="lazy" class="block w-full" />
+
+    <div class="compare__after">
+      <img src={assetPath(after)} alt={`${labels.after}：${alt}`} width={width} height={height} loading="lazy" class="block w-full" />
+    </div>
+
+    <span class="compare__label compare__label--before">{labels.before}</span>
+    <span class="compare__label compare__label--after">{labels.after}</span>
+
+    <div class="compare__handle" aria-hidden="true">
+      <span class="compare__grip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="m9 7-5 5 5 5M15 7l5 5-5 5" />
+        </svg>
+      </span>
+    </div>
+
+    {/* 用 range 做交互：拖拽、点击、键盘左右键都能用，无障碍也天然可用 */}
+    <input
+      class="compare__range"
+      type="range"
+      min="0"
+      max="100"
+      value="50"
+      step="0.1"
+      data-compare-range
+      aria-label={`${labels.before} / ${labels.after}`}
+    />
+  </div>
+  {caption && <figcaption class="media-caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .compare {
+    position: relative;
+    touch-action: pan-y;
+  }
+
+  .compare__after {
+    position: absolute;
+    inset: 0;
+    /* 只显示分隔线右侧的部分 */
+    clip-path: inset(0 0 0 var(--pos));
+  }
+
+  .compare__after img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .compare__handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 2px;
+    margin-left: -1px;
+    background: rgb(255 255 255 / 0.9);
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.18);
+    pointer-events: none;
+  }
+
+  .compare__grip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    transform: translate(-50%, -50%);
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.95);
+    color: var(--color-ink);
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+    transition: transform 160ms cubic-bezier(0.32, 0.08, 0.24, 1);
+  }
+
+  .compare:hover .compare__grip {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  .compare__label {
+    position: absolute;
+    top: 0.625rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 6px;
+    background: rgb(18 18 17 / 0.62);
+    color: #fff;
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
+
+  .compare__label--before {
+    left: 0.625rem;
+  }
+
+  .compare__label--after {
+    right: 0.625rem;
+  }
+
+  .compare__range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    appearance: none;
+    background: none;
+  }
+
+  .compare__range:focus-visible + .compare__handle,
+  .compare:has(.compare__range:focus-visible) .compare__grip {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  function initCompare() {
+    document.querySelectorAll<HTMLElement>('[data-compare]').forEach((root) => {
+      if (root.dataset.bound) return
+      root.dataset.bound = 'true'
+
+      const range = root.querySelector<HTMLInputElement>('[data-compare-range]')
+      if (!range) return
+      const update = () => root.style.setProperty('--pos', `${range.value}%`)
+      range.addEventListener('input', update)
+      update()
+    })
+  }
+
+  initCompare()
+  document.addEventListener('astro:page-load', initCompare)
+</script>

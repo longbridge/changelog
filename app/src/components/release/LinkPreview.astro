@@ -1,0 +1,337 @@
+---
+import { assetPath } from '@lib/assets'
+import { t, type Locale } from '@lib/i18n'
+
+interface Props {
+  /** 目标地址，站内站外都行 */
+  href: string
+  /** 预览卡片上显示的来源名，默认取域名 */
+  label?: string
+  /** Markdown 链接的 title（`[x](url "title")`），没写 label 时当来源名用 */
+  title?: string
+  /** 首屏占位图，iframe 加载完会盖上去；目标站禁止内嵌时它就是兜底 */
+  poster?: string
+  /** 预览区 CSS aspect-ratio 写法，默认 16/10 */
+  ratio?: string
+  /** 关掉悬停预览，只留一个普通链接 */
+  preview?: boolean
+  /** 新标签打开，默认：外链开、站内链不开 */
+  newTab?: boolean
+}
+
+const { href, label, title, poster, ratio = '16 / 10', preview = true, newTab } = Astro.props
+const locale = (Astro.currentLocale ?? 'zh-CN') as Locale
+
+const external = /^https?:\/\//i.test(href)
+// 锚点、mailto、tel 没有页面可以预览，退回成普通链接
+const previewable = preview && (external || href.startsWith('/'))
+const openInNewTab = newTab ?? external
+const host = external ? new URL(href).host.replace(/^www\./, '') : ''
+const source = label ?? title ?? (external ? host : href)
+---
+
+<a
+  href={href}
+  class={previewable ? 'link-preview' : undefined}
+  target={openInNewTab ? '_blank' : undefined}
+  rel={openInNewTab ? 'noopener noreferrer' : undefined}
+  title={title}
+  data-link-preview={previewable ? '' : undefined}
+  data-preview-src={previewable ? href : undefined}
+  data-preview-source={previewable ? source : undefined}
+  data-preview-poster={previewable && poster ? assetPath(poster) : undefined}
+  data-preview-ratio={previewable ? ratio : undefined}
+  data-preview-go={previewable ? t.goToPage[locale] : undefined}
+  data-preview-blocked={previewable ? t.previewBlocked[locale] : undefined}
+  ><slot />{
+    external && (
+      <svg
+        class="link-preview__mark"
+        width="11"
+        height="11"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M8 16 16 8M9 8h7v7" />
+      </svg>
+    )
+  }</a
+>
+
+<style>
+  /* 悬停时鼠标换成「去到目标页面」的指针：深色圆底 + 斜向箭头。
+     Safari 不支持 SVG 光标，会落到后面的 pointer */
+  .link-preview {
+    cursor:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'><circle cx='17' cy='17' r='12' fill='%231b1a18' stroke='%23ffffff' stroke-width='2'/><path d='M13.4 20.6 20.6 13.4M14.6 13.4h6v6' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+        17 17,
+      pointer;
+  }
+
+  .link-preview__mark {
+    display: inline-block;
+    margin-left: 0.15em;
+    vertical-align: -0.05em;
+    opacity: 0.65;
+    transition:
+      transform 200ms cubic-bezier(0.32, 0.08, 0.24, 1),
+      opacity 200ms ease;
+  }
+
+  .link-preview:hover .link-preview__mark,
+  .link-preview[data-preview-open] .link-preview__mark {
+    opacity: 1;
+    transform: translate(1px, -1px);
+  }
+
+  .link-preview[data-preview-open] {
+    text-decoration-thickness: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link-preview__mark {
+      transition: none;
+    }
+    .link-preview:hover .link-preview__mark,
+    .link-preview[data-preview-open] .link-preview__mark {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * 悬停预览：全页共用一张浮层卡片，跟着触发的链接定位。
+   * 卡片由脚本创建，样式在 global.css（拿不到 Astro 的 scoped class）。
+   */
+  const OPEN_DELAY = 260
+  const CLOSE_DELAY = 120
+  const BLOCKED_AFTER = 4000
+  const GAP = 10
+  const EDGE = 12
+  const MAX_WIDTH = 420
+
+  let card: HTMLElement | null = null
+  let stage: HTMLElement | null = null
+  let source: HTMLElement | null = null
+  let go: HTMLElement | null = null
+  let current: HTMLAnchorElement | null = null
+  let openTimer = 0
+  let closeTimer = 0
+  let blockedTimer = 0
+  let frame = 0
+
+  const canHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches
+
+  function ensureCard(): HTMLElement {
+    if (card?.isConnected) return card
+
+    card = document.createElement('div')
+    card.className = 'link-preview-card'
+    card.setAttribute('aria-hidden', 'true')
+    card.inert = true
+    card.innerHTML = `
+      <div class="link-preview-card__panel">
+        <div class="link-preview-card__bar">
+          <span class="link-preview-card__source"></span>
+          <span class="link-preview-card__go"></span>
+        </div>
+        <div class="link-preview-card__stage"></div>
+      </div>
+      <span class="link-preview-card__caret"></span>`
+    document.body.append(card)
+
+    stage = card.querySelector('.link-preview-card__stage')
+    source = card.querySelector('.link-preview-card__source')
+    go = card.querySelector('.link-preview-card__go')
+    return card
+  }
+
+  /** 卡片贴着链接放，优先在下方；下方放不下才翻到上方 */
+  function place(anchor: HTMLAnchorElement) {
+    if (!card) return
+    const rects = Array.from(anchor.getClientRects())
+    if (rects.length === 0) return
+
+    const vw = document.documentElement.clientWidth
+    const vh = window.innerHeight
+    const width = Math.min(MAX_WIDTH, vw - EDGE * 2)
+    card.style.width = `${width}px`
+
+    // 先量真实高度再决定上下，避免翻转后又超出视口
+    const height = card.offsetHeight
+    const below = rects[rects.length - 1]
+    const above = rects[0]
+    const fitsBelow = below.bottom + GAP + height <= vh - EDGE
+    const anchorRect = fitsBelow ? below : above
+    const top = fitsBelow ? below.bottom + GAP : above.top - GAP - height
+
+    const center = anchorRect.left + anchorRect.width / 2
+    const left = Math.min(Math.max(center - width / 2, EDGE), vw - width - EDGE)
+
+    card.dataset.placement = fitsBelow ? 'bottom' : 'top'
+    card.style.left = `${left}px`
+    card.style.top = `${Math.max(top, EDGE)}px`
+    card.style.setProperty('--caret-x', `${Math.min(Math.max(center - left, 18), width - 18)}px`)
+  }
+
+  function open(anchor: HTMLAnchorElement) {
+    const src = anchor.dataset.previewSrc
+    if (!src || !canHover()) return
+
+    const root = ensureCard()
+    if (!stage) return
+
+    current = anchor
+    anchor.setAttribute('data-preview-open', '')
+    source!.textContent = anchor.dataset.previewSource || ''
+    go!.textContent = anchor.dataset.previewGo || ''
+    root.style.setProperty('--ratio', anchor.dataset.previewRatio || '16 / 10')
+
+    // 同一个链接再次悬停复用已经加载好的 iframe，不重新请求
+    if (root.dataset.src !== src) {
+      root.dataset.src = src
+      root.dataset.state = 'loading'
+      stage.replaceChildren()
+
+      const poster = anchor.dataset.previewPoster
+      if (poster) {
+        const image = document.createElement('img')
+        image.src = poster
+        image.alt = ''
+        image.className = 'link-preview-card__poster'
+        stage.append(image)
+      }
+
+      const note = document.createElement('span')
+      note.className = 'link-preview-card__note'
+      note.textContent = anchor.dataset.previewBlocked || ''
+      stage.append(note)
+
+      /**
+       * 只给同源目标做 iframe 预览。
+       *
+       * 跨源站点绝大多数用 CSP 的 frame-ancestors 或 X-Frame-Options 拒绝内嵌，而**被拦和
+       * 加载成功在 JS 里完全无法区分**——两种情况 load 都会触发，读 contentWindow 都抛
+       * SecurityError（浏览器有意不给区分，否则就是跨站信息泄漏）。所以试了也只能得到一个
+       * 空白框，还要白等一次请求。
+       *
+       * 注意这是按「运行时所在的域」判断，不是按链接写法：本站部署在
+       * longbridge.com/<locale>/changelog 之后，指向 longbridge.com 的链接就是同源，预览照常。
+       */
+      let sameOrigin = false
+      try {
+        sameOrigin = new URL(src, location.href).origin === location.origin
+      } catch {
+        sameOrigin = false
+      }
+
+      if (!sameOrigin) {
+        // 给了占位图就拿它当预览，没有就直接提示去原页面
+        root.dataset.state = poster ? 'ready' : 'blocked'
+        window.clearTimeout(blockedTimer)
+      } else {
+        const iframe = document.createElement('iframe')
+        iframe.src = src
+        iframe.title = ''
+        iframe.tabIndex = -1
+        iframe.setAttribute('aria-hidden', 'true')
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin')
+        iframe.setAttribute('referrerpolicy', 'no-referrer')
+        iframe.className = 'link-preview-card__frame'
+        iframe.addEventListener('load', () => {
+          window.clearTimeout(blockedTimer)
+          if (root.dataset.src === src) root.dataset.state = 'ready'
+        })
+        stage.append(iframe)
+
+        // load 一直不来（网络卡住、对方直接丢请求）时也要把兜底露出来
+        window.clearTimeout(blockedTimer)
+        blockedTimer = window.setTimeout(() => {
+          if (root.dataset.src === src && root.dataset.state === 'loading') root.dataset.state = 'blocked'
+        }, BLOCKED_AFTER)
+      }
+    }
+
+    place(anchor)
+    requestAnimationFrame(() => root.classList.add('is-open'))
+  }
+
+  function close() {
+    window.clearTimeout(openTimer)
+    current?.removeAttribute('data-preview-open')
+    current = null
+    card?.classList.remove('is-open')
+  }
+
+  function scheduleOpen(anchor: HTMLAnchorElement, delay = OPEN_DELAY) {
+    window.clearTimeout(closeTimer)
+    if (current === anchor) return
+    window.clearTimeout(openTimer)
+    openTimer = window.setTimeout(() => open(anchor), delay)
+  }
+
+  function scheduleClose() {
+    window.clearTimeout(openTimer)
+    window.clearTimeout(closeTimer)
+    closeTimer = window.setTimeout(close, CLOSE_DELAY)
+  }
+
+  function trigger(event: Event): HTMLAnchorElement | null {
+    const target = event.target as Element | null
+    return target?.closest?.<HTMLAnchorElement>('a[data-link-preview]') ?? null
+  }
+
+  function bind() {
+    if (document.documentElement.dataset.linkPreviewBound) return
+    document.documentElement.dataset.linkPreviewBound = 'true'
+
+    document.addEventListener('pointerover', (event) => {
+      const anchor = trigger(event)
+      if (anchor) scheduleOpen(anchor)
+      else if (current) scheduleClose()
+    })
+
+    document.addEventListener('pointerout', (event) => {
+      if (trigger(event)) scheduleClose()
+    })
+
+    // 键盘用户：聚焦即预览
+    document.addEventListener('focusin', (event) => {
+      const anchor = trigger(event)
+      if (anchor) scheduleOpen(anchor, 0)
+      else if (current) close()
+    })
+    document.addEventListener('focusout', (event) => {
+      if (trigger(event)) scheduleClose()
+    })
+
+    document.addEventListener('click', close, true)
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') close()
+    })
+
+    // 滚动与缩放时跟住链接，而不是把卡片留在原地
+    const follow = () => {
+      if (!current) return
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => current && place(current))
+    }
+    document.addEventListener('scroll', follow, { capture: true, passive: true })
+    window.addEventListener('resize', follow)
+
+    // 客户端路由换页时卡片会被 body 一起换掉，先收起来，下次悬停重新创建
+    document.addEventListener('astro:before-swap', () => {
+      close()
+      card = null
+    })
+  }
+
+  bind()
+  document.addEventListener('astro:page-load', bind)
+</script>

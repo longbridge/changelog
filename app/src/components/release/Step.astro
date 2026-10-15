@@ -1,0 +1,27 @@
+---
+interface Props {
+  /** 切换器上显示的短标题 */
+  title: string
+}
+
+const { title } = Astro.props
+---
+
+{/* 没有 JS 时所有步骤按顺序平铺，同样读得通 */}
+<section class="step" data-step={title} data-reveal>
+  <h3 class="step__title">{title}</h3>
+  <slot />
+</section>
+
+<style>
+  .step__title {
+    margin: 0 0 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  /* 切换器接管后，标题由 tab 承担，面板里不再重复 */
+  :global([data-steps][data-bound]) .step__title {
+    display: none;
+  }
+</style>

@@ -1,0 +1,21 @@
+---
+interface Props {
+  /** 用 + 连接，例如 "⌘+K" 或 "Ctrl+Shift+P" */
+  keys: string
+}
+
+const parts = Astro.props.keys.split('+').map((key) => key.trim())
+---
+
+<span class="kbd">
+  {
+    parts.map((key, index) => (
+      <>
+        {index > 0 && <span class="kbd__plus">+</span>}
+        <kbd class="kbd__key">{key}</kbd>
+      </>
+    ))
+  }
+</span>
+
+{/* 样式在 global.css 的 .kbd：kbd-plugin把行内代码里的快捷键渲染成同样的结构，拿不到这里的 scoped 样式 */}

@@ -1,0 +1,93 @@
+---
+/**
+ * 内容进场与图片灯箱的统一驱动，在 BaseLayout 里放一次即可。
+ * 组件只要带 data-reveal 就能获得进场动画，不必各自写 observer。
+ */
+import { t, type Locale } from '@lib/i18n'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+---
+
+<dialog class="lightbox" data-lightbox aria-label={t.expandImage[locale]}>
+  {/* 占位：src 留空会让浏览器重新请求当前页，等点开时再由脚本填 */}
+  <img alt="" data-lightbox-image />
+</dialog>
+
+<script>
+  const REVEAL_SELECTOR = '[data-reveal]'
+  /** 正文里这些元素自动获得进场动画，不用在 MDX 里手写 */
+  const PROSE_SELECTOR = '.prose > h2, .prose > h3, .prose > p, .prose > ul, .prose > ol, .prose > blockquote, .prose > table'
+
+  const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  let observer: IntersectionObserver | null = null
+
+  function reveal(element: Element, delay = 0) {
+    if (delay) (element as HTMLElement).style.setProperty('--reveal-delay', `${delay}ms`)
+    element.classList.add('is-in')
+  }
+
+  function initReveal() {
+    document.documentElement.dataset.revealReady = ''
+
+    if (reducedMotion()) {
+      document.querySelectorAll(REVEAL_SELECTOR).forEach((el) => el.classList.add('is-in'))
+      return
+    }
+
+    document.querySelectorAll(PROSE_SELECTOR).forEach((el) => el.setAttribute('data-reveal', ''))
+
+    observer?.disconnect()
+    observer = new IntersectionObserver(
+      (entries) => {
+        // 同一屏内的元素依次进场，最多错开 5 个，长列表不会拖沓
+        let index = 0
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          reveal(entry.target, Math.min(index++, 5) * 60)
+          observer!.unobserve(entry.target)
+        }
+      },
+      { rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
+    )
+
+    document.querySelectorAll(REVEAL_SELECTOR).forEach((el) => {
+      // 首屏已经在可视区内的直接显示，避免加载后才淡入
+      if (el.getBoundingClientRect().top < innerHeight * 0.9) reveal(el)
+      else observer!.observe(el)
+    })
+  }
+
+  function initLightbox() {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]')
+    const image = dialog?.querySelector<HTMLImageElement>('[data-lightbox-image]')
+    if (!dialog || !image || dialog.dataset.bound) return
+    dialog.dataset.bound = 'true'
+
+    document.addEventListener('click', (event) => {
+      const zoomable = (event.target as HTMLElement).closest<HTMLImageElement>('[data-zoomable]')
+      if (zoomable) {
+        image.src = zoomable.currentSrc || zoomable.src
+        image.alt = zoomable.alt
+        dialog.showModal()
+        return
+      }
+      // 点图片以外的任何地方关闭
+      if (dialog.open && !(event.target as HTMLElement).closest('[data-lightbox-image]')) {
+        dialog.close()
+      }
+    })
+  }
+
+  function init() {
+    initReveal()
+    initLightbox()
+  }
+
+  init()
+  document.addEventListener('astro:page-load', init)
+</script>

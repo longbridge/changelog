@@ -1,0 +1,290 @@
+---
+import { LOCALE_META, LOCALES, hreflangsOf, localePath, ogLocale, t, type Locale } from '@lib/i18n'
+import { siteConfig } from '@config/site.config'
+import JsonLd from '@components/JsonLd.astro'
+import LocaleSwitcher from '@components/LocaleSwitcher.astro'
+import { ClientRouter } from 'astro:transitions'
+import Reveal from '@components/release/Reveal.astro'
+import '../styles/global.css'
+
+interface Props {
+  locale: Locale
+  title: string
+  description?: string
+  /** 各语言下对应的同一页面路径，用于 hreflang */
+  alternates?: Partial<Record<Locale, string>>
+  /** 产品主题色，注入后页面内的强调元素统一取色 */
+  accent?: string
+  /** 内部页面，不希望被搜索引擎收录 */
+  noindex?: boolean
+  /** 当前所在的产品，导航里高亮 */
+  activeProduct?: string
+  /** 结构化数据里的面包屑 */
+  breadcrumbs?: { name: string; path?: string }[]
+}
+
+const { locale, title, description, alternates, accent, noindex, activeProduct, breadcrumbs } = Astro.props
+const meta = LOCALE_META[locale]
+const pageTitle = title === siteConfig.name[locale] ? title : `${title} · ${siteConfig.name[locale]}`
+const pageDescription = description || siteConfig.description[locale]
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
+---
+
+<!doctype html>
+<html
+  lang={meta.htmlLang}
+  data-rail="open"
+  style={accent ? `--accent-default:${accent}` : undefined}
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={siteConfig.logo} />
+    <link rel="apple-touch-icon" href={siteConfig.logo} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    {/* logo 与 favicon 都在这个 CDN 上，先把连接建起来 */}
+    {
+      siteConfig.preconnect.map((origin) => (
+        <>
+          <link rel="preconnect" href={origin} crossorigin="anonymous" />
+          <link rel="dns-prefetch" href={origin} />
+        </>
+      ))
+    }
+
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={siteConfig.name[locale]} />
+    <meta property="og:image" content={siteConfig.logo} />
+    <meta property="og:locale" content={ogLocale(locale)} />
+    {
+      LOCALES.filter((alt) => alt !== locale).map((alt) => (
+        <meta property="og:locale:alternate" content={ogLocale(alt)} />
+      ))
+    }
+    <meta name="twitter:card" content="summary" />
+    {
+      LOCALES.flatMap((alt) =>
+        alternates?.[alt]
+          ? hreflangsOf(alt).map((tag) => (
+              <link rel="alternate" hreflang={tag} href={new URL(alternates[alt]!, Astro.site ?? Astro.url.origin)} />
+            ))
+          : [],
+      )
+    }
+    <link rel="alternate" type="application/rss+xml" title={siteConfig.name[locale]} href={localePath(locale, 'rss.xml')} />
+    <JsonLd locale={locale} breadcrumbs={breadcrumbs} />
+
+    {/* 客户端路由：页面间淡入淡出，标题做共享元素过渡（只在列表点进详情时，见下面的脚本） */}
+    <ClientRouter />
+    <script>
+      /**
+       * 共享元素过渡只留给「列表 → 详情」这一步：点哪条，哪条的标题飞进详情页。
+       * 其余方向必须关掉——
+       *   列表之间（首页 ↔ 产品页）两边各有一整屏同名标题，滚动位置还不一样，
+       *   每个标题都会各自飞一段；详情回列表时目标条目多半在视口外，标题会径直飞出屏幕。
+       * 两种都表现为「一堆标题跟着滚」，而读者在新页面的首屏根本看不到它们。
+       */
+      const BASE = import.meta.env.BASE_URL.replace(/\/$/, '')
+
+      /** 路径去掉 base 后还剩四段（locale / changelog / product / major）的才是详情页 */
+      function isDetail(url: string | URL) {
+        const path = new URL(url, location.origin).pathname
+        const rest = path.startsWith(BASE) ? path.slice(BASE.length) : path
+        return rest.split('/').filter(Boolean).length >= 4
+      }
+
+      /** 把来路那一条滚进视口，标题才有地方可落 */
+      function revealRow(detailPath: string) {
+        document.addEventListener(
+          'astro:after-swap',
+          () => {
+            const link =
+              document.querySelector(`.major-card a[href="${detailPath}"]`) ??
+              document.querySelector(`.major-card a[href="${detailPath.replace(/\/$/, '')}"]`)
+            link?.closest('.major-card')?.scrollIntoView({ block: 'center', behavior: 'instant' })
+          },
+          // after-swap 仍在 startViewTransition 的回调里，这时滚动才会被算进新快照
+          { once: true },
+        )
+      }
+
+      document.addEventListener('astro:before-preparation', (event) => {
+        const { from, to, direction, sourceElement } = event as unknown as {
+          from: URL
+          to: URL
+          direction?: string
+          sourceElement?: Element
+        }
+        const fromDetail = isDetail(from)
+        const toDetail = isDetail(to)
+
+        // 列表 → 详情：点哪条，哪条的标题飞过去
+        if (!fromDetail && toDetail) return
+
+        if (fromDetail && !toDetail) {
+          // 顺着面包屑原路返回：把那一条滚回视野里，动画才落得下来
+          if (sourceElement?.closest('[data-back-to-list]')) {
+            revealRow(from.pathname)
+            return
+          }
+          // 浏览器后退：列表的滚动位置本来就会恢复，条目多半还在原处
+          if (direction === 'back') return
+        }
+
+        // 其余情况关掉：列表之间两边各有一屏同名标题，
+        // 从详情点导航去别处时目标条目也多半在视口外
+        // 标记走 CSS，而不是摘掉 scope 属性——属性摘了就回不来，
+        // 落地页面下一次点进详情就没有动画了
+        document.documentElement.dataset.noSharedTransition = ''
+        // 旧页面的快照在 swap 时才拍，新文档同样要带上标记，否则单边留名会各自进出场
+        document.addEventListener(
+          'astro:before-swap',
+          (swap) => {
+            const { newDocument } = swap as unknown as { newDocument: Document }
+            newDocument.documentElement.dataset.noSharedTransition = ''
+          },
+          { once: true },
+        )
+      })
+
+      /**
+       * 换页进度条。延迟一会儿才出现：预取命中时换页是瞬间的，进度条一闪反而像出了问题。
+       * 进度是假的——fetch 拿不到可信的总长度，只表达「在加载」，完成时补满再淡出。
+       */
+      let progressTimer = 0
+      const progress = () => document.querySelector<HTMLElement>('.nav-progress')
+
+      document.addEventListener('astro:before-preparation', () => {
+        clearTimeout(progressTimer)
+        progressTimer = window.setTimeout(() => {
+          const bar = progress()
+          if (bar) bar.dataset.state = 'loading'
+        }, 120)
+      })
+
+      document.addEventListener('astro:after-swap', () => {
+        clearTimeout(progressTimer)
+        const bar = progress()
+        if (bar?.dataset.state !== 'loading') return
+        bar.dataset.state = 'done'
+        bar.addEventListener('transitionend', () => delete bar.dataset.state, { once: true })
+        // 减弱动效下没有 transition，transitionend 不会来
+        setTimeout(() => delete bar.dataset.state, 600)
+      })
+
+      // 过渡走完就撤掉标记，不影响下一次导航
+      document.addEventListener('astro:page-load', () => {
+        delete document.documentElement.dataset.noSharedTransition
+
+        // 记下读者停在哪个列表页：详情页的返回链接照这个走，
+        // 从「全部产品」点进去的就退回「全部产品」，而不是那个产品的列表
+        if (!isDetail(location.href)) {
+          try {
+            sessionStorage.setItem('lb:list', location.pathname)
+          } catch {}
+        }
+      })
+    </script>
+    {/* 版本栏默认展开，只有用户手动收起过才记成 closed；状态放在 html 上，首屏即正确。
+        换页后 html 会被替换，需要重新应用 */}
+    <script is:inline>
+      (() => {
+        const apply = () => {
+          document.documentElement.dataset.rail =
+            localStorage.getItem('version-rail') === 'closed' ? 'closed' : 'open'
+        }
+        apply()
+        if (!window.__railBound) {
+          window.__railBound = true
+          document.addEventListener('astro:after-swap', apply)
+        }
+      })()
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    {/* 换页进度条：ClientRouter 先 fetch 完下一页才切换，等待期间浏览器没有任何加载提示，
+        回源慢的时候点了像没反应。persist 让它跨页保留，结束动画才走得完 */}
+    <div class="nav-progress" aria-hidden="true" transition:persist="nav-progress"></div>
+    <header
+      class="sticky top-0 z-20 border-b border-rule/70 bg-paper/85 backdrop-blur-md"
+    >
+      <div class="mx-auto flex h-14 max-w-5xl items-center gap-5 px-5">
+        {/* 品牌位回主站，站内首页交给旁边的「全部更新日志」 */}
+        <a
+          href={siteConfig.brandUrl}
+          class="group flex shrink-0 items-center gap-2.5 text-[0.9375rem] font-semibold tracking-tight"
+        >
+          <img
+            src={siteConfig.logo}
+            alt=""
+            width="24"
+            height="24"
+            class="h-6 w-6"
+          />
+          <span class="truncate">{siteConfig.brand}</span>
+        </a>
+
+        {/* 产品直接铺开：一共就这么几个，藏进下拉反而多一次点击 */}
+        <nav class="hidden items-center gap-0.5 sm:flex" aria-label={t.allProducts[locale]}>
+          <a
+            href={localePath(locale)}
+            aria-current={activeProduct ? undefined : 'page'}
+            class="nav-link rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-ink transition-colors hover:bg-rule/50"
+          >
+            {t.allReleaseNotes[locale]}
+          </a>
+          {/* 站外链接：带个小箭头，读者知道点了会离开更新日志 */}
+          <a
+            href={siteConfig.developers(locale)}
+            target="_blank"
+            rel="noopener"
+            class="nav-link inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-ink transition-colors hover:bg-rule/50"
+          >
+            {t.developers[locale]}
+            <svg aria-hidden="true" viewBox="0 0 12 12" class="h-2.5 w-2.5 opacity-60" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h6v6M10 2 3 9" /></svg>
+          </a>
+        </nav>
+
+        <div class="ml-auto flex items-center gap-1.5">
+          <LocaleSwitcher locale={locale} alternates={alternates} />
+        </div>
+      </div>
+    </header>
+
+    <Reveal locale={locale} />
+
+    <main
+      class="mx-auto w-full max-w-5xl flex-1 px-5 py-10 sm:py-14"
+    >
+      <slot />
+    </main>
+
+    <footer class="mt-16 border-t border-rule/70">
+      <div
+        class="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-5 py-8 text-[0.8125rem] text-ink-faint"
+      >
+        <span>© {new Date().getFullYear()} Longbridge</span>
+        <span class="text-rule" aria-hidden="true">|</span>
+        {/* 主站入口：与顶栏的开发者平台一样新开标签页，读者看完还在更新日志 */}
+        {
+          siteConfig.footerLinks(locale).map((item) => (
+            <a href={item.href} target="_blank" rel="noopener" class="transition-colors hover:text-ink">
+              {t[item.key][locale]}
+            </a>
+          ))
+        }
+        <a
+          href={localePath(locale, 'rss.xml')}
+          class="transition-colors hover:text-ink">RSS</a
+        >
+      </div>
+    </footer>
+  </body>
+</html>

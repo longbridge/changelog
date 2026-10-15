@@ -1,0 +1,39 @@
+---
+import { assetPath } from '@lib/assets'
+import type { Locale } from '@lib/i18n'
+
+interface Props {
+  /** 图片地址，用自家 CDN 的完整 URL */
+  src: string
+  /** 必填：读屏用户靠它理解这张图讲了什么 */
+  alt: string
+  caption?: string
+  /** 传上原始像素尺寸可以避免加载时的跳动 */
+  width?: number
+  height?: number
+  /** 点击放大，默认开启 */
+  zoom?: boolean
+  /** 截图之外的插画/图标可以去掉外框 */
+  bare?: boolean
+}
+
+const { src: rawSrc, alt, caption, width, height, zoom = true, bare } = Astro.props
+const src = assetPath(rawSrc)
+const locale = (Astro.currentLocale ?? 'zh-CN') as Locale
+---
+
+<figure class="my-7" data-reveal>
+  <div class={bare ? '' : 'media-frame'}>
+    <img
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      loading="lazy"
+      decoding="async"
+      data-zoomable={zoom ? '' : undefined}
+      class="block w-full"
+    />
+  </div>
+  {caption && <figcaption class="media-caption">{caption}</figcaption>}
+</figure>

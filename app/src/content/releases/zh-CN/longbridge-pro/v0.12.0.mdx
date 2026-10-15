@@ -1,0 +1,71 @@
+---
+product: longbridge-pro
+version: 0.12.0
+tag: v0.12.0
+locale: zh-CN
+title: 全新品牌 Logo 与自定义技术指标
+summary: 全新的品牌 Logo。
+highlights: []
+topics:
+  - 指标
+  - 图表
+  - 资产
+releasedAt: 2026-02-05T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/v0.12.0.md
+---
+
+## 新增
+
+- 全新的品牌 Logo。
+
+  <Figure src="https://assets.lbctrl.com/uploads/80ab481b-d840-488a-beb8-d424bdc85d75/new-logo.png" alt="new-logo" width={402} height={396} />
+  <Figure src="https://assets.lbctrl.com/uploads/423cb07b-8b1e-424f-b3d8-3210147ce108/new-logo-dark.png" alt="new-logo-dark" width={402} height={396} />
+
+- **指标**: 支持自定义技术指标配置和编辑。
+<Video src="https://assets.lbctrl.com/uploads/791d53d7-a5c4-40da-b796-609bf67183c2/indicators.mp4" label="指标：支持自定义技术指标配置和编辑。" />
+
+- **图表**: 优化指标加载器，支持「参数」和「颜色」设置。
+<Video src="https://assets.lbctrl.com/uploads/e1c1966c-fba3-4091-9500-eba451ad8a25/setting.mp4" label="图表：优化指标加载器，支持「参数」和「颜色」设置。" />
+
+- **资产**: 新增「现金明细」面板。
+<Video src="https://assets.lbctrl.com/uploads/bd62adf4-8339-4b59-b318-b51394a8539e/cash.mp4" label="资产：新增「现金明细」面板。" />
+
+- 新增「订单」、「持仓」导出功能。
+<Video src="https://assets.lbctrl.com/uploads/24c11665-d661-433a-bd2a-14fa2bb920d0/export.mp4" label="新增「订单」、「持仓」导出功能。" />
+
+## 优化
+
+#### 交易
+
+- 增强交易键盘操作体验，支持使用键盘快捷键进行交易操作。
+- 优化成交通知体验，仅推送到当前激活窗口，避免重复通知。
+- 补充「当日订单」自动刷新功能，避免推送异常导致的订单更新可能不及时的问题。
+- 「历史订单」添加默认状态过滤，默认展示「已成交」状态。
+- 修正交易预估金额信息显示错误。
+
+#### 行情
+
+- 修复期权图表价格变动时可能不更新的问题。
+- 投资组合面板移除当前账户订单筛选选项。
+
+#### 资产
+
+- 调整资产侧边栏最小宽度。
+
+#### 其他
+
+- 优化网络异常处理，避免意外的登出。
+- 修复表格设置重置功能失效的问题。
+- 统一分析模块中的中性色显示。
+- 热力图优化，调整部分样式细节和悬停边框样式。
+- 自动更新优化，使用进度圆圈显示下载进度。
+- 修复部分系统配置拉取异常的问题。
+- 修复特殊交易状态的涨跌颜色显示错误的问题。

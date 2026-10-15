@@ -1,0 +1,65 @@
+---
+import { assetPath } from '@lib/assets'
+import { t, type Locale } from '@lib/i18n'
+
+interface Props {
+  /** 可交互演示的地址，通常是产品的只读体验页 */
+  src: string
+  title: string
+  /** 封面图，点击前显示，避免一进页面就加载第三方内容 */
+  poster?: string
+  /** CSS aspect-ratio 写法，默认 16/10 */
+  ratio?: string
+  caption?: string
+}
+
+const { src: rawSrc, title, poster: rawPoster, ratio = '16 / 10', caption } = Astro.props
+const src = assetPath(rawSrc)
+const poster = rawPoster ? assetPath(rawPoster) : undefined
+const locale = (Astro.currentLocale ?? 'zh-CN') as Locale
+---
+
+<figure class="my-7" data-reveal>
+  <div class="media-frame relative" style={`aspect-ratio:${ratio}`} data-demo data-src={src} data-title={title}>
+    {poster && <img src={poster} alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />}
+    <button
+      type="button"
+      data-demo-start
+      class="absolute inset-0 grid place-items-center bg-paper/55 backdrop-blur-[2px] transition-colors hover:bg-paper/35"
+    >
+      <span
+        class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[0.8125rem] font-medium text-white shadow-lg shadow-black/15 transition-transform hover:scale-[1.03]"
+        style="background:var(--accent)"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M8 5.2v13.6L19 12z"></path>
+        </svg>
+        {t.playDemo[locale]}
+      </span>
+    </button>
+  </div>
+  {caption && <figcaption class="media-caption">{caption}</figcaption>}
+</figure>
+
+<script>
+  function initDemos() {
+    document.querySelectorAll<HTMLElement>('[data-demo]').forEach((root) => {
+      if (root.dataset.bound) return
+      root.dataset.bound = 'true'
+
+      root.querySelector('[data-demo-start]')?.addEventListener('click', () => {
+        const frame = document.createElement('iframe')
+        frame.src = root.dataset.src || ''
+        frame.title = root.dataset.title || ''
+        frame.loading = 'lazy'
+        frame.className = 'absolute inset-0 h-full w-full opacity-0 transition-opacity duration-500'
+        frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups')
+        frame.addEventListener('load', () => frame.classList.replace('opacity-0', 'opacity-100'))
+        root.replaceChildren(frame)
+      })
+    })
+  }
+
+  initDemos()
+  document.addEventListener('astro:page-load', initDemos)
+</script>

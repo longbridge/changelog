@@ -1,0 +1,41 @@
+---
+product: longbridge-pro
+version: 0.17.0
+tag: v0.17.0
+locale: zh-CN
+title: 股东面板与 macOS 菜单栏行情
+summary: 行情：新增「股东」面板，展示主要股东及持股层级，便于分析股权结构的变化。
+highlights: []
+topics:
+  - 行情
+  - 托盘
+  - 登录
+releasedAt: 2026-06-09T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/v0.17.0.md
+---
+
+## 新增
+
+- **行情**：新增「股东」面板，展示主要股东及持股层级，便于分析股权结构的变化。
+<Video src="https://assets.lbctrl.com/uploads/e3746211-3449-4bdd-a7f5-fc7abdabef99/shareholder.mp4" label="行情：新增「股东」面板，展示主要股东及持股层级，便于分析股权结构的变化。" />
+- **托盘**：新增 macOS 菜单栏功能，无需打开主窗口即可查看自选股实时行情、当日盈亏，并支持切换分组、快速唤起主窗口。
+<Video src="https://assets.lbctrl.com/uploads/9d2dfc41-a05e-49f3-b42b-4b876110d450/tray.mp4" label="托盘：新增 macOS 菜单栏功能，无需打开主窗口即可查看自选股实时行情、当日盈亏，并支持切换分组、快速唤起主窗口。" />
+- **登录**：新增区域选择器，支持 Longbridge HK/SG 按用户偏好动态切换。
+<Figure src="https://assets.lbctrl.com/uploads/c3790f3c-b367-4fa6-bd69-c089b8759ac9/login.png" alt="login" width={2324} height={1620} />
+
+## 优化
+
+- **托盘**：新增 Windows「关闭到系统托盘」选项，应用可在后台运行，通过托盘图标随时恢复。
+- **设置**：新增「声音」开关，可独立控制股价提醒的声音通知，避免非交易时段被打扰。
+- **搜索**：新增「清除历史」功能，一键清空此前的搜索记录。
+- 优化提醒/撤单通知，展示订单详情（方向、数量、标的、价格），跟踪止损单以回撤/反弹形式呈现。
+- 修复切换热力图标签时出现的短暂白屏和颜色跳变问题。
+- 修复期权计算器在输入值被行情推送或程序化更新后未重新计算的问题。

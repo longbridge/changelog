@@ -1,0 +1,31 @@
+---
+// 根路径：只认 locale cookie，没有就走默认语言（en）。
+// 不再嗅探浏览器语言——系统语言是中文不代表这个人想看中文站，
+// 而且那样会让默认语言形同虚设。
+import { DEFAULT_LOCALE, LOCALE_META, LOCALES, localePath } from '@lib/i18n'
+
+const fallback = localePath(DEFAULT_LOCALE)
+const map = Object.fromEntries(LOCALES.map((locale) => [locale, localePath(locale)]))
+---
+
+<!doctype html>
+<html lang={LOCALE_META[DEFAULT_LOCALE].htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    {/* 禁用 JS 时的兜底：直接进默认语言 */}
+    <meta http-equiv="refresh" content={`0; url=${fallback}`} />
+    <title>Longbridge Release Notes</title>
+    <script is:inline define:vars={{ map, fallback }}>
+      // 与主站同名同值的 cookie（packages/i18n 的 LOCALE_COOKIE_KEY = 'locale'，
+      // 取值就是 zh-CN / zh-HK / en），读它语言才能跟着用户跨站走。
+      const raw = decodeURIComponent((document.cookie.match(/(?:^|;\s*)locale=([^;]*)/) ?? [])[1] ?? '')
+      // 大小写写法各家不一，对不上就当没有
+      const hit = Object.keys(map).find((locale) => locale.toLowerCase() === raw.toLowerCase())
+      location.replace(hit ? map[hit] : fallback)
+    </script>
+  </head>
+  <body>
+    <a href={fallback}>Longbridge Release Notes</a>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "name": "release-notes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Longbridge 各产品对外 Release Notes 的抓取、转换与静态站点发布",
+  "scripts": {
+    "fetch": "bun run scripts/fetch.ts",
+    "transform": "bun run scripts/transform.ts",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "check:assets": "bun run scripts/check-assets.ts",
+    "preview:report": "bun run scripts/preview-report.ts",
+    "preview:build": "SHOW_DRAFTS=1 astro build && bun run scripts/preview-report.ts",
+    "i18n:todo": "bun run scripts/i18n-todo.ts",
+    "deploy": "bun run scripts/deploy.ts"
+  },
+  "dependencies": {
+    "@astrojs/markdown-satteri": "0.4.1",
+    "@astrojs/mdx": "^8.0.1",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.2",
+    "tailwindcss": "^4.3.3",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/bun": "^1.4.2",
+    "typescript": "6"
+  }
+}

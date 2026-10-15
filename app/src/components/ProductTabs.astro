@@ -1,0 +1,125 @@
+---
+import { localePath, t, type Locale } from '@lib/i18n'
+import { isMultiProduct, visibleProducts } from '@config/products.config'
+import { hasDrafts } from '@lib/releases'
+
+interface Props {
+  locale: Locale
+  /** 当前停在哪个产品，不传表示「全部」 */
+  activeProduct?: string
+}
+
+const { locale, activeProduct } = Astro.props
+const products = visibleProducts(hasDrafts)
+---
+
+{/* 列表页的筛选条：点哪个产品，下面就只剩那个产品的更新。只有一个产品时不显示 */}
+{isMultiProduct(hasDrafts) && (
+<nav class="product-tabs" data-product-tabs aria-label={t.allProducts[locale]}>
+  <a
+    href={localePath(locale)}
+    class="product-tab"
+    draggable="false"
+    aria-current={activeProduct ? undefined : 'page'}
+  >
+    {t.allProducts[locale]}
+  </a>
+  {
+    products.map((product) => (
+      <a
+        href={localePath(locale, product.id)}
+        class="product-tab accent-scope"
+        style={`--accent-default:${product.accent}`}
+        draggable="false"
+        aria-current={activeProduct === product.id ? 'page' : undefined}
+      >
+        <img
+          src={product.logo}
+          alt=""
+          width="18"
+          height="18"
+          draggable="false"
+          loading="lazy"
+          decoding="async"
+        />
+        {product.name[locale]}
+      </a>
+    ))
+  }
+</nav>
+)}
+
+<script>
+  /**
+   * 产品多了就横着划：两侧按「那一边还有没有内容」渐隐，鼠标可以直接拖。
+   * 触摸板与触屏靠原生 overflow-x，不用管。
+   */
+  function initTabs() {
+    document.querySelectorAll<HTMLElement>('[data-product-tabs]').forEach((rail) => {
+      if (rail.dataset.bound) return
+      rail.dataset.bound = 'true'
+
+      const syncFade = () => {
+        const max = rail.scrollWidth - rail.clientWidth
+        // 放得下就不要渐隐，否则第一项和最后一项会被无故啃掉一块
+        if (max <= 1) {
+          delete rail.dataset.fade
+          return
+        }
+        const atStart = rail.scrollLeft <= 1
+        const atEnd = rail.scrollLeft >= max - 1
+        rail.dataset.fade = atStart ? 'end' : atEnd ? 'start' : 'both'
+      }
+
+      rail.addEventListener('scroll', syncFade, { passive: true })
+      new ResizeObserver(syncFade).observe(rail)
+      syncFade()
+
+      // 鼠标拖动。触屏/触摸板交给原生滚动，不要抢
+      let startX = 0
+      let startLeft = 0
+      let moved = 0
+
+      // 浏览器默认会把链接和图片做成可拖拽元素，一按住就弹出残影和地址提示，
+      // 横向拖动就被它抢走了。属性上已经标了 draggable=false，这里再拦一道
+      rail.addEventListener('dragstart', (event) => event.preventDefault())
+
+      const onMove = (event: PointerEvent) => {
+        const dx = event.clientX - startX
+        moved = Math.max(moved, Math.abs(dx))
+        rail.scrollLeft = startLeft - dx
+      }
+      const onUp = () => window.removeEventListener('pointermove', onMove)
+
+      rail.addEventListener('pointerdown', (event) => {
+        if (event.pointerType !== 'mouse' || event.button !== 0) return
+        // 先归零再判断能不能滚：放得下时如果直接 return，上一次拖动留下的 moved
+        // 会一直卡着，之后每次点击都被下面那道拦截挡掉
+        moved = 0
+        if (rail.scrollWidth - rail.clientWidth <= 1) return
+        startX = event.clientX
+        startLeft = rail.scrollLeft
+        // 不用 setPointerCapture：捕获之后浏览器会把随后的 click 一并重定向到容器上，
+        // 链接收不到，点了没反应。挂在 window 上，鼠标划出容器也跟得住
+        window.addEventListener('pointermove', onMove)
+        window.addEventListener('pointerup', onUp, { once: true })
+        window.addEventListener('pointercancel', onUp, { once: true })
+      })
+
+      // 拖过头就不算点击，否则一划就跳走了
+      rail.addEventListener(
+        'click',
+        (event) => {
+          if (moved > 4) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+        },
+        true,
+      )
+    })
+  }
+
+  initTabs()
+  document.addEventListener('astro:page-load', initTabs)
+</script>

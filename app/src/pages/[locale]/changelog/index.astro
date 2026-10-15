@@ -1,0 +1,70 @@
+---
+import type { GetStaticPaths } from 'astro'
+import BaseLayout from '@layouts/BaseLayout.astro'
+import { LOCALES, localePath, t, type Locale } from '@lib/i18n'
+import { siteConfig } from '@config/site.config'
+import { isMultiProduct } from '@config/products.config'
+import MajorCard from '@components/MajorCard.astro'
+import ProductTabs from '@components/ProductTabs.astro'
+import { hasDrafts } from '@lib/releases'
+import { listMajors } from '@lib/majors'
+
+export const getStaticPaths = (() =>
+  LOCALES.map((locale) => ({ params: { locale } }))) satisfies GetStaticPaths
+
+const locale = Astro.params.locale as Locale
+// 列表这一层只到大版本，小版本收在大版本页里
+const majors = await listMajors(locale)
+const alternates = Object.fromEntries(LOCALES.map((item) => [item, localePath(item)]))
+const draftCount = majors.filter((item) => item.entry.data.status === 'draft').length
+
+// 所有产品混成一条按时间倒序的流。读者关心的是「最近发生了什么」，
+// 而不是「哪个产品下有哪些版本」——后者进产品页看。
+// 最新的一条占头条位，其余两列排开；日期每张卡片自己带，不再按月分组。
+const [featured, ...rest] = majors
+---
+
+<BaseLayout
+  locale={locale}
+  title={siteConfig.name[locale]}
+  description={siteConfig.description[locale]}
+  alternates={alternates}
+>
+  <section class="mb-14">
+    <div class="max-w-2xl">
+      <h1 class="text-[2rem] leading-tight font-semibold tracking-tight sm:text-[2.5rem]">
+        {siteConfig.name[locale]}
+      </h1>
+      <p class="mt-3 text-[1.0625rem] leading-relaxed text-ink-soft">
+        {siteConfig.description[locale]}
+      </p>
+    </div>
+    {/* 切换条占满正文宽，窄屏时横向滚动而不是折行 */}
+    <ProductTabs locale={locale} />
+  </section>
+
+  {
+    hasDrafts && draftCount > 0 && (
+      <p class="draft-badge mb-8 rounded-xl border px-4 py-2.5 text-[0.8125rem]">
+        {t.draftNotice[locale]}
+      </p>
+    )
+  }
+
+  {
+    majors.length === 0 ? (
+      <p class="rounded-card border border-dashed border-rule px-5 py-10 text-center text-[0.9rem] text-ink-soft">
+        {t.empty[locale]}
+      </p>
+    ) : (
+      <>
+        <MajorCard locale={locale} group={featured} showProduct={isMultiProduct(hasDrafts)} featured />
+        <div class="major-grid">
+          {rest.map((major) => (
+            <MajorCard locale={locale} group={major} showProduct={isMultiProduct(hasDrafts)} />
+          ))}
+        </div>
+      </>
+    )
+  }
+</BaseLayout>

@@ -1,0 +1,212 @@
+---
+import { assetPath } from '@lib/assets'
+import { t, type Locale } from '@lib/i18n'
+
+interface Props {
+  /** mp4 优先；同名 webm 会自动作为备选源 */
+  src: string
+  poster?: string
+  caption?: string
+  /** 说明视频内容，读屏与加载失败时使用 */
+  label: string
+  /** 进入视口自动播放（静音循环），适合几秒的操作演示 */
+  autoplay?: boolean
+  loop?: boolean
+  /** 超过十几秒的完整演示建议给原生控件 */
+  controls?: boolean
+  /** 原始像素尺寸，用来先把高度占住。不传按 16:9 预留 */
+  width?: number
+  height?: number
+}
+
+const {
+  src: rawSrc,
+  poster: rawPoster,
+  caption,
+  label,
+  autoplay = true,
+  loop = true,
+  controls = false,
+  width,
+  height,
+} = Astro.props
+// 视频元数据没到之前浏览器不知道该占多高，框会先塌成一条再撑开，整页跟着重排。
+// 这里先按比例把位置占住。
+const ratio = width && height ? `${width} / ${height}` : '16 / 9'
+const src = assetPath(rawSrc)
+const poster = rawPoster ? assetPath(rawPoster) : undefined
+const locale = (Astro.currentLocale ?? 'zh-CN') as Locale
+// 站内素材可以约定同名 webm；外链 CDN 不做猜测，免得白等一次 404
+const webm = /^https?:/.test(src) ? src : src.replace(/\.mp4$/, '.webm')
+---
+
+<figure class="my-7" data-reveal>
+  <div class="media-frame relative group" data-video-state="loading" style={`--video-ratio:${ratio}`}>
+    <video
+      class="block w-full"
+      width={width}
+      height={height}
+      data-release-video
+      data-autoplay={autoplay ? '' : undefined}
+      poster={poster}
+      muted
+      playsinline
+      preload="metadata"
+      loop={loop}
+      controls={controls}
+      aria-label={label}
+    >
+      {webm !== src && <source src={webm} type="video/webm" />}
+      <source src={src} type="video/mp4" />
+    </video>
+
+    {/* 加载中的骨架，拿到第一帧就撤掉 */}
+    <span class="video-loading" aria-hidden="true" />
+
+    {
+      !controls && (
+        <button
+          type="button"
+          data-video-toggle
+          class="absolute inset-0 grid cursor-pointer place-items-center"
+          aria-label={t.play[locale]}
+        >
+          <span
+            class="grid h-11 w-11 place-items-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition-opacity [[data-video-toggle]:focus-visible_&]:opacity-100"
+            data-video-icon
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path data-icon-pause d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />
+              <path data-icon-play class="hidden" d="M8 5.2v13.6L19 12z" />
+            </svg>
+          </span>
+        </button>
+      )
+    }
+
+    {
+      /* 自己的进度条：原生 controls 那条太重，和站点不搭。
+         用 range 是为了白拿键盘操作与读屏支持，外观全部在 global.css 里重画。 */
+      !controls && (
+        <input
+          type="range"
+          class="video-progress"
+          data-video-progress
+          min="0"
+          max="1000"
+          value="0"
+          step="1"
+          aria-label={t.seek[locale]}
+        />
+      )
+    }
+  </div>
+  {caption && <figcaption class="media-caption">{caption}</figcaption>}
+</figure>
+
+<script>
+  function initVideos() {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    document.querySelectorAll<HTMLVideoElement>('[data-release-video]').forEach((video) => {
+      if (video.dataset.bound) return
+      video.dataset.bound = 'true'
+
+      const frame = video.parentElement
+      const settle = () => frame?.removeAttribute('data-video-state')
+      // 三个都听：有的浏览器 loadeddata 之后才给尺寸，出错时也别一直转圈
+      video.addEventListener('loadeddata', settle)
+      video.addEventListener('canplay', settle)
+      video.addEventListener('error', settle)
+      if (video.readyState >= 2) settle()
+      const toggle = frame?.querySelector<HTMLButtonElement>('[data-video-toggle]')
+      const playIcon = frame?.querySelector('[data-icon-play]')
+      const pauseIcon = frame?.querySelector('[data-icon-pause]')
+      const progress = frame?.querySelector<HTMLInputElement>('[data-video-progress]')
+
+      const syncIcon = () => {
+        playIcon?.classList.toggle('hidden', !video.paused)
+        pauseIcon?.classList.toggle('hidden', video.paused)
+        // 暂停时常驻显示播放按钮；播放时不显示 —— 几秒的演示和动图一样，hover 多半是想看清画面，
+        // 正中压个按钮、再蒙一层灰正好挡住。点画面任意处即可暂停（手形光标 + 底部进度条已经说明能操作），
+        // 键盘聚焦时仍会显示
+        frame
+          ?.querySelector('[data-video-icon]')
+          ?.classList.toggle('opacity-100', video.paused)
+      }
+
+      video.addEventListener('play', syncIcon)
+      video.addEventListener('pause', syncIcon)
+
+      if (progress) {
+        // 拖动期间不让播放进度回写，否则滑块会被拽回去
+        let scrubbing = false
+        let frame = 0
+
+        const paint = (ratio: number) => progress.style.setProperty('--played', `${ratio * 100}%`)
+
+        const sync = () => {
+          if (scrubbing || !video.duration) return
+          const ratio = video.currentTime / video.duration
+          progress.value = String(Math.round(ratio * 1000))
+          paint(ratio)
+        }
+
+        // timeupdate 每 250ms 才来一次，跟着它走进度条是一格一格跳的；
+        // 播放期间改用逐帧刷新，暂停就停掉，不白烧 CPU
+        const tick = () => {
+          sync()
+          frame = video.paused || video.ended ? 0 : requestAnimationFrame(tick)
+        }
+        const start = () => {
+          if (!frame) frame = requestAnimationFrame(tick)
+        }
+        const stop = () => {
+          if (frame) cancelAnimationFrame(frame)
+          frame = 0
+          sync()
+        }
+
+        video.addEventListener('play', start)
+        video.addEventListener('pause', stop)
+        video.addEventListener('ended', stop)
+        // 拖完、换源之后即使没在播也要对一次位置
+        video.addEventListener('seeked', sync)
+        video.addEventListener('loadedmetadata', sync)
+
+        progress.addEventListener('pointerdown', () => (scrubbing = true))
+        progress.addEventListener('pointerup', () => (scrubbing = false))
+        progress.addEventListener('pointercancel', () => (scrubbing = false))
+        progress.addEventListener('input', () => {
+          const ratio = Number(progress.value) / 1000
+          paint(ratio)
+          if (video.duration) video.currentTime = ratio * video.duration
+        })
+
+        paint(0)
+        if (!video.paused) start()
+      }
+      toggle?.addEventListener('click', () => {
+        if (video.paused) void video.play()
+        else video.pause()
+      })
+
+      // 省流量也省电：只有进入视口才播，划走就停
+      if (video.dataset.autoplay !== undefined && !reduced) {
+        new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) void video.play().catch(() => {})
+              else video.pause()
+            }
+          },
+          { threshold: 0.35 },
+        ).observe(video)
+      }
+      syncIcon()
+    })
+  }
+
+  initVideos()
+  document.addEventListener('astro:page-load', initVideos)
+</script>

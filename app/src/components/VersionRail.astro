@@ -1,0 +1,219 @@
+---
+import { t, type Locale } from '@lib/i18n'
+
+export interface RailItem {
+  /** 大版本号或小版本号 */
+  label: string
+  /** yyyy-mm-dd */
+  date: string
+  /** 大版本是链接，小版本是本页锚点 */
+  href: string
+  /** 悬停时的完整说明 */
+  title: string
+  /** 当前所在的大版本 */
+  isCurrent?: boolean
+  /** 小版本，缩进一层 */
+  isChild?: boolean
+  isDraft?: boolean
+}
+
+interface Props {
+  locale: Locale
+  productId: string
+  items: RailItem[]
+}
+
+const { locale, productId, items } = Astro.props
+---
+
+{/* 常驻的版本索引：绝对定位，不占布局流，正文位置始终不变 */}
+<aside
+  class="version-rail"
+  aria-label={t.releaseHistory[locale]}
+  transition:persist={`version-rail-${productId}`}
+>
+  <div class="version-rail__panel">
+    <ul class="version-rail__list" data-rail-list>
+      {
+        items.map((item, index) => (
+          <li style={`--i:${index}`}>
+            <a
+              href={item.href}
+              data-rail-item
+              data-child={item.isChild ? 'true' : undefined}
+              data-current={item.isCurrent ? 'true' : undefined}
+              aria-current={item.isCurrent ? 'page' : undefined}
+              title={item.title}
+              class="version-rail__item"
+            >
+              {/* 等宽短日期跨语言宽度一致，成列好扫读；完整日期放在 title 上 */}
+              <span class="tnum version-rail__date">{item.date}</span>
+              <span class="tnum version-rail__version">{item.label}</span>
+              {item.isDraft && <span class="version-rail__draft">{t.draftBadge[locale]}</span>}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</aside>
+
+<script>
+  const normalize = (path: string) => path.replace(/\/+$/, '')
+
+  /** 浮层跨页保留，大版本的高亮要自己跟着当前地址走 */
+  function markCurrent(list: HTMLElement) {
+    const here = normalize(location.pathname)
+    let current: HTMLAnchorElement | null = null
+    list.querySelectorAll<HTMLAnchorElement>('[data-rail-item]:not([data-child])').forEach((link) => {
+      const active = normalize(new URL(link.href).pathname) === here
+      link.toggleAttribute('data-current', active)
+      if (active) {
+        link.setAttribute('aria-current', 'page')
+        current = link
+      } else {
+        link.removeAttribute('aria-current')
+      }
+    })
+    return current as HTMLAnchorElement | null
+  }
+
+  /**
+   * 浮层跨页保留，可小版本是「当前大版本」那一套，换页后服务端渲染的新列表被丢弃，
+   * 留在页面上的还是上一个大版本的锚点。这里按当前页的小版本把这一层重建出来。
+   * 样式全在 global.css，动态建的节点拿不到 scoped 属性也不受影响。
+   */
+  function syncChildren(list: HTMLElement, current: HTMLElement | null) {
+    const sections = [...document.querySelectorAll<HTMLElement>('[data-release-section]')]
+    const wanted = sections.map((section) => section.id)
+    const existing = [...list.querySelectorAll<HTMLAnchorElement>('[data-child]')]
+    const have = existing.map((link) => decodeURIComponent(new URL(link.href).hash.slice(1)))
+
+    // 已经是这一页的那套就不动，免得首屏白白重放一次入场动画
+    if (wanted.length === have.length && wanted.every((id, index) => id === have[index])) return
+
+    existing.forEach((link) => link.closest('li')?.remove())
+
+    const anchor = current?.closest('li')
+    if (!anchor) return
+
+    let after: Element = anchor
+    sections.forEach((section, index) => {
+      const item = document.createElement('li')
+      item.style.setProperty('--i', String(index + 1))
+
+      const link = document.createElement('a')
+      link.className = 'version-rail__item'
+      link.href = `#${section.id}`
+      link.setAttribute('data-rail-item', '')
+      link.setAttribute('data-child', 'true')
+      link.title = section.dataset.railTitle ?? ''
+
+      const date = document.createElement('span')
+      date.className = 'tnum version-rail__date'
+      date.textContent = section.dataset.railDate ?? ''
+
+      const version = document.createElement('span')
+      version.className = 'tnum version-rail__version'
+      version.textContent = section.dataset.railVersion ?? ''
+
+      link.append(date, version)
+
+      if (section.dataset.railDraft) {
+        const draft = document.createElement('span')
+        draft.className = 'version-rail__draft'
+        draft.textContent = section.dataset.railDraft
+        link.append(draft)
+      }
+
+      item.append(link)
+      after.after(item)
+      after = item
+    })
+  }
+
+  let sectionObserver: IntersectionObserver | null = null
+
+  /** 小版本是本页锚点，高亮跟着读者滚到哪一节走 */
+  function spySections(list: HTMLElement) {
+    const sections = [...document.querySelectorAll<HTMLElement>('[data-release-section]')]
+    const links = new Map<string, HTMLElement>()
+    list.querySelectorAll<HTMLAnchorElement>('[data-child]').forEach((link) => {
+      links.set(decodeURIComponent(new URL(link.href).hash.slice(1)), link)
+    })
+
+    sectionObserver?.disconnect()
+    if (sections.length === 0 || links.size === 0) return
+
+    const visible = new Set<string>()
+    sectionObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id)
+          else visible.delete(entry.target.id)
+        }
+        // 同时有多节在视野里时，高亮最靠上的那个
+        const top = sections.find((section) => visible.has(section.id))?.id
+        links.forEach((link, id) => link.toggleAttribute('data-reading', id === top))
+      },
+      // 只认屏幕上半部分，视线落在哪一节就高亮哪一节
+      { rootMargin: '-10% 0px -55% 0px' },
+    )
+    sections.forEach((section) => sectionObserver?.observe(section))
+  }
+
+  /** 列表还能往下滚时，底部给一层渐隐提示 */
+  function markScrollEnd(list: HTMLElement) {
+    list.toggleAttribute('data-at-end', list.scrollTop + list.clientHeight >= list.scrollHeight - 2)
+  }
+
+  function syncRail() {
+    const list = document.querySelector<HTMLElement>('[data-rail-list]')
+    if (!list) return
+
+    const current = markCurrent(list)
+    // 条目数会变，居中要等这一层重建完再算
+    syncChildren(list, current)
+    // 每换一个大版本居中一次当前版本，同一页内则保留用户自己的滚动位置
+    const here = current ? normalize(new URL(current.href).pathname) : ''
+    if (current && list.dataset.positioned !== here) {
+      list.scrollTop = current.offsetTop - list.clientHeight / 2 + current.clientHeight / 2
+      list.dataset.positioned = here
+    }
+    spySections(list)
+    markScrollEnd(list)
+    if (!list.dataset.bound) {
+      list.dataset.bound = 'true'
+      list.addEventListener('scroll', () => markScrollEnd(list), { passive: true })
+    }
+  }
+
+  let contentObserver: ResizeObserver | null = null
+
+  /** 把正文高度量给浮层，正文短时列表跟着短，不会一路溢出到页脚 */
+  function fitToContent() {
+    const article = document.querySelector<HTMLElement>('.detail-grid article')
+    const rail = document.querySelector<HTMLElement>('.version-rail')
+    if (!article || !rail) return
+
+    const apply = () => {
+      const height = article.offsetHeight
+      // 元素被移出 DOM 时会报 0，那不是真实高度，写进去列表会整个塌掉
+      if (height > 0) rail.style.setProperty('--content-height', `${height}px`)
+    }
+
+    // 换页后要改观察新的正文：浮层本身跨页保留，旧 observer 却还盯着已经移除的
+    // 旧正文，它被移除时报的那个 0 会把列表压没
+    contentObserver?.disconnect()
+    contentObserver = new ResizeObserver(apply)
+    contentObserver.observe(article)
+    apply()
+  }
+
+  syncRail()
+  fitToContent()
+  document.addEventListener('astro:page-load', () => {
+    syncRail()
+    fitToContent()
+  })
+</script>

@@ -1,0 +1,87 @@
+---
+import { LOCALES, LOCALE_META, localePath, t, type Locale } from '@lib/i18n'
+
+interface Props {
+  locale: Locale
+  /** 有对应译文时跳到同一页面，否则回落到该语言首页 */
+  alternates?: Partial<Record<Locale, string>>
+}
+
+const { locale, alternates } = Astro.props
+---
+
+<details class="relative" data-locale-switcher>
+  <summary
+    class="tap-44 flex cursor-pointer list-none items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-ink transition-colors hover:bg-rule/50"
+    aria-label={t.language[locale]}
+  >
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z" />
+    </svg>
+    {LOCALE_META[locale].label}
+  </summary>
+  <ul
+    class="absolute right-0 z-30 mt-1.5 min-w-36 overflow-hidden rounded-xl border border-rule bg-paper-raised py-1 shadow-lg shadow-black/5"
+  >
+    {
+      LOCALES.map((item) => (
+        <li>
+          <a
+            href={alternates?.[item] ?? localePath(item)}
+            hreflang={LOCALE_META[item].htmlLang}
+            data-locale={item}
+            aria-current={item === locale ? 'true' : undefined}
+            class:list={[
+              'block px-3 py-2.5 text-[0.8125rem] transition-colors hover:bg-rule/50',
+              item === locale
+                ? 'font-medium text-ink'
+                : 'text-ink-soft',
+            ]}
+          >
+            {LOCALE_META[item].label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</details>
+
+<style>
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
+
+<script>
+  document.addEventListener('click', (event) => {
+    const target = event.target as Node
+
+    // 记住这次选择：根路径靠这个 cookie 决定进哪个语言，否则切完语言、
+    // 下次从 longbridge.com/changelog 进来又会被打回默认语言。
+    //
+    // 名字、取值、写法都跟主站对齐（packages/i18n 的 LOCALE_COOKIE_KEY = 'locale'，
+    // packages/cookie 的 setCookie + getCookieDomain）：写在根域名的末两段上，
+    // 语言才能跟着用户在 longbridge.com 各处走；写成两份不同 domain 的同名 cookie
+    // 反而会互相盖不掉。localhost 不认带点的 domain，本地就不带。
+    // 点到的可能是文字节点，先落到元素上再往上找
+    const element = target instanceof Element ? target : target.parentElement
+    const locale = element?.closest<HTMLElement>('[data-locale]')?.dataset.locale
+    if (locale) {
+      const { hostname, protocol } = location
+      const parts = hostname.split('.')
+      const domain =
+        hostname === 'localhost' || hostname === '127.0.0.1' || parts.length < 2
+          ? ''
+          : `; domain=.${parts.slice(-2).join('.')}`
+      const secure = protocol === 'https:' ? '; secure' : ''
+      // 有效期跟主站一样是 30 天
+      document.cookie = `locale=${encodeURIComponent(locale)}; path=/; max-age=2592000; samesite=lax${domain}${secure}`
+    }
+
+    // 点击外部关闭下拉
+    document.querySelectorAll<HTMLDetailsElement>('[data-locale-switcher][open]').forEach((el) => {
+      if (!el.contains(target)) el.open = false
+    })
+  })
+</script>

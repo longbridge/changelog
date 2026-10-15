@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+  <rect width="800" height="500" fill="#f4f2ee"/>
+  <rect x="0" y="0" width="800" height="44" fill="#ffffff"/>
+  <circle cx="24" cy="22" r="5" fill="#e0dcd4"/><circle cx="42" cy="22" r="5" fill="#e0dcd4"/><circle cx="60" cy="22" r="5" fill="#e0dcd4"/>
+  <rect x="100" y="14" width="200" height="16" rx="5" fill="#dcefe8"/>
+  <g font-family="ui-monospace, monospace" font-size="13">
+    <rect x="24" y="64" width="752" height="52" rx="8" fill="#ffffff"/>
+    <text x="40" y="86" fill="#1b1a18">700.HK  腾讯控股</text>
+    <text x="40" y="104" fill="#8a857d" font-size="11">港股 · 已连接实时行情</text>
+    <text x="620" y="94" fill="#2f7d6b" font-size="15">368.40  +1.2%</text>
+    <polyline points="440,100 470,86 500,92 530,74 560,80 590,66" fill="none" stroke="#2f7d6b" stroke-width="2"/>
+    <rect x="24" y="124" width="752" height="52" rx="8" fill="#ffffff"/>
+    <text x="40" y="146" fill="#1b1a18">AAPL  Apple Inc.</text>
+    <text x="40" y="164" fill="#8a857d" font-size="11">美股 · 盘前</text>
+    <text x="620" y="154" fill="#b4493c" font-size="15">229.87  -0.4%</text>
+    <polyline points="440,150 470,156 500,148 530,160 560,154 590,162" fill="none" stroke="#b4493c" stroke-width="2"/>
+    <rect x="24" y="184" width="752" height="52" rx="8" fill="#ffffff"/>
+    <text x="40" y="206" fill="#1b1a18">NVDA  NVIDIA</text>
+    <text x="40" y="224" fill="#8a857d" font-size="11">美股 · 已连接实时行情</text>
+    <text x="620" y="214" fill="#2f7d6b" font-size="15">141.20  +2.8%</text>
+    <polyline points="440,214 470,204 500,208 530,190 560,186 590,176" fill="none" stroke="#2f7d6b" stroke-width="2"/>
+  </g>
+  <text x="24" y="470" font-family="system-ui" font-size="12" fill="#8a857d">示例素材 · 新版列表</text>
+</svg>
