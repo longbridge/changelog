@@ -342,7 +342,8 @@ console.log(c.dim(`预览入口：${pathToFileURL(path.join(outDir, 'index.html'
 // 入口页链的是构建产物。单跑 preview:report 时 dist 里可能只有这份索引，
 // 点进去全是 404，先把这句说在前面。
 const built = await fs
-  .access(path.join(ROOT, 'dist', DEFAULT_LOCALE, 'index.html'))
+  // 页面是语言在前的 /<locale>/changelog/…，产物落在 dist/<locale>/changelog/index.html
+  .access(path.join(ROOT, 'dist', DEFAULT_LOCALE, SITE_SEGMENT, 'index.html'))
   .then(() => true)
   .catch(() => false)
 if (!built) {
