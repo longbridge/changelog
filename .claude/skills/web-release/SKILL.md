@@ -197,7 +197,7 @@ Merge only after the user explicitly says to go live. `main` needs an approval f
 gh pr merge <number> --auto --merge --delete-branch
 ```
 
-Tell the user the PR is waiting for a code owner's approval. Don't bypass the review. Pushing after the approval dismisses it.
+Enabling auto-merge (this command, or **Enable auto-merge** on the PR page) sends the code owner a Slack message with the preview and PR links. Tell the user the PR is waiting for that approval; the approver opens the PR → **Files changed** → **Review changes** → **Approve**, and it merges itself. Don't bypass the review. Pushing after the approval dismisses it.
 
 Never push to `main` directly. If the `production` environment requires approval, point the user to the Actions page; never bypass it.
 
