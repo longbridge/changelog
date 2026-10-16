@@ -32,6 +32,8 @@ To change facts (add or remove items, change the version), edit the md and run a
 | The PR is merged into `main` | GitHub Actions deploys production, `longbridge.com/<locale>/changelog` |
 | The PR is closed or merged | The preview deployments are deleted and the preview link stops working |
 
+`<project>` is the repo variable `CLOUDFLARE_PAGES_PROJECT`, currently `longbridge-changelog`. The Cloudflare token behind the previews has an expiry date; if the `preview` job fails at "Deploy to Cloudflare Pages" with an authentication error, tell the user that a repo admin needs to set a new `CLOUDFLARE_API_TOKEN`, and use the local preview meanwhile.
+
 One branch and one PR per release: cut `release/<product>-<version>` from `main` and open a PR to `main`. Every push updates the same preview URL.
 
 ## When the user says "publish releases/xxx/yyy.md"
