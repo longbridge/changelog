@@ -6,16 +6,18 @@
  * 查的是：素材文件在不在、图片视频有没有可访问的描述、有没有引用不可靠的外链图床、
  * published 的条目三语齐不齐、标题是不是还停在脚本占位，
  * 以及每个发出去的小版本有没有对应的大版本总结——列表页只展示大版本，缺了就整条不见。
+ * 仓库根 assets/ 里的素材另外查文件名、体积，以及有没有替换已经上线的文件。
  */
+import { execFile } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { LOCALES, SITE_SEGMENT, type Locale } from '../config/site.config'
+import { promisify } from 'node:util'
+import { LOCALES, type Locale } from '../config/site.config'
 import { getProduct, majorOf } from '../config/products.config'
-import { CONTENT_DIR, MAJORS_DIR, ROOT } from './lib/paths'
+import { ASSETS_DIR, CONTENT_DIR, MAJORS_DIR, REPO_ROOT, ROOT, localAssetFile } from './lib/paths'
 import { c } from './lib/cli'
 
-// 素材写成站点根路径 /release-assets/...，文件在 public/changelog/ 下，见 src/lib/assets.ts
-const PUBLIC_DIR = path.join(ROOT, 'public', SITE_SEGMENT)
+const run = promisify(execFile)
 
 /** 自家 CDN，更新日志里的图片视频本来就放在这 */
 const TRUSTED_HOSTS = ['assets.lbkrs.com', 'assets.lbctrl.com', 'pub.lbkrs.com']
@@ -81,7 +83,7 @@ for (const file of files) {
   for (const match of source.matchAll(/\b(?:src|poster|before|after)=["'](\/[^"']+)["']/g)) {
     const asset = match[1]
     const exists = await fs
-      .access(path.join(PUBLIC_DIR, asset))
+      .access(localAssetFile(asset))
       .then(() => true)
       .catch(() => false)
     if (!exists) issues.push({ file: relative, message: `素材不存在：${asset}` })
@@ -131,6 +133,52 @@ for (const release of publishedReleases) {
     })
   }
 }
+
+// 仓库里的素材：文件名会出现在公开 URL 里，体积决定页面加载；
+// Cloudflare Pages 单文件上限 25 MiB，超了预览直接部署失败
+const MB = 1024 * 1024
+const IMAGE = /\.(png|jpe?g|gif|webp|avif|svg)$/i
+const VIDEO = /\.(mp4|webm|mov)$/i
+
+async function walkAll(dir: string): Promise<string[]> {
+  const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => [])
+  const out: string[] = []
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) out.push(...(await walkAll(full)))
+    else if (entry.name !== '.gitkeep') out.push(full)
+  }
+  return out
+}
+
+for (const file of await walkAll(ASSETS_DIR)) {
+  const relative = path.relative(REPO_ROOT, file)
+  const name = path.basename(file)
+  if (!/^[a-z0-9][a-z0-9._-]*$/.test(name)) {
+    issues.push({ file: relative, message: '文件名只能用小写英文、数字、- _ .，它会出现在公开 URL 里' })
+  }
+  if (!IMAGE.test(name) && !VIDEO.test(name)) {
+    warnings.push({ file: relative, message: '不是常见的图片或视频格式' })
+  }
+  const { size } = await fs.stat(file)
+  const sizeText = `${(size / MB).toFixed(1)} MB`
+  if (size > 20 * MB) issues.push({ file: relative, message: `${sizeText}，超过 20 MB 上限，先压缩` })
+  else if (IMAGE.test(name) && size > 0.5 * MB) warnings.push({ file: relative, message: `图片 ${sizeText}，建议压到 500 KB 以内` })
+  else if (VIDEO.test(name) && size > 4 * MB) warnings.push({ file: relative, message: `视频 ${sizeText}，建议压到 4 MB 以内` })
+}
+
+// 素材不带内容哈希，线上按一年缓存：已经在 main 上的文件改了内容，用户看到的还是旧的。
+// 要换图就换个文件名。拿不到 main（浅克隆、离线）就跳过这项。
+try {
+  const { stdout } = await run(
+    'git',
+    ['diff', '--name-only', '--diff-filter=M', 'origin/main...HEAD', '--', path.relative(REPO_ROOT, ASSETS_DIR)],
+    { cwd: REPO_ROOT },
+  )
+  for (const file of stdout.split('\n').filter(Boolean)) {
+    issues.push({ file, message: '替换了已上线的素材，线上有缓存不会生效；请换一个新文件名' })
+  }
+} catch {}
 
 for (const issue of issues) console.log(`${c.red('✗')} ${issue.file} ${c.dim('·')} ${issue.message}`)
 for (const warning of warnings)

@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "my-chrome": {
-      "command": "npx",
-      "args": ["chrome-devtools-mcp@latest", "--autoConnect"]
-    }
-  }
-}
