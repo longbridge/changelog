@@ -1,61 +1,87 @@
 ---
 name: release-page-compose
-description: 把产品交来的一份 release md 装配成完整的对外更新日志页面——选版式、套骨架、配图、出三语、生成预览。当用户说「产品给了一份更新说明」「把这版做成 release page」「按模板排一下这个版本」「releases/ 里的内容装配一下」，或需要为新交互扩展自定义组件时使用。
+description: Turn a release md handed over by a product manager into a complete public changelog page — pick a layout, fill the skeleton, add media, produce all three locales, and generate the preview. Use when the user says things like 「产品给了一份更新说明」「把这版做成 release page」「按模板排一下这个版本」「releases/ 里的内容装配一下」 ("product sent release notes", "turn this version into a release page", "lay out this version from the template"), or when a new interaction needs a custom component.
 ---
 
-# Release Page 装配
+# Composing a Release Page
 
-> 路径相对仓库根：原数据在 `releases/`，代码在 `app/`。`bun run` 命令在 `app/` 下执行。
+> Paths are relative to the repo root: source data lives in `releases/`, code in `app/`. Run `bun run` commands inside `app/`.
 
-产品交一份 md，这里把它变成能对外发布的页面。核心是**照配方填空**，不是每次重新设计版式。
+The product manager hands over one md file; this skill turns it into a page ready to publish. The core idea is **fill in a recipe**, not redesign the layout every time.
 
-## 输入
+## Input
 
-产品把文件放在 `releases/<product>/<version>.md`，格式见仓库根 `README.md` 的「模板」一节。
+The product manager puts the file at `releases/<product>/<version>.md`. The format is described in "Release notes template" in the repo-root `CONTRIBUTING.md`:
 
-拿到的东西往往不完整，按这个顺序处理，**不要卡在第一步等齐所有信息**：
+```
+Product: longbridge-pro
+Version: 1.1.0
+Release date: 2026-10-20
+Platforms: macOS, Windows
 
-| 缺什么 | 怎么办 |
+## Key message
+## New
+## Improved
+## Fixed
+## Heads-up
+## Assets
+```
+
+No frontmatter. Content may be in any language. Legacy Chinese keys are still accepted: `产品` / `版本` / `发布日期` / `平台` and sections `这一版最想让用户知道的` / `新增` / `优化` / `修复` / `需要用户注意的` / `素材`.
+
+How the sections map onto the page:
+
+| Template section | Goes into |
 | --- | --- |
-| 版本号、日期、平台 | 去同目录 `releases/<product>/` 找同版本的抓取原文（`<tag>.<locale>.md`），或问 |
-| 每条变更的用户价值 | 先按原文装配，把看不懂的条目列出来一次性问清 |
-| 素材 | 先出纯文字版，在预览报告里标出「这几条配图会更清楚」 |
-| 繁体/英文 | 先出 `zh-CN` 并保持 `status: draft`，翻译完再一起转 published |
+| Product / Version / Release date / Platforms | frontmatter `product` / `version` + `tag` / `releasedAt` / `platforms` |
+| Key message | `summary` and `highlights` (and the lead paragraph for recipe A) |
+| New / Improved / Fixed | the three MDX groups `## 新增功能` / `## 体验优化` / `## 问题修复` (zh-CN headings; translate them in zh-HK / en) |
+| Heads-up | a `<Callout>` (recipe E when users must take action) |
+| Assets | media, via `release-notes-media` |
 
-产品写的通常已经是用户口径，但仍要过一遍
-[`release-notes-mdx/references/brand-voice.md`](../release-notes-mdx/references/brand-voice.md)：
-删内部系统名、去掉「优化/提升/全新」这类没有信息量的词、长句断开、每条一句话。
-产品自己写的稿子最常见的问题是营销 hype 和公司黑话，工程稿则是实现细节泄漏——两边都要收。
-拿不准怎么改，翻 [`examples.md`](../release-notes-mdx/references/examples.md) 的真实对照。
+What you receive is often incomplete. Handle it in this order — **don't block on step one waiting for everything**:
 
-## 五步
+| Missing | What to do |
+| --- | --- |
+| Version, date, platforms | Look in the same directory `releases/<product>/` for the fetched source of the same version (`<tag>.<locale>.md`), or ask |
+| User value of each change | Compose from the source as-is first, list the items you don't understand, and ask about them all at once |
+| Assets | Ship a text-only version first; in the preview report, flag "these items would be clearer with an image" |
+| Traditional Chinese / English | Do `zh-CN` first and keep `status: draft`; switch all locales to published together once translated |
 
-1. **归位**：读产品的 `releases/<product>/<version>.md`；同目录如果有同版本的抓取原文，两边对照，以产品的说法为准，用抓取原文补漏。
-2. **定版式**：按下面的决策表选一个配方。
-3. **填空**：复制配方骨架，逐项填。frontmatter 里 `product` `version` `tag` `releasedAt` `source` 按抓取原文或产品提供的信息填准；纯手写稿的 `source` 填 `provider: manual`、`repo: releases/<product>/<version>.md`、`url: https://longbridge.com`。
-4. **配媒体**：走 `release-notes-media` skill。没素材就停在纯文字，别编路径。
-5. **验收**：
+Product managers usually already write from the user's perspective, but still run it through
+[`release-notes-mdx/references/brand-voice.md`](../release-notes-mdx/references/brand-voice.md):
+remove internal system names, drop empty words like "optimized / improved / all-new" (「优化/提升/全新」), break up long sentences, one sentence per item.
+The most common problems in product-written drafts are marketing hype and corporate jargon; in engineering drafts it's leaked implementation detail — fix both.
+If unsure how to rewrite something, check the real before/after pairs in [`examples.md`](../release-notes-mdx/references/examples.md).
+
+## Five steps
+
+1. **Locate**: read the product manager's `releases/<product>/<version>.md`. If the same directory has a fetched source for the same version, compare the two: the product manager's wording wins, the fetched source fills gaps.
+2. **Pick a layout**: choose one recipe from the decision table below.
+3. **Fill in**: copy the recipe skeleton and fill each item. Fill frontmatter `product` `version` `tag` `releasedAt` `source` accurately from the fetched source or the product manager's info; for a purely handwritten draft, `source` is `provider: manual`, `repo: releases/<product>/<version>.md`, `url: https://longbridge.com`.
+4. **Add media**: go through the `release-notes-media` skill. No assets means stay text-only — never invent paths.
+5. **Verify**:
    ```bash
-   bun run check:assets     # 素材与 alt
-   bun run preview:report   # 这次改了哪些版本、缺什么
-   bun run preview:build    # 带草稿构建，本地看 app/dist/preview/index.html
+   bun run check:assets     # assets and alt text
+   bun run preview:report   # which versions changed this time, what's missing
+   bun run preview:build    # build including drafts; open app/dist/preview/index.html locally
    ```
 
-## 决策表
+## Decision table
 
-| 这一版的形态 | 用配方 |
+| Shape of this release | Recipe |
 | --- | --- |
-| 一个主打功能，其他都是陪衬 | A 重磅版 |
-| 三条以上并列的新功能/优化 | B 综合版 |
-| 界面改版、交互重排 | C 改版版 |
-| 只有修复、性能、兼容性 | D 维护版 |
-| 用户必须做点什么才能继续用 | E 变更版（可与 A/B/C 叠加，Callout 置顶） |
+| One headline feature, everything else is supporting | A Headline |
+| Three or more parallel new features / improvements | B Roundup |
+| UI redesign, interaction rearranged | C Redesign |
+| Only fixes, performance, compatibility | D Maintenance |
+| Users must do something to keep using it | E Breaking change (can stack with A/B/C, Callout at the top) |
 
-## 配方
+## Recipes
 
-下面的骨架可以直接复制。`highlights` 是列表页展示用的短语，不超过 20 字、不带句号。
+The skeletons below can be copied directly. They show zh-CN output, so the sample copy (headings, titles, highlights, step labels, callouts) stays in Chinese. `highlights` are short phrases shown on the list page: at most 20 characters, no trailing period.
 
-### A 重磅版
+### A Headline
 
 ```mdx
 ---
@@ -64,7 +90,7 @@ version: '2.4.0'
 tag: v2.4.0
 locale: zh-CN
 title: Longbridge 桌面端 2.4.0
-summary: 一句话说清这版的主角，不超过 60 字
+summary: (one sentence naming this release's headline feature, max 60 characters)
 highlights:
   - 自选列表直接看走势
   - 多屏布局可拖拽
@@ -79,7 +105,7 @@ source:
 
 <Figure src="..." alt="..." caption="..." width={1600} height={1000} />
 
-主角功能的两三句话：解决了什么问题，用户现在可以怎么做。
+(Two or three sentences on the headline feature: what problem it solves, what users can do now.)
 
 <Steps title="怎么用">
   <Step title="第一步">…</Step>
@@ -88,7 +114,7 @@ source:
 
 ## 新增功能
 
-- 其余新增，一条一句
+- (other new features, one sentence each)
 
 ## 体验优化
 
@@ -99,37 +125,37 @@ source:
 - …
 ```
 
-### B 综合版
+### B Roundup
 
 ```mdx
 ---
-（frontmatter 同上，highlights 取 3-5 条）
+(frontmatter same as above; 3-5 highlights)
 ---
 
 ## 新增功能
 
 ### 自选列表支持看当日走势
 
-一句话说明价值。
+(One sentence on the value.)
 
 <Figure src="..." alt="..." width={1600} height={1000} />
 
 ### 选股器支持自定义指标
 
-一句话说明价值。
+(One sentence on the value.)
 
 ## 体验优化
 
-- 逐条，一句一条，不配图
+- (one sentence per item, no images)
 
 ## 问题修复
 
 - …
 ```
 
-要点：只给最值得说的一到两个小节配图，其余保持列表。
+Key point: only give images to the one or two subsections most worth showing; keep the rest as lists.
 
-### C 改版版
+### C Redesign
 
 ```mdx
 <Compare
@@ -139,11 +165,11 @@ source:
   caption="拖动分隔线对比改版前后"
 />
 
-两三句话讲清为什么改、用户能感知到什么。
+(Two or three sentences on why it changed and what users will notice.)
 
 ## 这次调整了什么
 
-- 变化点，一条一句
+- (one change per item, one sentence each)
 
 <Callout type="info">原来的入口现在在「更多」菜单里。</Callout>
 
@@ -152,22 +178,22 @@ source:
 - …
 ```
 
-### D 维护版
+### D Maintenance
 
 ```mdx
 ---
-（frontmatter 同上；highlights 可以留空）
+(frontmatter same as above; highlights may be empty)
 summary: 修复了若干影响使用的问题，建议更新
 ---
 
 ## 问题修复
 
-- 一条一句，只写用户能感知的
+- (one sentence per item, only what users can notice)
 ```
 
-维护版**不配任何图**。这类版本产品经常给一长串内部修复，挑出用户能感知的那几条，其余合并成「其他稳定性修复」。
+Maintenance releases get **no images at all**. Product managers often hand over a long list of internal fixes for these; pick the few that users can notice and merge the rest into "other stability fixes" (「其他稳定性修复」).
 
-### E 变更版
+### E Breaking change
 
 ```mdx
 <Callout type="warning">
@@ -183,42 +209,42 @@ summary: 修复了若干影响使用的问题，建议更新
 
 ## 影响范围
 
-- 谁会受影响、什么时候生效
+- (who is affected, when it takes effect)
 
-（后面接 A/B/C 的正文结构）
+(Then continue with the body structure of A/B/C.)
 ```
 
-## 三语
+## Three locales
 
-`zh-CN` 定稿后再翻。三个语言的**媒体块数量、位置、highlights 条数必须一致**，读者切语言时不该发现内容变多变少。术语表见 `release-notes-mdx`。
+Translate only after `zh-CN` is final. Across the three locales, **the number and position of media blocks and the number of highlights must match** — readers switching languages should never find content appearing or disappearing. The glossary lives in `release-notes-mdx`.
 
-## 自定义组件
+## Custom components
 
-产品想要现成组件做不到的交互时，按这三级走，不要一上来就改公共组件：
+When the product manager wants an interaction the existing components can't do, go through these three levels — don't start by changing shared components:
 
-**一级 · 一次性**：在这一篇 MDX 里直接写 HTML + 内联 `<style>`。适合只此一版会用的排版。不要在 MDX 里写 `<script>`——脚本要跟着组件走，否则下次没人知道它在哪。
+**Level 1 · One-off**: write HTML + inline `<style>` directly in this one MDX file. Suitable for a layout only this release will use. Don't write `<script>` in MDX — scripts must live with a component, or next time nobody will know where it is.
 
-**二级 · 试验组件**：`src/components/release/custom/<Name>.astro`，在 MDX 里 `import Name from '@components/release/custom/Name.astro'` 使用。这一层不进全局注入，改坏了只影响用到它的那几篇。
+**Level 2 · Experimental component**: `src/components/release/custom/<Name>.astro`, used in MDX via `import Name from '@components/release/custom/Name.astro'`. This level is not globally injected; if it breaks, only the pages using it are affected.
 
-**三级 · 沉淀**：同一个交互被三个以上版本用过、形态稳定了，移到 `src/components/release/`，并同步四处：
-1. 详情页 `src/pages/[locale]/[product]/[version].astro` 的 `mdxComponents` 映射（加了才能免 import）
-2. `/[locale]/changelog/preview` 预览页加一节，带效果和写法
-3. `release-notes-media` skill 的组件清单表
-4. README 的组件表
+**Level 3 · Promote**: once the same interaction has been used by three or more releases and its shape is stable, move it to `src/components/release/` and update all four places:
+1. The `mdxComponents` mapping in the detail page `src/pages/[locale]/[product]/[version].astro` (required for import-free use)
+2. Add a section to the `/[locale]/changelog/preview` page, showing the result and the usage
+3. The component list table in the `release-notes-media` skill
+4. The component table in `app/README.md`
 
-### 写组件的硬性要求
+### Hard requirements for components
 
-- **props 里描述性文字必填**：图片 `alt`、视频 `label`。`scripts/check-assets.ts` 会检查，新组件要顺手把检查规则加进去。
-- **动效要能关**：所有动画在 `prefers-reduced-motion: reduce` 下退化为无动画。
-- **没有 JS 也要能读**：内容默认可见，脚本只做增强（参考 `Steps`：无脚本时步骤平铺）。
-- **脚本用委托 + `astro:page-load`**：站点开了客户端路由，组件脚本只执行一次，直接绑在节点上会在换页后失效；用 `dataset` 标记防重复初始化。
-- **动态创建的元素要用全局样式**：Astro 的 scoped 样式靠编译期属性实现，JS 新建的元素拿不到，这类样式写进 `src/styles/global.css`。
-- **颜色走 token**：用 `var(--accent)`、`var(--color-ink)` 这些变量，不要写死色值，否则暗色模式和产品主题色都会失效。
+- **Descriptive text props are required**: image `alt`, video `label`. `scripts/check-assets.ts` checks these; when adding a new component, add its check rules too.
+- **Motion must be disableable**: all animation degrades to none under `prefers-reduced-motion: reduce`.
+- **Readable without JS**: content is visible by default; scripts only enhance (see `Steps`: without scripts, steps are laid out flat).
+- **Scripts use delegation + `astro:page-load`**: the site uses client-side routing, so component scripts run only once; handlers bound directly to nodes stop working after navigation. Use `dataset` markers to prevent double initialization.
+- **Dynamically created elements need global styles**: Astro scoped styles rely on compile-time attributes, which JS-created elements don't get; put those styles in `src/styles/global.css`.
+- **Colors use tokens**: use variables like `var(--accent)` and `var(--color-ink)`, never hard-coded values, or dark mode and product theme colors will break.
 
-## 验收清单
+## Acceptance checklist
 
-- [ ] `bun run check` 与 `bun run check:assets` 通过
-- [ ] `bun run preview:report` 里这一版没有红色阻断项
-- [ ] 三语齐全且结构一致；未翻完的保持 `status: draft`
-- [ ] 本地 `bun run dev` 打开这一版：图没裂、视频能播、对比能拖、步骤能切
-- [ ] 定稿后把三语的 `status` 一起改成 `published`
+- [ ] `bun run check` and `bun run check:assets` pass
+- [ ] `bun run preview:report` shows no red blockers for this release
+- [ ] All three locales exist with the same structure; untranslated ones stay `status: draft`
+- [ ] Open this release in local `bun run dev`: images not broken, videos play, compares drag, steps switch
+- [ ] Once final, switch `status` to `published` in all three locales together

@@ -1,0 +1,18 @@
+name: Content issue
+description: A typo, broken link, missing translation or wrong information in the release notes.
+labels: [content]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      placeholder: https://longbridge.com/en/changelog/longbridge-pro/1.1#v1.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong?
+      description: Quote the text and describe what it should say.
+    validations:
+      required: true

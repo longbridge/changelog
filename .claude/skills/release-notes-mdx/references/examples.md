@@ -1,40 +1,46 @@
-# 实例对照
+# Worked examples
 
-下面每一组都来自 `longbridge-web` 真实发生过的版本，左边是抓取到的原文，右边是站点上最终发布的样子。
-规则记不住的时候，翻这一页比翻规则快。
+Each pair below comes from a real `longbridge-web` release: on the left, the fetched source; on the right, what was finally published on the site.
+When you can't remember the rules, flipping through this page is faster than rereading them.
 
-配套的规则在 [`classification.md`](classification.md)（哪些该写）与
-[`brand-voice.md`](brand-voice.md)（怎么写）。
+The matching rules are in [`classification.md`](classification.md) (what to write) and
+[`brand-voice.md`](brand-voice.md) (how to write it).
 
-**代价最大的两个教训在 §8 和 §9**，都是漏写和写偏，不是用词问题——先看那两组。
+**The two most costly lessons are §8 and §9** — both are about omissions and skewed framing, not word choice. Read those two first.
 
-## 1 · 一条提交拆成两条，顺手把黑话去掉
+## 1 · Split one commit into two items, dropping the jargon on the way
 
-`release-2026.09.21` 原文：
+`release-2026.09.21` source:
 
 > **calendar** 财经日历五个列表 tab 接入虚拟滚动，恢复日历点位点击切换列表，修复列表一滚动的时候右侧的股票类的小卡片重新多次 render 的问题 — `e48c82f`
 
-发布：
+(financial calendar's five list tabs use virtual scrolling; restored tapping calendar dots to switch lists; fixed the small stock cards on the right re-rendering repeatedly while scrolling)
+
+Published:
 
 ```markdown
 - 财经日历的长列表往下滚不卡了
 - 点日历上的日期，下面的列表会跟着跳过去
 ```
 
-三件事：**「虚拟滚动」「render」是黑话**，换成用户在屏幕上看到的结果；原文一句话塞了三件事，
-**拆成两条**；「卡片重复渲染」用户根本感知不到，**删掉**。
+(long lists in the financial calendar scroll without stutter; tap a date on the calendar and the list below jumps to it)
 
-这一条还有个坑：同一个区间里它先被 `Revert` 过一次。写之前核对了最终状态才敢写，
-详见 `classification.md` 的「已回退」。
+Three things: **「虚拟滚动」 (virtual scrolling) and 「render」 are jargon**, replaced with what the user sees on screen; the source crammed three things into one sentence,
+so it was **split into two items**; 「卡片重复渲染」 (cards re-rendering) is something users can't perceive at all, so it was **deleted**.
 
-## 2 · 陈述现象 → 说清好在哪
+This item had another trap: within the same range it had been `Revert`ed once first. We only wrote it after checking the final state;
+see "Reverted" in `classification.md`.
 
-`release-2026.09.15` 原文：
+## 2 · Stating a phenomenon → saying why it's better
+
+`release-2026.09.15` source:
 
 > **blocks** feed 图片按原始比例布局，不再统一裁成 16:9 — `9bd1669`
 > **blocks** feed 单图改为宽度铺满，长图补角标提示 — `c6d3d32`
 
-发布：
+(feed images laid out at original aspect ratio instead of all cropped to 16:9; single images now full width, long images get a corner badge)
+
+Published:
 
 ```yaml
 title: 长图不再被裁掉一半
@@ -45,16 +51,20 @@ summary: 资讯里的图片按原来的比例显示，不再统一裁成 16:9。
 - 只有一张图时宽度铺满，长图会在右下角标出来
 ```
 
-标题最初写的是「资讯图片按原始比例显示」——那是**在陈述现象，没说好在哪**。
-读者关心的是「我的长图不会被砍了」。`feed` 这个词也没留，站点上那块内容叫「资讯」。
+(title: long images no longer cropped in half; summary: images in news show at their original ratio instead of all being cropped to 16:9; item: a single image fills the width, and long images are marked in the bottom-right corner)
 
-## 3 · 判断受众范围，别往大了写
+The title was first written as 「资讯图片按原始比例显示」 (news images shown at original ratio) — that **states a phenomenon without saying why it's better**.
+What readers care about is "my long images won't get chopped". The word `feed` was also dropped; on the site that section is called 「资讯」 (News).
 
-`release-2026.09.14` 原文：
+## 3 · Determine the audience; don't overstate it
+
+`release-2026.09.14` source:
 
 > **sg** US/HK 产品页时间改 24 小时制，三页 section 按新流程重排 — `739d58b`
 
-发布：
+(US/HK product pages switch to 24-hour time; sections on three pages reordered per the new flow)
+
+Published:
 
 ```markdown
 ### 新加坡产品页改用 24 小时制
@@ -62,30 +72,32 @@ summary: 资讯里的图片按原来的比例显示，不再统一裁成 16:9。
 美股和港股产品页都跟着改了。三个页面的板块顺序也重新排过。
 ```
 
-scope 是 `sg`，「影响的部署单元」表里也只有 🇸🇬 SG。所以是**新加坡站的产品页**，
-不是「网页版的产品页」。原文里的「US/HK」指的是那个站点下的美股页、港股页，不是香港站。
-这种地方看错一次，整条就是错的。
+(Singapore product pages switch to 24-hour time. Both the US and HK stock product pages changed. The section order on the three pages was also rearranged.)
 
-## 4 · 同一批提交，一半收录一半排除
+The scope is `sg`, and the "Affected deployment units" table only lists 🇸🇬 SG. So it's **the Singapore site's product pages**,
+not "the web version's product pages". The "US/HK" in the source means the US-stock and HK-stock pages under that site, not the Hong Kong site.
+Misread something like this once, and the whole item is wrong.
 
-`release-2026.09.14` 的修复小节共 8 条，最后发布了 4 条：
+## 4 · Same batch of commits: half included, half excluded
 
-| 原文 | 收录 | 为什么 |
+The fixes section of `release-2026.09.14` had 8 items; 4 were finally published:
+
+| Source | Included | Why |
 | --- | --- | --- |
-| **ui** 对齐 hover-card 的 dismissable-layer 版本，修弹窗内「更多」菜单点不着 | ✅ 弹窗里的「更多」菜单点不动 | 用户点得到点不到 |
-| **cookie-consent** gate tracking scripts until consent | ✅ 你同意之前，我们不会开始统计 | 用户能控制的事 |
-| **quote** 治理概览页一次刷新的重复请求 | ✅ 个股概览页打开更快 | 只写用户能感知的结果 |
-| 修改词牌站点文案的书写错误 | ✅ 站点文案里的错字 | 看得见 |
-| **lint** 多语言检查规则不再误报空文案 | ✗ | 研发工具 |
-| **ci** 调整自动修复机器人的提交身份 | ✗ | CI |
-| **engine,ci** 调整构建产物的上传方式 | ✗ | 构建 |
-| **news,blocks** 修复付费墙 JSON-LD cssSelector 失配并补充 inLanguage | ✗ | 搜索引擎读的东西，用户看不见 |
+| **ui** 对齐 hover-card 的 dismissable-layer 版本，修弹窗内「更多」菜单点不着 (align hover-card's dismissable-layer version; fix "More" menu in dialogs not clickable) | ✅ 弹窗里的「更多」菜单点不动 ("More" menu in dialogs couldn't be clicked) | Whether users can click it or not |
+| **cookie-consent** gate tracking scripts until consent | ✅ 你同意之前，我们不会开始统计 (we won't start tracking until you agree) | Something users control |
+| **quote** 治理概览页一次刷新的重复请求 (eliminate duplicate requests on overview page refresh) | ✅ 个股概览页打开更快 (stock overview page opens faster) | Write only the user-perceptible result |
+| 修改词牌站点文案的书写错误 (fix typos in site copy) | ✅ 站点文案里的错字 (typos in site copy) | Visible |
+| **lint** 多语言检查规则不再误报空文案 (i18n lint rule no longer flags empty strings falsely) | ✗ | Dev tooling |
+| **ci** 调整自动修复机器人的提交身份 (change the auto-fix bot's commit identity) | ✗ | CI |
+| **engine,ci** 调整构建产物的上传方式 (change how build artifacts are uploaded) | ✗ | Build |
+| **news,blocks** 修复付费墙 JSON-LD cssSelector 失配并补充 inLanguage (fix paywall JSON-LD cssSelector mismatch and add inLanguage) | ✗ | Read by search engines; invisible to users |
 
-注意第三条的改法：原文说的是「重复请求」，发布写的是「打开更快」。**技术原因不写，结果才写。**
+Note how the third one was rewritten: the source says "duplicate requests", the published copy says "opens faster". **Don't write the technical cause; write the result.**
 
-## 5 · 安全：同一版里一条收、一条不收
+## 5 · Security: in the same release, one included and one not
 
-`release-2026.08.31` 收录：
+`release-2026.08.31` included:
 
 ```markdown
 ### 美国站的 Cookie 选择
@@ -93,32 +105,40 @@ scope 是 `sg`，「影响的部署单元」表里也只有 🇸🇬 SG。所以
 进站会先问你是否同意，非必要的默认不启用；页脚提供 CCPA「Do Not Sell」入口。
 ```
 
-`release-2026.09.15` 排除：
+(Cookie choices on the US site. You're asked for consent on arrival, non-essential cookies are off by default, and the footer has a CCPA "Do Not Sell" link.)
+
+`release-2026.09.15` excluded:
 
 > 补充代码仓库的密钥扫描检查 — `9d3a7c4`
 
-差别是**用户能不能用到、公开出来安不安全**。前者是给用户的控制能力，后者是内部防护细节，
-写出来只会给人提示。
+(added secret scanning checks to the code repository)
 
-## 6 · 整版都不值得单独成节
+The difference is **whether users can use it, and whether it's safe to disclose**. The former gives users control; the latter is an internal protection detail,
+and writing it up would only hand people hints.
 
-`release-2026.09.18` 全部改动：
+## 6 · A whole release not worth its own section
+
+All changes in `release-2026.09.18`:
 
 > 修復导航头多语言问题 — `af2a67a`
 > *（内部改动 2 项：格式化、把 .dark 选择器临时改名）*
 
-对外只剩一条，凑不出标题。三语一起标 `status: skipped`，条目并进了 `release-2026.09.21`
-的「问题修复」：
+(fixed nav header i18n issue; *2 internal changes: formatting, temporarily renaming the .dark selector*)
+
+Only one public item remained, not enough for a title. All three locales were marked `status: skipped` together, and the item was folded into
+`release-2026.09.21`'s 「问题修复」 (Fixed):
 
 ```markdown
 - 顶部导航在部分语言下的文字显示不全
 ```
 
-`release-2026.09.16` 同理，两条修复并进了 `09.17`。这样 9 月从 9 节收敛成 7 节，每一节都有东西可说。
+(top navigation text cut off in some languages)
 
-## 7 · 大版本总结不是小版本的拼接
+Same for `release-2026.09.16`: its two fixes were folded into `09.17`. This brought September down from 9 sections to 7, each with something worth saying.
 
-2026.09 一共 7 节，总结只有三行：
+## 7 · A major summary is not a stitch-up of minors
+
+2026.09 had 7 sections in total; the summary is just three lines:
 
 ```yaml
 title: 读文章随手就能问 AI
@@ -129,32 +149,38 @@ highlights:
   - 滚动和翻页恢复正常
 ```
 
-挑这个月**最值得说的一到两件**，其余交给下面的分节。另外总结的标题不要和它下面
-第一个小版本的标题撞车——同一屏上出现两句几乎一样的话很显眼。
+(title: ask AI right while reading; summary: highlight a passage while reading to ask LongbridgeAI, and screener filters are easier to pick; highlights: highlight to ask LongbridgeAI / easier filter picking / scrolling and paging back to normal)
 
-## 8 · 漏掉了整个月最大的功能
+Pick the **one or two things most worth saying** this month, and leave the rest to the sections below. Also, the summary title must not collide with the title of
+the first minor version under it — two nearly identical lines on the same screen stand out.
 
-`release-2026.09.21` 的原文里，与它相关的只有一条，还在「问题修复」下面：
+## 8 · Missing the biggest feature of the month
+
+In the source for `release-2026.09.21`, there was only one related item, and it was under 「问题修复」 (Fixed):
 
 > **quote** 并列详情面板标题未滚动时完整展示 — `dcb2c1a`
 
-第一版就照着写成了一条修复，而且理解错了：
+(side-by-side detail panel title shown in full before scrolling)
+
+The first draft wrote it up as a fix, and misunderstood it too:
 
 ```markdown
 ✗ 并排看两只股票时，标题一开始就完整显示
 ```
 
-「并列详情」其实是**资讯和帖子在个股页右侧并列展开**，不是两只股票并排。回 git 里搜这个词，
-背后是 8 条 feat，构成当月最大的功能：宽屏流式缩放 + 2K 以上并列阅读。
+(✗ "when viewing two stocks side by side, the title shows in full from the start")
 
-它一条都没进抓取原文，因为发在 `release-2026.09.18.5`——一个没建 Release 对象的 tag。
+「并列详情」 actually means **news and posts expanding side by side on the right of the stock page**, not two stocks side by side. Searching git for the term
+revealed 8 feat commits behind it, making up the month's biggest feature: fluid scaling on wide screens + side-by-side reading at 2K and above.
 
-**两个教训**：抓取原文不是全集，动笔前要对 tag 数（见 `classification.md` 第〇节）；
-原文里出现没见过的产品概念，回 git 搜它的来源（第三节）。
+Not one of them made it into the fetched source, because they shipped in `release-2026.09.18.5` — a tag with no Release object.
 
-## 9 · 一版写了五件事，重点没了
+**Two lessons**: the fetched source is not the full set, so count tags before writing (see section 0 of `classification.md`);
+when the source mentions an unfamiliar product concept, search git for its origin (section 3).
 
-`release-2026.07.24` 第一版的正文：
+## 9 · Five things in one release, and the point got lost
+
+The body of the first draft of `release-2026.07.24`:
 
 ```
 期权链
@@ -164,14 +190,16 @@ highlights:
 选股器可以自己定制 AI 面板
 ```
 
-五件事平铺，读者不知道该记哪个。那一版真正值得说的只有一件：**Web 支持美股期权链**。
+(Option chains; AI summaries on financials and valuation pages; earnings calls link straight to the live stream; stock filter tags on the deep-dive page scroll horizontally instead of getting squeezed; customizable AI panel in the screener.)
 
-后面几条的问题不是写得不好，是**颗粒度细到不值得占版面**——「筛选标签能横着划」这种事，
-用户用到的时候会觉得顺手，但不会因为它去读更新日志。
+Five things laid out flat, and readers don't know which to remember. The one thing really worth saying in that release: **「Web 支持美股期权链」 (US option chains on Web)**.
 
-同一版的标题也翻过一次车：
+The problem with the rest isn't that they were badly written; it's that they're **too fine-grained to deserve space** — something like "filter tags scroll horizontally"
+feels handy when users run into it, but nobody reads a changelog because of it.
+
+The title for that same release also went wrong once:
 
 ```
-✗ 期权链从客户端搬到网页版     ← 「从哪搬到哪」是我们的内部视角
-✓ Web 支持美股期权链           ← 用户只关心网页版现在有没有
+✗ 期权链从客户端搬到网页版     ← "moved from where to where" is our internal perspective
+✓ Web 支持美股期权链           ← users only care whether the web version has it now
 ```

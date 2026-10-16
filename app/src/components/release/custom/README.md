@@ -1,6 +1,6 @@
-# 试验组件
+# Experimental components
 
-某一版需要、但还没稳定到进公共组件的交互放这里。
+Interactions that a particular release needs but that aren't stable enough to become shared components live here.
 
 ```mdx
 import Timeline from '@components/release/custom/Timeline.astro'
@@ -8,6 +8,6 @@ import Timeline from '@components/release/custom/Timeline.astro'
 <Timeline ... />
 ```
 
-这一层不进详情页的 `mdxComponents` 全局注入，所以必须显式 import——改坏了只影响用到它的那几篇。
+This layer is not globally injected via the detail page's `mdxComponents`, so it must be imported explicitly — if you break something here, only the pages that use it are affected.
 
-同一个交互被三个以上版本用过、形态稳定了，就移到上一层 `src/components/release/`，并同步更新详情页的注入映射、`/[locale]/preview` 预览页、`release-notes-media` skill 清单和 README。规范见 `release-page-compose` skill。
+Once the same interaction has been used by three or more releases and its shape has stabilized, move it up one level to `src/components/release/`, and update the detail page's injection map, the `/[locale]/changelog/preview` preview page, the `release-notes-media` skill's component list and the README accordingly. See the `release-page-compose` skill for the conventions.

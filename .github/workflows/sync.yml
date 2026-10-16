@@ -1,15 +1,17 @@
-# 定时抓公开来源 → 生成初稿 → 有变化就开（或更新）一条 PR。
+# Fetch public sources on a schedule → generate first drafts → open (or update) a PR if anything changed.
 #
-# 固定用 sync/releases 分支：上一条没合时会把新内容追加进同一条 PR，不会堆一摞冲突的 PR。
-# 只开 PR、不自动合并：初稿要人或 agent 改写成对外口径，三语齐了再转 published。
+# Always uses the sync/releases branch: if the previous PR isn't merged yet, new content is added to it
+# instead of piling up conflicting PRs.
+# Opens a PR only, never auto-merges: drafts must be rewritten into public wording by a person or agent,
+# and flipped to published once all three locales are ready.
 #
-# 用 GITHUB_TOKEN 开的 PR 不会触发其他 workflow（check 不跑）。
-# 要在同步 PR 上跑检查，配一个有 contents / pull-requests 写权限的 PAT 到 secrets.SYNC_TOKEN。
+# PRs opened with GITHUB_TOKEN don't trigger other workflows (check won't run).
+# To run checks on sync PRs, store a PAT with contents / pull-requests write access in secrets.SYNC_TOKEN.
 name: sync
 
 on:
   schedule:
-    # 每天北京时间 11:00
+    # Daily at 03:00 UTC (11:00 Beijing time)
     - cron: '0 3 * * *'
   workflow_dispatch:
 
@@ -30,12 +32,12 @@ jobs:
         with:
           bun-version: 1.3.14
       - run: bun install --frozen-lockfile
-      - name: 抓取
+      - name: Fetch
         env:
-          # 只用来提高 GitHub 接口的限额，公开来源匿名也能抓
+          # Only raises the GitHub API rate limit; public sources can be fetched anonymously
           RELEASE_NOTES_GH_TOKEN: ${{ github.token }}
         run: bun run fetch
-      - name: 生成初稿
+      - name: Generate drafts
         run: bun run transform
       - uses: peter-evans/create-pull-request@v7
         with:
@@ -45,12 +47,12 @@ jobs:
           add-paths: |
             releases
             app/src/content
-          commit-message: 'chore(content): 同步上游更新'
-          title: 'chore(content): 同步上游更新'
+          commit-message: 'chore(content): sync upstream release notes'
+          title: 'chore(content): sync upstream release notes'
           labels: release-sync
           delete-branch: true
           body: |
-            由 sync workflow 自动生成。
+            Generated automatically by the sync workflow.
 
-            - 非 curated 来源生成的是 `draft` 初稿，需要改写成对外口径才能发
-            - 合并到 main 就会上生产，先 PR 到 canary 验收的话从本分支另开一条
+            - Non-curated sources produce `draft` entries that must be rewritten into public wording before publishing
+            - Merging into main deploys production; to review on staging first, open another PR from this branch to canary

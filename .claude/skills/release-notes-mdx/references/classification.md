@@ -1,169 +1,175 @@
-# 哪些改动该写进更新日志
+# Which changes belong in the changelog
 
-改写之前先做的一步：从抓取产物里挑出**值得对外说的**那几条。挑错了，后面文案写得再好也是错的。
+The step before rewriting: pick out the few items from the fetched output that are **worth saying publicly**. Pick wrong, and no amount of good copy afterwards fixes it.
 
-判断顺序：**先确认原文是全的 → 读三张表 → 逐条过滤 → 合并同类项**。
+Order of judgment: **confirm the source is complete → read the three tables → filter item by item → merge duplicates**.
 
-## 〇、先确认原文是不是全的
+## 0. First confirm whether the source is complete
 
-**抓取原文是起点，不是全集。** `bun run fetch` 对 `github` 来源只能抓到有 Release 对象的 tag，
-而 CI 每次部署都会打 tag，绝大多数 tag 上没有 Release 对象。
+**The fetched source is a starting point, not the full set.** For the `github` source, `bun run fetch` only captures tags that have a Release object,
+and CI tags every deploy, so the vast majority of tags have no Release object.
 
-2026 年 9 月的实测：
+Measured in September 2026:
 
 ```
-仓库里的 release tag        43 个
-有 Release 对象、被抓到的     9 个
-raw 九个文件声明覆盖         63 项改动
-仓库当月实际提交            374 条（feat/fix/perf 285 条）
+release tags in the repo                 43
+with a Release object, fetched            9
+changes covered by the nine raw files    63
+actual commits that month               374 (285 feat/fix/perf)
 ```
 
-代价是真实的：当月最大的功能「个股页超宽屏并列阅读」由 8 条 feat 组成，发在
-`release-2026.09.18.5`——一个没有 Release 对象的 tag。它在抓取原文里**一条都看不到**，
-只有一条收尾的 fix 漏了出来，差点被当成孤立 bug 写进「问题修复」。
+The cost is real: that month's biggest feature, "side-by-side reading on ultra-wide stock pages", consisted of 8 feat commits shipped in
+`release-2026.09.18.5` — a tag with no Release object. It **doesn't appear at all** in the fetched source;
+only one closing fix leaked through, and it nearly got written up as an isolated bug under 「问题修复」 (Fixed).
 
-所以动笔前先对一次数：
+So count before you write:
 
 ```bash
-git tag --list 'release-2026.09*' | wc -l              # 仓库实际有多少
-ls releases/<product>/ | grep '\.zh-CN\.md$' | wc -l      # 抓到多少
+git tag --list 'release-2026.09*' | wc -l              # how many the repo actually has
+ls releases/<product>/ | grep '\.zh-CN\.md$' | wc -l      # how many were fetched
 ```
 
-**对不上就去 git 里补**，按两个已写版本之间的区间捞：
+**If they don't match, fill the gap from git**, pulling the range between two written versions:
 
 ```bash
-git -C <上游仓库> log --format='%h %s' <上一版的 tag>..<这一版的 tag>   | grep -E '^[0-9a-f]+ (feat|fix|perf)'
+git -C <upstream-repo> log --format='%h %s' <previous-tag>..<this-tag>   | grep -E '^[0-9a-f]+ (feat|fix|perf)'
 ```
 
-整理一个月的内容时，**先按月跑一遍 git log 盘出功能清单，再回头用抓取原文补细节**。
-反过来做——只读 raw——必然漏掉发在无 Release tag 上的东西，而那往往正是大功能：
-大功能改动多、发布批次多，落在无 Release 对象 tag 上的概率反而最高。
+When compiling a month of content, **first run git log for the month to inventory the features, then go back to the fetched source for details**.
+Doing it the other way — reading only the raw files — will inevitably miss what shipped on tags without a Release, and that is often exactly the big features:
+big features have more changes and more release batches, so they're actually the most likely to land on tags without a Release object.
 
-## 一、再读抓取产物里的三张表
+## 1. Then read the three tables in the fetched output
 
-内部口径的抓取原文 `releases/<product>/<tag>.<locale>.md` 除了改动列表，还有三块结构化信息。**这三块决定了哪些条目根本不该进入候选**，跳过它们直接读改动列表是这一步最常见的错误。
+Besides the change list, the internal-voice fetched source `releases/<product>/<tag>.<locale>.md` has three structured blocks. **These three decide which items shouldn't be candidates at all**; skipping them and going straight to the change list is the most common mistake at this step.
 
-### 🔙 已回退
+### 🔙 Reverted
 
-出现这一节，说明区间里有改动被撤回了。**每一条都要回去核对后面有没有重新落地**：
+If this section appears, some change in the range was rolled back. **For each entry, check whether it re-landed afterwards**:
 
-| 情况 | 怎么办 |
+| Situation | What to do |
 | --- | --- |
-| 回退后没有重新落地 | 当它不存在，不要写 |
-| 回退后又重新落地（常见：修好问题再上） | 按**最终那一条**的口径写，中间的反复不用提 |
+| Reverted and never re-landed | Treat it as nonexistent; don't write it |
+| Reverted and re-landed (common: fixed then shipped again) | Write it per the **final** commit; don't mention the back-and-forth |
 
-真实例子，`release-2026.09.21`：
+Real example, `release-2026.09.21`:
 
 ```
 82ca320  perf(calendar): 财经日历五个列表 tab 接入虚拟滚动
-4e6cce5  Revert "perf(calendar): ..."          ← 抓取产物把它列在「已回退」
+4e6cce5  Revert "perf(calendar): ..."          ← the fetched output lists this under "Reverted"
 e48c82f  perf(calendar): ...接入虚拟滚动，恢复日历点位点击切换列表，修复卡片重复渲染
 ```
 
-最终生效的是 `e48c82f`，所以这一版可以写「财经日历长列表滚动更顺」，而且要带上它一起修的
-「点日期切回对应列表」。如果没有 `e48c82f`，这条就一个字都不能写。
+The one in effect is `e48c82f`, so this release can say 「财经日历长列表滚动更顺」 (financial calendar long lists scroll more smoothly), and should also include what it fixed alongside:
+「点日期切回对应列表」 (tapping a date switches back to the matching list). Without `e48c82f`, not a single word of this could be written.
 
-分不清先后时用 `git merge-base --is-ancestor <revert> <后来那条>` 确认。
+If you can't tell the order, confirm with `git merge-base --is-ancestor <revert> <later-commit>`.
 
-### 影响的部署单元
+### Affected deployment units
 
-表里列的是这次改动落到了哪几个站点（🇭🇰 HK / 🇸🇬 SG / 🌐 Longbridge.com / 📰 Discover / 📦 Shell）。
+This table lists which sites the change landed on (🇭🇰 HK / 🇸🇬 SG / 🌐 Longbridge.com / 📰 Discover / 📦 Shell).
 
-**只影响一个站点的改动，不能写成全局口径。** 写之前先确认这一条的受众：
+**A change affecting only one site must not be written as global.** Before writing, confirm each item's audience:
 
-- 只动 SG → 「新加坡站的…」，不要写成「网页版新增…」
-- 只动 Longbridge.com → 「官网…」，那是市场站点，不是交易产品
-- 动 Discover → 才是大多数用户理解的「网页版」
+- Only SG → 「新加坡站的…」 ("the Singapore site's…"), not 「网页版新增…」 ("the web version adds…")
+- Only Longbridge.com → 「官网…」 ("the website…"); that's the marketing site, not the trading product
+- Discover → only this is what most users understand as 「网页版」 ("the web version")
 
-表里还标了「要发 / 已发」。**标着「要发」的表示代码合了但还没部署**——这种不能写进已发布的版本里。
+The table also marks "to ship / shipped" (「要发 / 已发」). **Items marked 「要发」 (to ship) are merged but not yet deployed** — they can't go into a published release.
 
-### 共享包改动
+### Shared package changes
 
-`packages/blocks`、`packages/ui` 这类被多个站点依赖，表头那句「实际影响面需人工确认」是认真的。
-一条 `blocks` 的改动可能同时影响资讯流和社区，也可能只在其中一处露出。**拿不准就去看代码，或者
-写成你能确认的那个最小范围**，不要往大了写。
+`packages/blocks`, `packages/ui` and similar are depended on by multiple sites; the table header's note that "actual impact needs manual confirmation" means it.
+A `blocks` change might affect both the news feed and the community, or show up in only one of them. **If unsure, read the code, or
+write the smallest scope you can confirm** — don't overstate it.
 
-## 二、逐条过滤
+## 2. Filter item by item
 
-### 收录
+### Include
 
-改动影响到下面任何一项，就值得写：
+A change is worth writing if it affects any of the following:
 
-- 用户能做什么
-- 用户怎么完成一件事
-- 用户完成一件事有多快
-- 用户完成一件事有多可靠
-- 用户能看到哪些信息
-- 用户能用哪些外部连接
-- 用户能创作什么
-- 用户能控制什么
-- 明显的视觉或交互变化
+- What users can do
+- How users get something done
+- How fast users get something done
+- How reliably users get something done
+- What information users can see
+- Which external connections users can use
+- What users can create
+- What users can control
+- Noticeable visual or interaction changes
 
-### 排除
+### Exclude
 
-这些默认不写：
+These are not written by default:
 
-重构 / 代码清理 / 单元测试 / E2E 测试 / 依赖升级 / 构建改动 / CI/CD /
-内部日志 / 内部监控 / 内部接口调整 / 改名 / 类型完善 / 内部架构调整 / 研发工具
+Refactors / code cleanup / unit tests / E2E tests / dependency upgrades / build changes / CI/CD /
+internal logging / internal monitoring / internal API changes / renames / type improvements / internal architecture changes / dev tooling
 
-还有两类这个仓库特别常见的：
+Plus two kinds especially common in this repo:
 
-- **尚未对外开放的功能**（开关还关着、只有内部账号能进）——发了也没人能用
-- **lint / 规范类改动**（`stylelint` `lint` `docs` `ci` 这些 scope）——对用户完全不可见
+- **Features not yet public** (flag still off, only internal accounts can access) — no one can use it even if announced
+- **Lint / convention changes** (`stylelint` `lint` `docs` `ci` scopes) — completely invisible to users
 
-### 需要具体分析的三类
+### Three categories needing case-by-case judgment
 
-**性能**——用户能感觉到才写。
+**Performance** — write it only if users can feel it.
 
 ```
 ✗ 治理概览页一次刷新的重复请求
 ✓ 个股概览页打开更快
 ```
 
-反过来，看到一条 `perf` 提交不等于用户能感知。改的是首屏、是长列表、是频繁操作的路径，才值得写；
-只是少发了一个后台请求，不写。
+(✗ "eliminated duplicate requests on overview page refresh"; ✓ "stock overview page opens faster")
 
-**安全**——满足三条才写：影响用户信任、改变了用户能看到的安全能力、公开出来是安全的。
-**不要披露实现细节**。我们做过的正例是「账户中心能看到登录设备」「美国站可以自己选 Cookie」；
-反例是内部的密钥扫描与事故记录，那类一个字都不提。
+Conversely, a `perf` commit doesn't mean users can perceive it. It's worth writing if it changes first paint, long lists, or frequently used paths;
+if it just drops one background request, don't.
 
-**基础设施**——默认不写。例外是它产生了明确的用户结果，这时**只写结果，不写迁移**：
+**Security** — write it only if all three hold: it affects user trust, it changes a security capability users can see, and it's safe to disclose.
+**Don't disclose implementation details.** Our positive examples are 「账户中心能看到登录设备」 (login devices visible in the account center) and 「美国站可以自己选 Cookie」 (choose your own cookies on the US site);
+negative examples are internal secret scanning and incident records — not a word about those.
+
+**Infrastructure** — not written by default. The exception is when it produces a clear user outcome; then **write only the outcome, not the migration**:
 
 ```
 技术：图片处理迁到新的 worker 架构
 产品：大图上传更不容易失败
 ```
 
-### 拿不准时问这六个问题
+(Technical: image processing moved to a new worker architecture. Product: large image uploads fail less often.)
 
-1. 有没有新的能力？
-2. 已有能力有没有明显变好？
-3. 有没有新的使用路径？
-4. 已有路径有没有变得不那么烦？
-5. 有没有修掉一个用户看得见的问题？
-6. 不提实现，能不能把好处说清楚？
+### When unsure, ask these six questions
 
-**六个都否，就排除。** 不要为了凑数量把工程工作摆上去。
+1. Is there a new capability?
+2. Did an existing capability get noticeably better?
+3. Is there a new usage path?
+4. Did an existing path become less annoying?
+5. Was a user-visible problem fixed?
+6. Can you explain the benefit without mentioning implementation?
 
-### 抓取产物的分节只是信号
+**If all six are no, exclude it.** Don't pad the count with engineering work.
 
-`✨ 新功能` `🐛 修复` `⚡ 性能` 是按 commit 前缀机械分的，不是结论。写成 `feat` 的可能是内部
-改造，写成 `fix` 的可能才是这一版最值得说的事。**一条都要自己看。**
+### The fetched output's sections are only signals
 
-## 三、一条孤立的修复，背后可能是一整个功能
+`✨ 新功能` (new features) `🐛 修复` (fixes) `⚡ 性能` (performance) are split mechanically by commit prefix; they aren't conclusions. Something labeled `feat` may be internal
+rework; something labeled `fix` may be the most worth-saying thing in the release. **Look at every item yourself.**
 
-看到一条修复里出现**你没见过的名词**——「并列详情面板」「流式缩放」「吸顶条」——不要直接把它
-当成孤立 bug 写掉。回 git 里搜这个词：
+## 3. A lone fix may hide an entire feature
+
+When a fix mentions **a term you haven't seen** — 「并列详情面板」 (side-by-side detail panel), 「流式缩放」 (fluid scaling), 「吸顶条」 (sticky bar) — don't just
+write it up as an isolated bug. Search git for the term:
 
 ```bash
-git -C <上游仓库> log --since=<两个月前> --format='%h %s' | grep '并列详情'
+git -C <upstream-repo> log --since=<two-months-ago> --format='%h %s' | grep '并列详情'
 ```
 
-真实例子。`release-2026.09.21` 的原文里只有这一条：
+Real example. The source for `release-2026.09.21` had only this line:
 
 > **quote** 并列详情面板标题未滚动时完整展示 — `dcb2c1a`
 
-搜一下「并列详情」，背后是 8 条 feat：
+(side-by-side detail panel title shown in full before scrolling)
+
+Searching 「并列详情」 reveals 8 feat commits behind it:
 
 ```
 99402794f  资讯与帖子在 2K 以上改为列表右侧并列展开详情
@@ -174,14 +180,14 @@ ac701a375  并列详情限定 2K 以上，开合改为抽屉动画
 …
 ```
 
-这是那个月最大的功能。只写那条 fix，等于把功能的收尾当成了功能本身。
+That was the month's biggest feature. Writing only that fix treats the feature's finishing touch as the feature itself.
 
-**信号**：修复的措辞里带着一个完整的产品概念（面板、模式、卡片、入口），而这个概念在之前的
-版本里从没出现过——说明它是新的，去找它的来源。
+**Signal**: the fix's wording carries a complete product concept (panel, mode, card, entry point), and that concept never appeared in
+earlier releases — meaning it's new; go find where it came from.
 
-## 四、合并同类项
+## 4. Merge duplicates
 
-一个功能常常拆在好几条提交里，甚至拆在好几个 tag 里。读者看到的是功能，不是实现过程。
+A feature is often split across several commits, even across several tags. Readers see features, not the implementation process.
 
 ```
 feat: 新增导出接口
@@ -193,15 +199,17 @@ test: 导出 worker
 → 一条：大批量数据可以一次导出，不用再拆成几份
 ```
 
-跨 tag 的同一个功能（先出页面、再补筛选、最后修问题），挂在功能成型的那一版下面写完整，
-不要按 tag 各写一遍。具体怎么落到文件上，见 `SKILL.md` 的「一个 tag 不一定值得一篇」。
+(Add export API / add export button / fix export timeout / refactor export worker / test export worker → one item: "large datasets can be exported in one go, no more splitting them up".)
 
-## 定稿前
+For the same feature across tags (page first, then filters, then fixes), write it in full under the version where the feature came together;
+don't write it once per tag. For how that maps onto files, see "Not every tag deserves its own section" in `SKILL.md`.
 
-- [ ] 仓库 tag 数与抓到的 raw 数对过，缺口从 git log 补齐
-- [ ] 原文里出现的陌生产品概念都回 git 搜过来源
-- [ ] 「已回退」里的每一条都核对过最终状态
-- [ ] 每条的受众范围和「影响的部署单元」对得上
-- [ ] 没有写进标着「要发」还没部署的改动
-- [ ] 每条都能用六个问题里的至少一个说清楚
-- [ ] 同一个功能没有被拆成几条
+## Before finalizing
+
+- [ ] Compared the repo's tag count against the raw file count; filled gaps from git log
+- [ ] Searched git for the origin of every unfamiliar product concept in the source
+- [ ] Checked the final state of every entry under "Reverted"
+- [ ] Each item's audience matches "Affected deployment units"
+- [ ] Nothing marked 「要发」 (to ship) but not yet deployed was included
+- [ ] Every item can be justified by at least one of the six questions
+- [ ] No single feature was split into several items

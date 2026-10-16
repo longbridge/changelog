@@ -1,16 +1,16 @@
-# 分支即环境：
-#   canary  → 测试环境 longbridge.xyz/<locale>/changelog（OSS staging）
-#   main    → 生产     longbridge.com/<locale>/changelog（OSS release）
+# Branches are environments:
+#   canary  → staging     longbridge.xyz/<locale>/changelog (OSS staging)
+#   main    → production  longbridge.com/<locale>/changelog (OSS release)
 #
-# 分支模型：从 main 切 release/xxx，先 PR 到 canary 验收，再用同一个分支 PR 到 main。
-# canary 从不合回 main，定期按 main 重置。
+# Branch model: cut release/xxx from main, PR to canary for review, then PR the same branch to main.
+# canary is never merged back into main and is reset to main periodically.
 #
-# 部署目标不进仓库，全部在 Settings 里配：
-#   仓库 Variables       OSS_BUCKET  OSS_ENDPOINT               两个环境共用
-#   Environment 变量     OSS_PREFIX                             staging / production 各一个
-#   凭证                 默认用组织共享的 FE_LB_ASSET_ACCESS_KEY_*；
-#                        某个环境要用别的 key，就在该环境配 OSS_ACCESS_KEY_ID / OSS_ACCESS_KEY_SECRET 覆盖
-# Environment 上配的同名变量优先于仓库级；production 环境可以再加 Required reviewers。
+# Deployment targets are not in the repository; they're all configured in Settings:
+#   Repository variables   OSS_BUCKET  OSS_ENDPOINT     shared by both environments
+#   Environment variables  OSS_PREFIX                   one each for staging / production
+#   Credentials            organization-wide FE_LB_ASSET_ACCESS_KEY_* by default;
+#                          set OSS_ACCESS_KEY_ID / OSS_ACCESS_KEY_SECRET on an environment to override
+# Environment variables take precedence over repository ones; production can also require reviewers.
 name: deploy
 
 on:
@@ -18,7 +18,7 @@ on:
     branches: [main, canary]
   workflow_dispatch:
 
-# 同一环境不并发上传，避免两次发布交叉覆盖；新的一次排队，不取消正在传的
+# One upload per environment at a time so two releases can't overwrite each other; new runs queue instead of cancelling
 concurrency:
   group: deploy-${{ github.ref_name }}
   cancel-in-progress: false
@@ -42,7 +42,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.14
-      - name: 安装 ossutil
+      - name: Install ossutil
         working-directory: ${{ runner.temp }}
         run: |
           curl -sSL -o ossutil.zip https://github.com/aliyun/ossutil/releases/download/v1.7.17/ossutil-v1.7.17-linux-amd64.zip
@@ -52,6 +52,6 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run check
       - run: bun run check:assets
-      # 测试环境与生产是同一份构建（只含 published），deploy 上传前会核对产物的资源路径
+      # Staging and production use the same build (published only); deploy verifies asset paths before uploading
       - run: bun run build
       - run: bun run deploy
