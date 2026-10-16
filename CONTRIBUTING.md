@@ -62,7 +62,7 @@ Then follow [Publishing release notes](README.md#publishing-release-notes). The 
 
 - Cut one branch per release from `main`: `release/<product>-<version>`, and open a PR to `main`.
 - Every PR gets a preview on Cloudflare Pages; the link is commented on the PR and stays the same as you push.
-- Merging the PR deploys production. Never push to `main` directly.
+- Merging needs an approving review from a code owner (see [`.github/CODEOWNERS`](.github/CODEOWNERS)); a new push dismisses earlier approvals. Merging the PR deploys production. Never push to `main` directly.
 
 ### Commit messages
 
