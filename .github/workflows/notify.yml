@@ -1,0 +1,40 @@
+# When a PR is set to auto-merge (the agent does this when the product manager says "go live"),
+# post a Slack message asking the code owner to approve it.
+#
+# One-time setup in Settings → Secrets and variables → Actions:
+#   Secret  SLACK_WEBHOOK_URL   Slack Incoming Webhook for the channel or DM to notify
+#   Secret  SLACK_APPROVER_ID   optional: Slack member ID to @mention, e.g. U012AB3CD
+# Without the webhook the job does nothing.
+name: notify
+
+on:
+  pull_request:
+    branches: [main]
+    types: [auto_merge_enabled]
+
+permissions:
+  contents: read
+
+jobs:
+  approval:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_APPROVER_ID: ${{ secrets.SLACK_APPROVER_ID }}
+      TITLE: ${{ github.event.pull_request.title }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      PREVIEW_URL: https://pr-${{ github.event.number }}.${{ vars.CLOUDFLARE_PAGES_PROJECT }}.pages.dev
+      AUTHOR: ${{ github.event.pull_request.user.login }}
+    steps:
+      - name: Post to Slack
+        if: env.SLACK_WEBHOOK_URL != ''
+        run: |
+          mention=""
+          [ -n "$SLACK_APPROVER_ID" ] && mention="<@$SLACK_APPROVER_ID> "
+          text="${mention}待批准上线：*${TITLE}*（${AUTHOR}）
+          预览：${PREVIEW_URL}
+          批准：${PR_URL}/files
+          批准后自动合并并部署到生产。"
+          jq -n --arg text "$text" '{text: $text}' |
+            curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
