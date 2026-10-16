@@ -30,6 +30,7 @@ To change facts (add or remove items, change the version), edit the md and run a
 | --- | --- |
 | A PR to `main` is opened or updated | GitHub Actions builds the site with drafts and deploys a preview to Cloudflare Pages. A bot comments the link on the PR: `https://pr-<number>.<project>.pages.dev` |
 | The PR is merged into `main` | GitHub Actions deploys production, `longbridge.com/<locale>/changelog` |
+| The PR is closed or merged | The preview deployments are deleted and the preview link stops working |
 
 One branch and one PR per release: cut `release/<product>-<version>` from `main` and open a PR to `main`. Every push updates the same preview URL.
 

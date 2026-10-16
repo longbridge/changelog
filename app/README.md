@@ -56,14 +56,14 @@ So publishing a version takes both: the release is `published`, and its major-ve
 | A PR to `main` is opened or updated | Cloudflare Pages preview with drafts, `https://pr-<number>.<project>.pages.dev`, linked in a PR comment |
 | The PR is merged into `main` | Production, `longbridge.com/<locale>/changelog` |
 
-One branch and one PR per release, cut from `main`. The preview URL stays the same for the life of the PR. Locally, `bun run preview:build` builds the same thing.
+One branch and one PR per release, cut from `main`. The preview URL stays the same for the life of the PR and stops working once the PR is closed or merged. Locally, `bun run preview:build` builds the same thing.
 
 Workflows live in `../.github/workflows/`:
 
 | File | Trigger | What it does |
 | --- | --- | --- |
 | `check.yml` | PR to `main` | `check` + `check:assets`; must pass to merge |
-| `preview.yml` | PR to `main` | Build with drafts + preview report → Cloudflare Pages → sticky PR comment with the links |
+| `preview.yml` | PR to `main` | Build with drafts + preview report → Cloudflare Pages → sticky PR comment with the links. When the PR is closed or merged, deletes all of its preview deployments |
 | `deploy.yml` | Push to `main` | Check → build → upload to OSS with `bun run deploy` |
 | `sync.yml` | Daily schedule, or manual | Fetch + transform; if anything changed, open (or update) a PR from the `sync/releases` branch. Never auto-merges |
 
