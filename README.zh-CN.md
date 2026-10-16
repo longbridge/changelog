@@ -8,9 +8,9 @@
 
 Longbridge 各产品对外更新日志的源码仓库，线上地址 **[longbridge.com/zh-CN/changelog](https://longbridge.com/zh-CN/changelog)**。
 
-站点用 [Astro](https://astro.build) 构建成静态页面，提供英文、繁体中文、简体中文三种语言。更新日志的原文来自公开渠道的定时抓取或产品团队手写，改写成 MDX 后在每个 PR 的预览环境验收，合并后自动部署。
+站点用 [Astro](https://astro.build) 构建成静态页面，提供英文、简体中文、繁体中文三种语言。更新日志的原文来自公开渠道的定时抓取或产品团队手写，改写成 MDX 后在每个 PR 的预览环境验收，合并后自动部署。
 
-- **线上站点：** [English](https://longbridge.com/en/changelog) · [繁體中文](https://longbridge.com/zh-HK/changelog) · [简体中文](https://longbridge.com/zh-CN/changelog)
+- **线上站点：** [English](https://longbridge.com/en/changelog) · [简体中文](https://longbridge.com/zh-CN/changelog) · [繁體中文](https://longbridge.com/zh-HK/changelog)
 - **RSS：** `https://longbridge.com/<locale>/changelog/rss.xml`
 
 ## 目录

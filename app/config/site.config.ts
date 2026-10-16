@@ -4,7 +4,7 @@
  */
 
 /** 顺序即语言切换菜单的展示顺序 */
-export const LOCALES = ['en', 'zh-HK', 'zh-CN'] as const
+export const LOCALES = ['en', 'zh-CN', 'zh-HK'] as const
 export type Locale = (typeof LOCALES)[number]
 
 /** 站点默认展示语言：根路径识别不出浏览器语言时落到这里 */
@@ -15,8 +15,8 @@ export type I18nText = Record<Locale, string>
 
 export const LOCALE_META: Record<Locale, { label: string; htmlLang: string; dateLocale: string }> = {
   en: { label: 'English', htmlLang: 'en', dateLocale: 'en-US' },
-  'zh-HK': { label: '繁體中文', htmlLang: 'zh-Hant-HK', dateLocale: 'zh-HK' },
   'zh-CN': { label: '简体中文', htmlLang: 'zh-Hans', dateLocale: 'zh-CN' },
+  'zh-HK': { label: '繁體中文', htmlLang: 'zh-Hant-HK', dateLocale: 'zh-HK' },
 }
 
 /**

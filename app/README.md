@@ -147,7 +147,7 @@ Set `RELEASE_NOTES_GH_TOKEN` to raise the GitHub API rate limit; CI uses the wor
 
 ### Locales
 
-Add or remove them in `LOCALES` in `config/site.config.ts`. The default is three locales, `en` `zh-HK` `zh-CN` (also the order in the language switcher), with routes like `/zh-HK/changelog/longbridge-pro/v2.1`. `/changelog` redirects based on the main site's `locale` cookie and falls back to the default locale (`en`).
+Add or remove them in `LOCALES` in `config/site.config.ts`. The default is three locales, `en` `zh-CN` `zh-HK` (also the order in the language switcher), with routes like `/zh-HK/changelog/longbridge-pro/v2.1`. `/changelog` redirects based on the main site's `locale` cookie and falls back to the default locale (`en`).
 
 ## Commands
 
