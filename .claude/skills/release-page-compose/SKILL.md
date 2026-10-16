@@ -59,10 +59,10 @@ If unsure how to rewrite something, check the real before/after pairs in [`examp
 1. **Locate**: read the product manager's `releases/<product>/<version>.md`. If the same directory has a fetched source for the same version, compare the two: the product manager's wording wins, the fetched source fills gaps.
 2. **Pick a layout**: choose one recipe from the decision table below.
 3. **Fill in**: copy the recipe skeleton and fill each item. Fill frontmatter `product` `version` `tag` `releasedAt` `source` accurately from the fetched source or the product manager's info; for a purely handwritten draft, `source` is `provider: manual`, `repo: releases/<product>/<version>.md`, `url: https://longbridge.com`.
-4. **Add media**: go through the `release-notes-media` skill. No assets means stay text-only — never invent paths.
+4. **Add media**: go through the `release-notes-media` skill. Local files go into `assets/<product>/<version>/` and are referenced as `/assets/<product>/<version>/<file>`. No assets means stay text-only — never invent paths.
 5. **Verify**:
    ```bash
-   bun run check:assets     # assets and alt text
+   bun run check:assets     # assets, alt text, filenames and sizes
    bun run preview:report   # which versions changed this time, what's missing
    bun run preview:build    # build including drafts; open app/dist/preview/index.html locally
    ```
@@ -159,8 +159,8 @@ Key point: only give images to the one or two subsections most worth showing; ke
 
 ```mdx
 <Compare
-  before="https://assets.lbkrs.com/uploads/<uuid>/x-before.png"
-  after="https://assets.lbkrs.com/uploads/<uuid>/x-after.png"
+  before="/assets/<product>/<version>/x-before.png"
+  after="/assets/<product>/<version>/x-after.png"
   alt="说明改了什么"
   caption="拖动分隔线对比改版前后"
 />
@@ -247,4 +247,4 @@ When the product manager wants an interaction the existing components can't do, 
 - [ ] `bun run preview:report` shows no red blockers for this release
 - [ ] All three locales exist with the same structure; untranslated ones stay `status: draft`
 - [ ] Open this release in local `bun run dev`: images not broken, videos play, compares drag, steps switch
-- [ ] Once final, switch `status` to `published` in all three locales together
+- [ ] Once final, switch `status` to `published` in all three locales together, before committing — merging the PR ships it as is

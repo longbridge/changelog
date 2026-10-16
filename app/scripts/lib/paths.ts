@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { SITE_SEGMENT } from '../../config/site.config'
 
 /** 代码根目录 app/（scripts/lib 上两级），站点、脚本、配置都在这下面 */
 export const ROOT = fileURLToPath(new URL('../..', import.meta.url))
@@ -27,3 +28,12 @@ export const contentFile = (locale: string, productId: string, tagSlug: string) 
   path.join(CONTENT_DIR, locale, productId, `${tagSlug}.mdx`)
 export const majorFile = (locale: string, productId: string, major: string) =>
   path.join(MAJORS_DIR, locale, productId, `${major}.mdx`)
+
+/**
+ * 仓库根的 assets/，产品的截图录屏按 assets/<product>/<version>/<file> 放这里。
+ * public/changelog/assets 是指向它的软链接，构建时随站点一起进 dist，部署时一起传 OSS。
+ */
+export const ASSETS_DIR = path.join(REPO_ROOT, 'assets')
+
+/** MDX 里的站内素材路径（/assets/... 或 /release-assets/...）对应的本地文件，见 src/lib/assets.ts */
+export const localAssetFile = (src: string) => path.join(ROOT, 'public', SITE_SEGMENT, src)

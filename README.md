@@ -8,7 +8,7 @@
 
 Source of the public release notes for Longbridge products, published at **[longbridge.com/en/changelog](https://longbridge.com/en/changelog)**.
 
-The site is a static [Astro](https://astro.build) build in three locales (English, Traditional Chinese, Simplified Chinese). Release notes are either fetched from public sources or written by the product team, rewritten into MDX, reviewed on a staging site, and deployed on merge.
+The site is a static [Astro](https://astro.build) build in three locales (English, Traditional Chinese, Simplified Chinese). Release notes are either fetched from public sources or written by the product team, rewritten into MDX, reviewed on a per-PR preview, and deployed on merge.
 
 - **Live site:** [English](https://longbridge.com/en/changelog) · [繁體中文](https://longbridge.com/zh-HK/changelog) · [简体中文](https://longbridge.com/zh-CN/changelog)
 - **RSS:** `https://longbridge.com/<locale>/changelog/rss.xml`
@@ -62,7 +62,7 @@ See [`app/README.md`](app/README.md) for the content pipeline, configuration, MD
 
 1. Write the release notes as `releases/<product>/<version>.md` using the [template](CONTRIBUTING.md#release-notes-template).
 2. Open [Claude Code](https://claude.com/claude-code) (or another coding agent) at the repository root and ask it to publish the file, e.g. `Publish releases/longbridge-pro/1.1.0.md`.
-3. The agent rewrites the copy, produces all three locales and a local preview, and **stops for your review**. After you approve, it opens a PR to `canary` (staging); after you approve staging, it opens a PR to `main` (production).
+3. The agent rewrites the copy, produces all three locales and a local preview, and **stops for your review**. After you approve, it opens a PR and sends you the online preview link; after you approve that, it merges the PR to go live.
 
 The full agent workflow, including its review gates, is in [`AGENTS.md`](AGENTS.md).
 
@@ -73,25 +73,24 @@ The full agent workflow, including its review gates, is in [`AGENTS.md`](AGENTS.
 ├── releases/<product>/          Source notes, one directory per product
 │   ├── <version>.md             Written by the product team (input)
 │   └── <tag>.<locale>.md        Fetched from public sources (do not edit)
+├── assets/<product>/<version>/  Screenshots and recordings, deployed with the site
 ├── app/                         Astro site and CLI scripts
 │   ├── config/                  Products, locales, frontmatter schema
 │   ├── scripts/                 fetch, transform, checks, preview report, deploy
 │   └── src/content/             Published MDX (releases and major-version summaries)
 ├── .claude/skills/              Agent skills for composing and rewriting release notes
-├── .github/workflows/           CI: check, deploy, sync
+├── .github/workflows/           CI: check, preview, deploy, sync
 └── AGENTS.md                    Instructions for coding agents
 ```
 
 ## Deployment
 
-Each branch maps to an environment, and merging deploys it:
-
-| Branch | Environment |
+| When | Result |
 | --- | --- |
-| `canary` | Staging |
-| `main` | Production, [longbridge.com/en/changelog](https://longbridge.com/en/changelog) |
+| A PR to `main` is opened or updated | Preview on [Cloudflare Pages](https://pages.cloudflare.com), linked in a PR comment |
+| The PR is merged into `main` | Production, [longbridge.com/en/changelog](https://longbridge.com/en/changelog) |
 
-Each release uses its own branch cut from `main`, merged into `canary` first and into `main` after review. `canary` is never merged into `main`. Details are in [`app/README.md`](app/README.md#deployment).
+Each release uses its own branch and PR. Details are in [`app/README.md`](app/README.md#deployment).
 
 ## Contributing
 

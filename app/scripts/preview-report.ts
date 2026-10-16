@@ -15,7 +15,7 @@ import { promisify } from 'node:util'
 import { pathToFileURL } from 'node:url'
 import { getProduct, majorOf, products } from '../config/products.config'
 import { DEFAULT_LOCALE, LOCALES, SITE_SEGMENT, type Locale } from '../config/site.config'
-import { CONTENT_DIR, MAJORS_DIR, REPO_ROOT, ROOT } from './lib/paths'
+import { CONTENT_DIR, MAJORS_DIR, REPO_ROOT, ROOT, localAssetFile } from './lib/paths'
 import { parseFrontmatter } from './lib/store'
 import { parseArgs, c } from './lib/cli'
 
@@ -114,7 +114,7 @@ async function readEntry(file: string): Promise<Entry | null> {
   const missingAssets: string[] = []
   for (const match of body.matchAll(/\b(?:src|poster|before|after)=["'](\/[^"']+)["']/g)) {
     const exists = await fs
-      .access(path.join(ROOT, 'public', match[1]))
+      .access(localAssetFile(match[1]))
       .then(() => true)
       .catch(() => false)
     if (!exists) missingAssets.push(match[1])

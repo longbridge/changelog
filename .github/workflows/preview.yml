@@ -1,0 +1,123 @@
+# Every PR to main gets a preview on Cloudflare Pages, with drafts included, and a sticky comment with the links.
+# The URL stays the same for the life of the PR: https://pr-<number>.<project>.pages.dev
+# Preview deployments on pages.dev are served with X-Robots-Tag: noindex.
+# When the PR is closed or merged, the cleanup job deletes all of its deployments, so the links stop working.
+#
+# One-time setup in Settings → Secrets and variables → Actions:
+#   Secret    CLOUDFLARE_API_TOKEN       API token with the "Cloudflare Pages: Edit" permission
+#   Secret    CLOUDFLARE_ACCOUNT_ID
+#   Variable  CLOUDFLARE_PAGES_PROJECT   a Direct Upload Pages project, e.g. created with
+#                                        bunx wrangler pages project create <name> --production-branch=main
+# Without the token the job builds but skips the deployment.
+#
+# PRs from forks don't get secrets, and PRs opened by the sync workflow with GITHUB_TOKEN
+# don't trigger workflows, so neither gets a preview.
+name: preview
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
+concurrency:
+  group: preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: app
+
+jobs:
+  preview:
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      # The same site as production plus drafts; the review report (preview:report) stays local
+      - name: Build with drafts
+        run: SHOW_DRAFTS=1 bun run build
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: app
+          packageManager: bun
+          command: >-
+            pages deploy dist
+            --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+            --branch=pr-${{ github.event.number }}
+            --commit-hash=${{ github.event.pull_request.head.sha }}
+            --commit-dirty=true
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Comment preview links
+        if: steps.deploy.outcome == 'success'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            ### Preview
+
+            ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+
+            Drafts are included. This link always shows the latest commit of this PR and stops working when the PR is closed.
+            This commit only: ${{ steps.deploy.outputs.deployment-url }} (built from ${{ github.event.pull_request.head.sha }})
+
+  # Management API calls are free; the rate limit is 1200 requests per 5 minutes.
+  cleanup:
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+      BRANCH: pr-${{ github.event.number }}
+    steps:
+      - name: Delete preview deployments
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        working-directory: .
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT/deployments"
+          auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
+
+          # Collect first, delete afterwards: deleting while paging would shift the pages
+          ids=()
+          page=1
+          while :; do
+            body=$(curl -fsS "${auth[@]}" "$api?env=preview&per_page=25&page=$page")
+            count=$(jq '.result | length' <<<"$body")
+            [ "$count" -eq 0 ] && break
+            while read -r id; do ids+=("$id"); done < <(jq -r --arg b "$BRANCH" \
+              '.result[] | select(.deployment_trigger.metadata.branch == $b) | .id' <<<"$body")
+            page=$((page + 1))
+          done
+
+          echo "Deleting ${#ids[@]} deployment(s) of $BRANCH"
+          [ "${#ids[@]}" -eq 0 ] && exit 0
+          for id in "${ids[@]}"; do
+            # force: the latest deployment of a branch holds the alias and can't be deleted otherwise
+            curl -fsS -X DELETE "${auth[@]}" "$api/$id?force=true" >/dev/null
+          done
+      - name: Update the preview comment
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            ### Preview
+
+            Removed when the PR was closed.

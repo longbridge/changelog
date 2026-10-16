@@ -55,4 +55,4 @@ jobs:
             Generated automatically by the sync workflow.
 
             - Non-curated sources produce `draft` entries that must be rewritten into public wording before publishing
-            - Merging into main deploys production; to review on staging first, open another PR from this branch to canary
+            - Merging into main deploys production; review the Cloudflare Pages preview first

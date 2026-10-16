@@ -11,7 +11,8 @@
  *   OSS_ACCESS_KEY_ID       凭证
  *   OSS_ACCESS_KEY_SECRET
  *
- * CI 里按 GitHub Environment（staging / production）各配一套，变量名相同、值不同，见 .github/workflows/deploy.yml。
+ * CI 里配在 GitHub Environment production 上，见 .github/workflows/deploy.yml。
+ * 仓库根 assets/ 的素材经 public/changelog/assets 软链接进了 dist，跟着第一趟一起上传。
  */
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
@@ -80,8 +81,9 @@ async function upload(label: string, extra: string[]) {
 // 日志是公开的：只打印前缀，不打印桶名
 console.log(`上传到 ${c.bold(prefix)}`)
 
-// 文件名带内容哈希，可以长缓存
+// _astro 下的文件名带内容哈希，可以长缓存；assets/ 不带哈希，check:assets 禁止替换已上线的文件
 await upload('静态资源（缓存 1 年）', [
+  '--exclude', '.gitkeep',
   '--exclude', '*.html',
   '--exclude', '*.xml',
   '--exclude', '*.map',

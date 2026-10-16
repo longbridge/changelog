@@ -49,8 +49,8 @@ Anything users must act on after upgrading (sign in again, a moved entry point).
 
 ## Assets
 
-Screenshots or recordings for each item, saying which item each one is for. Local file paths are fine: the agent uploads them and replaces them with CDN links.
-CDN links (assets.lbkrs.com / assets.lbctrl.com / pub.lbkrs.com) can be pasted directly. Assets are never committed. Leave this empty for a text-only page.
+Screenshots or recordings for each item, saying which item each one is for. Local file paths are fine:
+the agent copies them into assets/<product>/<version>/ and they're deployed with the site. Leave this empty for a text-only page.
 - Watchlist redesign, before and after: ~/Desktop/watchlist-before.png ~/Desktop/watchlist-after.png
 ```
 
@@ -60,10 +60,9 @@ Then follow [Publishing release notes](README.md#publishing-release-notes). The 
 
 ### Branches
 
-- Cut one branch per release from `main`: `release/<product>-<version>`.
-- Open a PR to `canary` first. Merging it deploys staging.
-- After review on staging, open a PR from the **same branch** to `main`. Merging it deploys production.
-- Never merge `canary` into `main`, and never push to `main` directly.
+- Cut one branch per release from `main`: `release/<product>-<version>`, and open a PR to `main`.
+- Every PR gets a preview on Cloudflare Pages; the link is commented on the PR and stays the same as you push.
+- Merging the PR deploys production. Never push to `main` directly.
 
 ### Commit messages
 
@@ -103,5 +102,9 @@ bun run preview:build
 ```
 
 The repository is public. Don't commit internal hostnames, internal system names, people's names, credentials or unreleased features. Deployment targets and credentials live in GitHub Secrets and Variables only.
+
+### Assets
+
+Put images and videos in `assets/<product>/<version>/` and reference them as `/assets/<product>/<version>/<file>`. Filenames are lowercase English (they're public URLs); keep images under 500 KB and videos under 4 MB. Never replace a file that's already on `main`, since assets are cached for a year: use a new filename. `bun run check:assets` enforces all of this.
 
 Code conventions are in [`app/CLAUDE.md`](app/CLAUDE.md) and [`app/README.md`](app/README.md).

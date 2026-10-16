@@ -6,5 +6,3 @@ dist/
 
 # Fetched sources and handwritten notes in releases/<product>/ are all committed: every source is public.
 
-# Local staging for asset uploads; the browser tool can only upload files inside the project
-app/.uploads/
