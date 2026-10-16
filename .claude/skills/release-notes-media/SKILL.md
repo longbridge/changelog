@@ -72,7 +72,17 @@ assets/longbridge-pro/1.1.0/drag-layout.mp4          demo video
 - **Never replace a file that's already on `main`**: assets are cached for a year, so a changed file won't reach users. Use a new filename instead
 - Existing URLs on our CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`) remain valid, but new assets go into the repo
 - Screenshots 1600-2400px wide, png; photos as jpg/webp
-- Single image < 500KB; video < 4MB, < 15 seconds, muted, loops cleanly; hard limit 20MB per file. Compress before committing — the repo keeps every version forever
+- Single image < 500KB; video < 4MB, < 15 seconds, muted, loops cleanly. **Check sizes before the first commit** (`ls -lh assets/<product>/<version>/`): `bun run check:assets` fails on new files over these limits, and once a file is on `main` it can't be replaced. Compress instead of asking the user:
+
+  ```bash
+  # images → webp, max 2400px wide, quality 80 (cwebp: brew install webp)
+  cwebp -q 80 -resize 2400 0 in.png -o out.webp
+  # if still too large, lower the quality (-q 70) or crop to the relevant area
+  # video → h264 mp4, 1600px wide, muted, fast start
+  ffmpeg -i in.mov -vf "scale='min(1600,iw)':-2" -c:v libx264 -crf 28 -preset slow -an -movflags +faststart out.mp4
+  ```
+
+  Hard limit 20MB per file. The repo keeps every version forever
 - Pass `width` / `height` (original pixels, from `sips -g pixelWidth -g pixelHeight <file>`) to `<Figure>` to avoid layout shift while loading
 - Crop screenshots to the relevant area; don't include the whole screen with unrelated windows and personal info
 - **No real user data in screenshots**: accounts, phone numbers, real holdings and amounts must all be replaced with demo data

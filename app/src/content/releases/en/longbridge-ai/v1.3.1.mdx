@@ -6,12 +6,12 @@ locale: en
 title: "Background responses and completion notifications"
 summary: "Step away while waiting for an answer, and the AI keeps responding in the background. Try public Agents in the gallery without signing in"
 highlights:
-  - "Background Responses"
-  - "Guest Agent Trials"
-  - "GPT-6 Model Support"
+  - "Background responses"
+  - "Guest Agent trials"
+  - "GPT-6 model support"
 topics:
   - LongbridgeAI
-  - My Agents and Workflow Building
+  - My Agents and workflow building
 releasedAt: 2026-09-11T10:54:17.036Z
 platforms:
   - Web
@@ -24,43 +24,43 @@ source:
 
 ## LongbridgeAI
 
-### New Features
+### New features
 
-- **Guest Agent Trials**: Try public Agents in the gallery without signing in. Trial limits apply separately to each Agent, helping you find an assistant that fits your needs before choosing one.
-
-### Improvements
-
-- **Background Responses and Completion Notifications**: You can step away while waiting for a LongbridgeAI answer, and the AI will continue responding in the background. Return later or after receiving a completion message to read the answer, without having to stay in the conversation.
-- **AI Landing Page Loading**: The website's `/ai` page now uses fewer resources for its initial view and loads content on demand, reducing the amount of data downloaded on your first visit so you can get to your research conversation sooner.
-- **Small-Screen Input Field**: On small screens, the input field automatically collapses into a compact pill shape to leave room for controls, making it easier to enter research questions.
-
-### Bug Fixes
-
-- **Connector Authorization**: Fixed mismatches between the identity used to authorize a connector and the identity used at runtime, as well as repeated retries or unnecessary reauthorization prompts after authentication became invalid, reducing interruptions during research.
-- **Region Detection**: Fixed an issue that incorrectly identified users in Singapore as being in Hong Kong.
-
-### Usage Changes
-
-- **Asset Tool Verification**: When calling tools that involve assets, you must verify your trading password before proceeding.
-
-## My Agents and Workflow Building
-
-### New Features
-
-- **GPT-6 Model Support**: Model integrations now include `gpt-6-astra` through direct connections, Azure, and OpenRouter, so you can choose the route that fits your existing setup.
-- **Market Ranking Tools**: Agent Platform's built-in MCP tools now include market rankings for pre-market, regular trading, and after-hours sessions, providing data from different trading sessions for generating market updates.
+- **Guest Agent trials**: Try public Agents in the gallery without signing in. Trial limits apply separately to each Agent, helping you find an assistant that fits your needs before choosing one.
 
 ### Improvements
 
-- **Intelligent Question Classification**: In customer support question classification, an LLM provides fallback classification for questions that keyword and pattern rules do not match, while maintaining backward compatibility.
-- **Direct Model Requests**: Direct model calls now automatically retry when a connection is no longer valid, reducing the impact of occasional request failures on Agent runs.
+- **Background responses and completion notifications**: You can step away while waiting for a LongbridgeAI answer, and the AI will continue responding in the background. Return later or after receiving a completion message to read the answer, without having to stay in the conversation.
+- **AI landing page loading**: The website's `/ai` page now uses fewer resources for its initial view and loads content on demand, reducing the amount of data downloaded on your first visit so you can get to your research conversation sooner.
+- **Small-screen input field**: On small screens, the input field automatically collapses into a compact pill shape to leave room for controls, making it easier to enter research questions.
 
-### Bug Fixes
+### Bug fixes
 
-- **Environment Variable Secret Editing**: Fixed an issue where masked values shown in the editor could corrupt configured secrets when environment variables were edited and saved.
-- **Workflow Import**: Importing a workflow no longer clears the model configuration in thinking-level nodes, reducing the need to reconfigure them after import.
+- **Connector authorization**: Fixed mismatches between the identity used to authorize a connector and the identity used at runtime, as well as repeated retries or unnecessary reauthorization prompts after authentication became invalid, reducing interruptions during research.
+- **Region detection**: Fixed an issue that incorrectly identified users in Singapore as being in Hong Kong.
 
-### Usage Changes
+### Usage changes
 
-- **Workflow Request Access**: External access from workflow HTTP request nodes and built-in request tools is now restricted to permitted destinations. If your workflow relies on external services, check that those services remain accessible.
-- **Chat HTML Rendering**: Chat messages now render only HTML tags on the allowlist; custom tags are no longer rendered. If your Agent's output relies on custom tags, check how it displays and adjust the output accordingly.
+- **Asset tool verification**: When calling tools that involve assets, you must verify your trading password before proceeding.
+
+## My Agents and workflow building
+
+### New features
+
+- **GPT-6 model support**: Model integrations now include `gpt-6-astra` through direct connections, Azure, and OpenRouter, so you can choose the route that fits your existing setup.
+- **Market ranking tools**: Agent Platform's built-in MCP tools now include market rankings for pre-market, regular trading, and after-hours sessions, providing data from different trading sessions for generating market updates.
+
+### Improvements
+
+- **Intelligent question classification**: In customer support question classification, an LLM provides fallback classification for questions that keyword and pattern rules do not match, while maintaining backward compatibility.
+- **Direct model requests**: Direct model calls now automatically retry when a connection is no longer valid, reducing the impact of occasional request failures on Agent runs.
+
+### Bug fixes
+
+- **Environment variable secret editing**: Fixed an issue where masked values shown in the editor could corrupt configured secrets when environment variables were edited and saved.
+- **Workflow import**: Importing a workflow no longer clears the model configuration in thinking-level nodes, reducing the need to reconfigure them after import.
+
+### Usage changes
+
+- **Workflow request access**: External access from workflow HTTP request nodes and built-in request tools is now restricted to permitted destinations. If your workflow relies on external services, check that those services remain accessible.
+- **Chat HTML rendering**: Chat messages now render only HTML tags on the allowlist; custom tags are no longer rendered. If your Agent's output relies on custom tags, check how it displays and adjust the output accordingly.
