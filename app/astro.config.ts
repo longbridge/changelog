@@ -25,7 +25,9 @@ export default defineConfig({
       // 只收各语言的页面：/ 与 /changelog 是跳转页（/ 在线上还是主站的地址），内部预览页也不进站点地图
       filter: (page) =>
         LOCALES.some((locale) => new URL(page).pathname.includes(`/${locale}/${SITE_SEGMENT}`)) &&
-        !page.includes('/preview'),
+        !page.includes('/preview') &&
+        // 不带 v 的旧大版本地址只是跳转页
+        !new RegExp(`/${SITE_SEGMENT}/[^/]+/\\d[^/]*/?$`).test(new URL(page).pathname),
       // 地址统一成不带尾斜杠
       serialize: (item) => ({ ...item, url: item.url.replace(/\/$/, '') }),
       i18n: {

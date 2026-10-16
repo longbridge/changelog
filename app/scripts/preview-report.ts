@@ -240,7 +240,7 @@ const rows = report
     const links = LOCALES.map((locale) => {
       const entry = group.byLocale[locale]
       if (!entry) return `<span class="lang lang--missing">${locale}</span>`
-      return `<a class="lang" href="../${locale}/${SITE_SEGMENT}/${group.product}/${major}/index.html#${entry.slug}">${locale}</a>`
+      return `<a class="lang" href="../${locale}/${SITE_SEGMENT}/${group.product}/v${major}/index.html#${entry.slug}">${locale}</a>`
     }).join('')
 
     const primary = group.byLocale[DEFAULT_LOCALE] ?? Object.values(group.byLocale)[0]
