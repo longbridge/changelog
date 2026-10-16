@@ -1,6 +1,6 @@
 ---
 name: web-release
-description: The full path for writing a public Release Page in this repo from scratch, seeing it in the local preview, and finally shipping it via canary. Use when the user says things like 「帮我写一个 release page」「加一个版本的更新日志」「这版更新怎么发到 release 站点」「我写完了怎么预览」「预览里看不到我刚写的版本」 ("write a release page", "add a changelog entry for a version", "how do I preview this", "my new version doesn't show up in the preview"), or is new to this repo and doesn't know which file to start with.
+description: The full path for writing a public Release Page in this repo from scratch, seeing it in the local preview, reviewing it on the PR preview, and finally shipping it to production. Use when the user says things like 「帮我写一个 release page」「加一个版本的更新日志」「这版更新怎么发到 release 站点」「我写完了怎么预览」「预览里看不到我刚写的版本」 ("write a release page", "add a changelog entry for a version", "how do I preview this", "my new version doesn't show up in the preview"), or is new to this repo and doesn't know which file to start with.
 ---
 
 # Write a Release Page and ship it
@@ -33,7 +33,7 @@ All three skills only cover "what it should look like". **Where to write, how to
 
 ## 0 · Environment and red lines
 
-The repo root holds only source data `releases/` and code `app/`. **All `bun run` / `make` commands below run inside `app/`**; file paths are relative to the repo root.
+The repo root holds source data `releases/`, page assets `assets/` and code `app/`. **All `bun run` / `make` commands below run inside `app/`**; file paths are relative to the repo root.
 
 ```bash
 cd app && bun install
@@ -44,7 +44,7 @@ Confirm these before writing — violating them means rework:
 - **Never hand-edit fetched sources** `releases/<product>/<tag>.<locale>.md` (frontmatter has `fetchedAt`); a re-run of `bun run fetch` overwrites them as-is.
 - **This is a public repo**: no internal system names, internal links, personal names, or unreleased features.
 - **Never write asset paths that don't exist.** No screenshot means stay text-only and ask the user for one; don't invent a plausible-looking URL.
-- Images and videos in the body always use full URLs on our own CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`); assets never go into the repo.
+- New images and videos go into the repo under `assets/<product>/<version>/` and are referenced as `/assets/<product>/<version>/<file>` (see "Assets" in `AGENTS.md`). Existing full URLs on our own CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`) remain valid. Never replace a file that's already on `main`; use a new filename.
 - The frontmatter fields `product` `version` `tag` `releasedAt` `source` describe the same release and must be identical across all three locales.
 
 ## 1 · Locate: the six files to touch
@@ -132,19 +132,20 @@ One sentence per item, 20-40 characters, only changes users can notice, worded p
 
 ```bash
 bun run check          # types and frontmatter schema
-bun run check:assets   # assets exist, alt text complete, three locales complete, major summary keeping up
+bun run check:assets   # assets exist, alt text complete, three locales complete, major summary keeping up; asset filenames, sizes, no replacing files already on main
 ```
 
 `check:assets` catches "half-done" work: a minor version is `published` but a locale's file is missing, or the major version summary isn't `published` yet — in either case the page won't appear online.
 
 ## 5 · Preview
 
-Two kinds; pick by situation. **There are no online preview links**: before merging, everything is viewed locally; only after merging is it deployed to the corresponding environment.
+Three kinds; pick by situation.
 
 | Situation | How |
 | --- | --- |
 | Viewing while writing | `bun run dev`, shows drafts automatically. Astro 7's dev server is a daemon: `bunx astro dev status` / `stop` / `logs` |
 | Self-check when done / handing to product for review | `bun run preview:build`, then open the `app/dist/preview/index.html` it prints at the end |
+| Online review after the PR is open | The `preview` workflow deploys every PR to `main` (drafts included) to Cloudflare Pages and comments the link: `https://pr-<number>.<project>.pages.dev`, review report at `/preview/`. See step 6 |
 
 `app/dist/preview/index.html` is an index: which versions changed, whether all three locales are present, whether assets are missing, which items are still drafts,
 with each locale label linking straight to this version's anchor on the major version page. It covers "every changed version in the working tree" — **uncommitted and untracked new files count too**, so you can run it right after writing.
@@ -163,34 +164,38 @@ Check in this order, from most to least likely:
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | Whole version missing, not on the list page either | **Missing major version summary.** Minor versions hang under the major version page; without `app/src/content/majors/<locale>/<product>/<major>.mdx` nothing renders | Create that file. `bun run preview:report` reports it as a blocker |
-| Visible locally, gone after `bun run build` | `status` is still `draft`, or the major version summary is still `draft` | Switch both layers to `published` |
+| Visible locally or on the PR preview, gone after `bun run build` or in production | Both previews show drafts; production doesn't. `status` is still `draft`, or the major version summary is still `draft` | Switch both layers to `published` |
 | Never appears no matter what | `status: skipped` | That status means "never shown"; change it |
 | Switching language jumps back to the product page | That locale's file wasn't created | Complete all three locales; `bun run i18n:todo` lists what's pending |
 | Links in the preview index 404 | dist has no site build yet | Run `bun run preview:build`, not just `preview:report` |
-| Broken images | Asset path doesn't exist | Run `bun run check:assets`, then ask the user for the real asset — **don't swap in another guessed path** |
+| No preview link on the PR | The `preview` workflow is still running, skipped the deployment (no Cloudflare token), or the PR comes from a fork / the sync bot | `gh pr checks --watch`; if it was skipped, fall back to the local preview and say so |
+| Broken images | Asset path doesn't exist, or the file isn't under `assets/<product>/<version>/` | Run `bun run check:assets`, then ask the user for the real asset — **don't swap in another guessed path** |
+| Online image still shows the old version | A file already on `main` was replaced; assets are cached for a year | Revert it and use a new filename; `check:assets` flags replacements |
 
 ## 6 · Commit and ship
 
-**Branch = environment, merge = deploy**: merging into `canary` deploys to the test environment (longbridge.xyz); merging into `main` deploys to production (longbridge.com). No tags, no PR previews.
+**One branch, one PR, merge = deploy**: cut `release/<product>-<version>` from `main` and open one PR to `main`. Every PR gets a Cloudflare Pages preview with drafts included; merging the PR deploys production (longbridge.com). No tags.
 
-The test environment and production use the same build and show only `published` — before opening a PR, switch the minor version and the major version summary to `published` in all three locales together.
+Merging ships the PR as is — before committing, switch the minor version and the major version summary to `published` in all three locales together, then rerun step 4.
 
 ```bash
 git switch -c release/<product>-<version> origin/main
-git add app/src/content releases       # run from the repo root; commit content only, dist/ never goes in the repo
+git add app/src/content releases assets   # run from the repo root; content and assets only, dist/ never goes in the repo
 git commit -m "feat(<product>): release notes for <version>"
 git push -u origin HEAD
-gh pr create --base canary --title "feat(<product>): release notes for <version>"
-```
-
-Merge once the PR checks (`check` + `check:assets`) pass; after deploy finishes, verify at `longbridge.xyz/<locale>/changelog/...`.
-If something's wrong, keep pushing to this branch and merge into canary again. Once verified, open a PR to `main` **from the same branch**:
-
-```bash
 gh pr create --base main --title "feat(<product>): release notes for <version>"
 ```
 
-Never merge `canary` into `main`: it may contain other people's versions that haven't been verified yet.
+Wait for `check` and `preview` (`gh pr checks --watch`). The preview bot comments the link on the PR; review at `https://pr-<number>.<project>.pages.dev/preview/` and `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/<major>#<tag>`.
+If something's wrong, keep pushing to this branch; the preview URL stays the same.
+
+Merge only after the user explicitly says to go live:
+
+```bash
+gh pr merge <number> --merge --delete-branch
+```
+
+Never push to `main` directly. If the `production` environment requires approval, point the user to the Actions page; never bypass it.
 
 ## Pre-delivery checklist
 
@@ -203,5 +208,5 @@ Never merge `canary` into `main`: it may contain other people's versions that ha
 - [ ] Open the preview index and click into each locale to confirm the page really exists, images aren't broken, and `title` isn't a version number
 - [ ] Three locales share the same structure: media block count and position, list item count, and `highlights` count all match
 - [ ] Once final, switch `status` of the minor version and the major version summary to `published` **together**
-- [ ] No asset path was invented
+- [ ] No asset path was invented; new assets are in `assets/<product>/<version>/` with lowercase English filenames and within size limits
 - [ ] No internal system names, internal links, or personal names (public repo)

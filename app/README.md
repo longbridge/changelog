@@ -49,33 +49,34 @@ So publishing a version takes both: the release is `published`, and its major-ve
 
 ## Deployment
 
-**Branches are environments and merging deploys.** No tags, no PR previews:
+**Every PR gets a preview, merging deploys production.** No tags, no staging branch:
 
-| Merged into | Deployed to |
+| When | Deployed to |
 | --- | --- |
-| `canary` | Staging, `longbridge.xyz/<locale>/changelog` |
-| `main` | Production, `longbridge.com/<locale>/changelog` |
+| A PR to `main` is opened or updated | Cloudflare Pages preview with drafts, `https://pr-<number>.<project>.pages.dev`, linked in a PR comment |
+| The PR is merged into `main` | Production, `longbridge.com/<locale>/changelog` |
 
-One branch per release: cut it from `main`, open a PR to `canary` for review, then a PR from the same branch to `main`. `canary` is never merged back into `main` and is reset to `main` periodically.
-Preview before merging locally with `bun run preview:build`.
+One branch and one PR per release, cut from `main`. The preview URL stays the same for the life of the PR. Locally, `bun run preview:build` builds the same thing.
 
 Workflows live in `../.github/workflows/`:
 
 | File | Trigger | What it does |
 | --- | --- | --- |
-| `check.yml` | PR to `main` / `canary` | `check` + `check:assets`; must pass to merge |
-| `deploy.yml` | Push to `main` / `canary` | Check → build → upload to OSS with `bun run deploy` |
+| `check.yml` | PR to `main` | `check` + `check:assets`; must pass to merge |
+| `preview.yml` | PR to `main` | Build with drafts + preview report → Cloudflare Pages → sticky PR comment with the links |
+| `deploy.yml` | Push to `main` | Check → build → upload to OSS with `bun run deploy` |
 | `sync.yml` | Daily schedule, or manual | Fetch + transform; if anything changed, open (or update) a PR from the `sync/releases` branch. Never auto-merges |
 
 ### Deployment targets
 
-The repository is public, so **bucket names, paths and credentials are never in code**. They're all configured in the GitHub repository settings. The `staging` environment is used by canary, `production` by main:
+The repository is public, so **bucket names, paths and credentials are never in code**. They're all configured in the GitHub repository settings:
 
 | Kind | Name |
 | --- | --- |
-| Repository variables | `OSS_BUCKET` `OSS_ENDPOINT` (shared by both environments) |
-| Environment variables | `OSS_PREFIX` (one each for staging / production) |
-| Credentials | The organization-wide `FE_LB_ASSET_ACCESS_KEY_*` by default. To use a different key for one environment, set `OSS_ACCESS_KEY_ID` `OSS_ACCESS_KEY_SECRET` on that environment |
+| Repository variables | `OSS_BUCKET` `OSS_ENDPOINT` |
+| `production` environment variables | `OSS_PREFIX` |
+| Credentials | The organization-wide `FE_LB_ASSET_ACCESS_KEY_*` by default. To use a different key, set `OSS_ACCESS_KEY_ID` `OSS_ACCESS_KEY_SECRET` on the `production` environment |
+| PR previews | Secrets `CLOUDFLARE_API_TOKEN` (Cloudflare Pages: Edit) and `CLOUDFLARE_ACCOUNT_ID`, variable `CLOUDFLARE_PAGES_PROJECT` (a Direct Upload project). Without the token the preview job builds but skips deploying |
 
 The `production` environment can also require reviewers, so someone has to approve the upload after a merge into `main`.
 
@@ -159,7 +160,7 @@ Add or remove them in `LOCALES` in `config/site.config.ts`. The default is three
 | `bun run check:assets` | Checks that assets exist, images and videos have descriptions, no unreliable external images, published entries exist in all three locales, titles aren't still script placeholders, and major-version summaries are up to date |
 | `bun run i18n:todo` | Lists untranslated entries with the translation and source paths |
 | `bun run preview:report` | Lists versions changed in this branch (compared with `main`, including uncommitted files), missing locales and assets; writes `dist/preview/index.html` |
-| `bun run preview:build` | Build with drafts + preview report, for local review before merging |
+| `bun run preview:build` | Build with drafts + preview report; the same build the PR preview deploys |
 | `bun run deploy` | Upload `dist/` to OSS, target from the `OSS_*` environment variables; `--dry-run` only prints the commands |
 
 ## MDX frontmatter
@@ -213,7 +214,7 @@ The body is MDX. These components can be used **without imports** (the detail pa
 
 Plain Markdown links in the body are wrapped in `<LinkPreview>` automatically. Write the tag by hand only to set `poster` or `label`, or to turn the preview off.
 
-Upload assets to our CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`) and use full URLs in MDX; images are not committed to this repository. Scroll-in animations for paragraphs and lists are applied site-wide, and all motion respects the system's reduced-motion setting.
+Put images and videos in the repo-root `assets/<product>/<version>/` and reference them as `/assets/<product>/<version>/<file>`; the components add the `/changelog` prefix. `public/changelog/assets` is a symlink to that directory, so dev, build and deploy all include the files. Filenames are lowercase English (they appear in public URLs). Assets aren't content-hashed and are cached for a year, so never replace a file already on `main`: use a new filename. `bun run check:assets` checks names, sizes (warns above 500 KB for images and 4 MB for videos, fails above 20 MB, which keeps under the 25 MiB Cloudflare Pages limit) and replaced files. Older entries use full URLs on our CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`), which remain valid. Scroll-in animations for paragraphs and lists are applied site-wide, and all motion respects the system's reduced-motion setting.
 
 See the `release-notes-media` skill for usage and restraint guidelines, and run `bun run check:assets` when you're done.
 
@@ -232,6 +233,7 @@ It covers **every changed version in the working tree**, including uncommitted a
 
 ```
 ../releases/<product>/   Source notes: handwritten and fetched
+../assets/<product>/     Images and videos used in the pages
 ../.github/workflows/    check / deploy / sync
 ../.claude/skills/       web-release (entry), release-page-compose (composing), release-notes-mdx (public wording), release-notes-media (rich media)
 config/                  Product and site configuration; adding a product only touches this
@@ -242,14 +244,15 @@ src/pages/               Routes: /[locale]/changelog/[product]/[major]
 src/components/          Page components
 src/components/release/  Rich media components available in MDX
 src/components/release/custom/  Experimental components (need explicit imports)
-public/changelog/release-assets/   Sample images for the component preview page only; body assets use the CDN
+public/changelog/assets           Symlink to ../../../assets (repo-root assets/), keep it
+public/changelog/release-assets/   Sample images for the component preview page
 ```
 
 ## The four skills
 
 | Skill | When to use |
 | --- | --- |
-| `web-release` | **Entry point.** The full path from writing a release page → local preview → PR to canary → PR to main, including a "not showing in preview" troubleshooting table |
+| `web-release` | **Entry point.** The full path from writing a release page → local preview → PR preview → merge to go live, including a "not showing in preview" troubleshooting table |
 | `release-page-compose` | A product manager handed over an md that needs to become a full page. Includes layout recipes and the custom component path |
 | `release-notes-mdx` | Fetched sources need rewriting into public wording and translating into three locales |
 | `release-notes-media` | The copy is final; add screenshots, comparisons and walkthroughs to highlights |

@@ -6,5 +6,5 @@
 
 - [ ] `bun run check` and `bun run check:assets` pass
 - [ ] All three locales (`en`, `zh-CN`, `zh-HK`) are updated and aligned
-- [ ] Reviewed in the local preview (`bun run preview:build`) or on staging
+- [ ] Reviewed on the PR preview
 - [ ] No internal hostnames, system names, people's names or unreleased features

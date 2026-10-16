@@ -31,14 +31,14 @@ bun run check                     # type check
 bun run check:assets              # asset references, accessible descriptions, locale parity
 bun run i18n:todo                 # list entries waiting for translation
 bun run preview:build             # build with drafts + preview report, for product review
-# Releasing is done by merging: PR into canary → staging, into main → production (.github/workflows/deploy.yml)
+# Every PR to main gets a Cloudflare Pages preview (preview.yml); merging deploys production (deploy.yml)
 ```
 
 ## Content rules
 
-- The four skills: `web-release` (entry point: write a release page from scratch → local preview → PR to canary for staging → PR to main to go live; read it first if you're new to the repo), `release-page-compose` (product md → full page, including layout recipes and custom component extensions), `release-notes-mdx` (fetched source → public wording in three locales), `release-notes-media` (rich media for finalized copy).
+- The four skills: `web-release` (entry point: write a release page from scratch → local preview → PR preview → merge to go live; read it first if you're new to the repo), `release-page-compose` (product md → full page, including layout recipes and custom component extensions), `release-notes-mdx` (fetched source → public wording in three locales), `release-notes-media` (rich media for finalized copy).
 - **Never write asset paths that don't exist.** Without a screenshot, keep it text-only and ask the user for one; `bun run check:assets` catches broken images.
-- Images and videos in the body use full URLs on our own CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`); assets are not committed. `public/changelog/release-assets/` only holds sample images for the component preview page.
+- Images and videos live in the repo-root `assets/<product>/<version>/` and are referenced as `/assets/<product>/<version>/<file>`; `public/changelog/assets` is a symlink to it, don't replace it with a directory. Never replace a file already on `main` (no content hash, cached a year); use a new filename. Older entries use full CDN URLs (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`), which stay valid. `public/changelog/release-assets/` only holds sample images for the component preview page.
 - `status`: `draft` is visible locally only / `published` is public / `skipped` is never shown.
 - `product` `version` `tag` `releasedAt` `source` in the frontmatter are maintained by scripts; don't touch them when rewriting.
 - The site has two levels: the list page only shows **major versions** (first two parts of the version, `0.20.1` → `0.20`, `2026.09.11` → `2026.09`). A major-version page has one section per release; releases have no URL of their own, and the anchor is `#<filename>`.
@@ -64,5 +64,5 @@ bun run preview:build             # build with drafts + preview report, for prod
 - All motion must degrade to no animation under `prefers-reduced-motion: reduce`.
 - A new MDX component must be added in four places: `mdxComponents` on the detail page, the `/[locale]/changelog/preview` preview page, the list in the `release-notes-media` skill, and the component table in README. See the `release-page-compose` skill.
 - The frontmatter schema is defined once in `config/content.schema.ts`; `src/content.config.ts` and the scripts import it from there. Change fields there first.
-- CI lives in `.github/workflows/` and every job uses `working-directory: app`. PRs run `check.yml`; merges into `canary` / `main` are deployed to staging / production by `deploy.yml`; `sync.yml` fetches on a schedule and opens a PR to `main`.
+- CI lives in `.github/workflows/` and every job uses `working-directory: app`. PRs run `check.yml` and `preview.yml` (Cloudflare Pages preview); merges into `main` are deployed to production by `deploy.yml`; `sync.yml` fetches on a schedule and opens a PR to `main`.
 - Only public data sources. Before adding an internal source that needs credentials, confirm first: fetched text goes into the public repository verbatim.

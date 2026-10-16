@@ -20,12 +20,12 @@ Public-facing copy comes first, rich media second. If the MDX is still a `status
 When there are no assets, handle it in this order:
 
 1. Ask the user for them: say which screen, which state, and whether light and dark versions are needed
-2. If the user gives local files, upload them to our CDN following "Uploading assets" in `AGENTS.md`; if they give CDN links, use those directly. Only write full URLs in MDX
+2. If the user gives local files, put them in the repo under `assets/<product>/<version>/` following "Assets" in `AGENTS.md` and reference them as `/assets/<product>/<version>/<file>`; if they give existing CDN links, use those directly
 3. If you can't get them, keep it text-only and tell the user "these entries would be clearer with images"
 
 There is exactly one exception: when the user explicitly asks for an effect preview, you may use the sample assets under `/release-assets/_example/`, and must state at hand-off that they are placeholders.
 
-After editing, run `bun run check:assets`; it flags missing assets, missing alt text and external images.
+After editing, run `bun run check:assets`; it flags missing assets, missing alt text, external images, bad filenames, oversized files and replaced files.
 
 ## Components
 
@@ -59,18 +59,21 @@ This is a changelog, not a launch-event landing page.
 
 ## Asset guidelines
 
-Assets don't go into the repo; upload them to our CDN and write the full URL in MDX. The upload tool always places files under `uploads/<random uuid>/<filename>` and the directory can't be customized, so filenames are what tell assets apart:
+Assets live in the repo and deploy with the site; there is no upload step. Put files in `assets/<product>/<version>/` at the repo root and reference them in MDX as `/assets/<product>/<version>/<file>` (the components add the `/changelog` prefix; `app/public/changelog/assets` is a symlink to `assets/`, so dev, build and deploy all include them):
 
 ```
-https://assets.lbkrs.com/uploads/<uuid>/quotes-list.png          screenshot
-https://assets.lbkrs.com/uploads/<uuid>/quotes-list-dark.png     dark version (optional)
-https://assets.lbkrs.com/uploads/<uuid>/quotes-before.png        comparison image
-https://assets.lbkrs.com/uploads/<uuid>/drag-layout.mp4          demo video
+assets/longbridge-pro/1.1.0/quotes-list.png          screenshot
+assets/longbridge-pro/1.1.0/quotes-list-dark.png     dark version (optional)
+assets/longbridge-pro/1.1.0/quotes-before.png        comparison image
+assets/longbridge-pro/1.1.0/drag-layout.mp4          demo video
 ```
 
+- **Filenames are part of a public URL**: lowercase English, digits, `-` `_` `.` only, describing the content; nothing internal, no personal names
+- **Never replace a file that's already on `main`**: assets are cached for a year, so a changed file won't reach users. Use a new filename instead
+- Existing URLs on our CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`) remain valid, but new assets go into the repo
 - Screenshots 1600-2400px wide, png; photos as jpg/webp
-- Single image < 500KB; video < 4MB, < 15 seconds, muted, loops cleanly
-- Pass `width` / `height` (original pixels) to `<Figure>` to avoid layout shift while loading
+- Single image < 500KB; video < 4MB, < 15 seconds, muted, loops cleanly; hard limit 20MB per file. Compress before committing — the repo keeps every version forever
+- Pass `width` / `height` (original pixels, from `sips -g pixelWidth -g pixelHeight <file>`) to `<Figure>` to avoid layout shift while loading
 - Crop screenshots to the relevant area; don't include the whole screen with unrelated windows and personal info
 - **No real user data in screenshots**: accounts, phone numbers, real holdings and amounts must all be replaced with demo data
 
@@ -96,8 +99,8 @@ A zh-CN page (the copy stays in Chinese; the zh-HK and en files mirror the same 
 - 自选列表支持直接查看当日走势
 
 <Compare
-  before="https://assets.lbkrs.com/uploads/<uuid>/watchlist-before.png"
-  after="https://assets.lbkrs.com/uploads/<uuid>/watchlist-after.png"
+  before="/assets/longbridge-pro/1.1.0/watchlist-before.png"
+  after="/assets/longbridge-pro/1.1.0/watchlist-after.png"
   alt="自选列表从纯数字改为带走势图的卡片"
   caption="拖动分隔线对比改版前后"
   width={1600}
@@ -107,8 +110,8 @@ A zh-CN page (the copy stays in Chinese; the zh-HK and en files mirror the same 
 - 支持拖拽调整多屏布局
 
 <Video
-  src="https://assets.lbkrs.com/uploads/<uuid>/drag-layout.mp4"
-  poster="https://assets.lbkrs.com/uploads/<uuid>/drag-layout-poster.jpg"
+  src="/assets/longbridge-pro/1.1.0/drag-layout.mp4"
+  poster="/assets/longbridge-pro/1.1.0/drag-layout-poster.jpg"
   label="把行情窗口拖到第二块屏幕并自动吸附对齐"
   caption="窗口会自动吸附到网格"
 />
@@ -127,6 +130,6 @@ A zh-CN page (the copy stays in Chinese; the zh-HK and en files mirror the same 
 
 ## Wrap-up
 
-1. `bun run check:assets` — assets and descriptions
+1. `bun run check:assets` — assets, descriptions, filenames, sizes and no replaced files
 2. `bun run build` — the build passes
 3. Take a quick local look: `bun run dev`, confirm images aren't broken, videos play, comparison sliders drag, and steps switch
