@@ -169,6 +169,8 @@ Check in this order, from most to least likely:
 | Switching language jumps back to the product page | That locale's file wasn't created | Complete all three locales; `bun run i18n:todo` lists what's pending |
 | Links in the preview index 404 | dist has no site build yet | Run `bun run preview:build`, not just `preview:report` |
 | No preview link on the PR | The `preview` workflow is still running, skipped the deployment (no Cloudflare token), or the PR comes from a fork / the sync bot | `gh pr checks --watch`; if it was skipped, fall back to the local preview and say so |
+| `preview` fails at "Deploy to Cloudflare Pages" with an authentication error | The `CLOUDFLARE_API_TOKEN` secret expired or was revoked (tokens are issued with an expiry date) | Tell the user; a repo admin creates a new token and runs `gh secret set CLOUDFLARE_API_TOKEN`. Meanwhile use the local preview |
+| Preview link returns 404 | The PR was closed or merged; the `cleanup` job deletes its previews | Reopen the PR to rebuild it, or use production after merge |
 | Broken images | Asset path doesn't exist, or the file isn't under `assets/<product>/<version>/` | Run `bun run check:assets`, then ask the user for the real asset — **don't swap in another guessed path** |
 | Online image still shows the old version | A file already on `main` was replaced; assets are cached for a year | Revert it and use a new filename; `check:assets` flags replacements |
 
@@ -186,8 +188,8 @@ git push -u origin HEAD
 gh pr create --base main --title "feat(<product>): release notes for <version>"
 ```
 
-Wait for `check` and `preview` (`gh pr checks --watch`). The preview bot comments the link on the PR; review at `https://pr-<number>.<project>.pages.dev` and `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/<major>#<tag>`.
-If something's wrong, keep pushing to this branch; the preview URL stays the same.
+Wait for `check` and `preview` (`gh pr checks --watch`). The preview bot comments the link on the PR; review at `https://pr-<number>.<project>.pages.dev` and `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/<major>#<tag>`. The project is the repo variable `CLOUDFLARE_PAGES_PROJECT`, currently `longbridge-changelog`.
+If something's wrong, keep pushing to this branch; the preview URL stays the same. When the PR is closed or merged, the `cleanup` job deletes its previews and the link returns 404.
 
 Merge only after the user explicitly says to go live:
 

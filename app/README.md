@@ -76,7 +76,7 @@ The repository is public, so **bucket names, paths and credentials are never in 
 | Repository variables | `OSS_BUCKET` `OSS_ENDPOINT` |
 | `production` environment variables | `OSS_PREFIX` |
 | Credentials | The organization-wide `FE_LB_ASSET_ACCESS_KEY_*` by default. To use a different key, set `OSS_ACCESS_KEY_ID` `OSS_ACCESS_KEY_SECRET` on the `production` environment |
-| PR previews | Secrets `CLOUDFLARE_API_TOKEN` (Cloudflare Pages: Edit) and `CLOUDFLARE_ACCOUNT_ID`, variable `CLOUDFLARE_PAGES_PROJECT` (a Direct Upload project). Without the token the preview job builds but skips deploying |
+| PR previews | Secrets `CLOUDFLARE_API_TOKEN` (Cloudflare Pages: Edit) and `CLOUDFLARE_ACCOUNT_ID`, variable `CLOUDFLARE_PAGES_PROJECT` (a Direct Upload project). Without the token the preview job builds but skips deploying. Create the token with an expiry date and only the "Cloudflare Pages: Edit" permission; when it expires, deploys fail with an authentication error until a new one is set |
 
 The `production` environment can also require reviewers, so someone has to approve the upload after a merge into `main`.
 
