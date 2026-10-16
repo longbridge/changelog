@@ -8,9 +8,9 @@
 
 Source of the public release notes for Longbridge products, published at **[longbridge.com/en/changelog](https://longbridge.com/en/changelog)**.
 
-The site is a static [Astro](https://astro.build) build in three locales (English, Traditional Chinese, Simplified Chinese). Release notes are either fetched from public sources or written by the product team, rewritten into MDX, reviewed on a per-PR preview, and deployed on merge.
+The site is a static [Astro](https://astro.build) build in three locales (English, Simplified Chinese, Traditional Chinese). Release notes are either fetched from public sources or written by the product team, rewritten into MDX, reviewed on a per-PR preview, and deployed on merge.
 
-- **Live site:** [English](https://longbridge.com/en/changelog) · [繁體中文](https://longbridge.com/zh-HK/changelog) · [简体中文](https://longbridge.com/zh-CN/changelog)
+- **Live site:** [English](https://longbridge.com/en/changelog) · [简体中文](https://longbridge.com/zh-CN/changelog) · [繁體中文](https://longbridge.com/zh-HK/changelog)
 - **RSS:** `https://longbridge.com/<locale>/changelog/rss.xml`
 
 ## Table of contents
