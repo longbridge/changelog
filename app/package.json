@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Longbridge 各产品对外 Release Notes 的抓取、转换与静态站点发布",
+  "description": "Fetch, transform and publish the public release notes of Longbridge products as a static site",
+  "license": "MIT",
   "scripts": {
     "fetch": "bun run scripts/fetch.ts",
     "transform": "bun run scripts/transform.ts",

@@ -4,7 +4,7 @@ dist/
 .DS_Store
 *.log
 
-# 抓取的原文与产品手写稿都在 releases/<product>/，全部提交：来源都是公开的。
+# Fetched sources and handwritten notes in releases/<product>/ are all committed: every source is public.
 
-# 上传素材前的本地中转，浏览器工具只能上传项目目录内的文件
+# Local staging for asset uploads; the browser tool can only upload files inside the project
 app/.uploads/

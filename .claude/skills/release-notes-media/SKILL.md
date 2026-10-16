@@ -1,92 +1,94 @@
 ---
 name: release-notes-media
-description: 给已经定稿的 Release Notes MDX 加上图片、视频、前后对比、分步演示、可交互 demo 等富媒体与动效，让版本说明可看可玩。当用户要求丰富更新日志、加截图或演示、做前后对比、加交互动画、把纯文字的版本说明做得更生动时使用。
+description: Add images, videos, before/after comparisons, step-by-step walkthroughs, interactive demos and other rich media and motion to finalized Release Notes MDX, so release notes can be seen and tried, not just read. Use when the user asks to enrich the changelog, add screenshots or demos, make a before/after comparison, add interactive animation, or make a text-only release note more vivid — e.g. 「加截图」「配个视频」「做前后对比」「加个演示」「让更新日志更生动」.
 ---
 
-# Release Notes 富媒体增强
+# Rich Media for Release Notes
 
-> 路径相对仓库根：原数据在 `releases/`，代码在 `app/`。`bun run` 命令在 `app/` 下执行。
+> Paths are relative to the repo root: raw data lives in `releases/`, code in `app/`. Run `bun run` commands from `app/`.
 
-纯文字的更新日志能读懂，但读不出"变化"。这个 skill 负责把已经改写成对外口径的条目，升级成看得见、点得动的内容。
+A text-only changelog is understandable, but it doesn't show the *change*. This skill upgrades entries that have already been rewritten for the public into content readers can see and interact with.
 
-## 前置
+## Prerequisite
 
-先有对外文案，再谈富媒体。如果 MDX 还是 `status: draft` 的抓取初稿，先走 `release-notes-mdx` 把文案改对，再回到这里。
+Public-facing copy comes first, rich media second. If the MDX is still a `status: draft` fetched first draft, run `release-notes-mdx` to get the copy right, then come back here.
 
-## 铁律：不要编造素材
+## Iron rule: never fabricate assets
 
-**绝不写一个不存在的图片或视频路径。** 站点会构建通过，但线上就是一个裂图。
+**Never write an image or video path that doesn't exist.** The site will still build, but production will show a broken image.
 
-没有素材时，按这个顺序处理：
+When there are no assets, handle it in this order:
 
-1. 问用户要：说明需要哪一屏、什么状态、明暗两版要不要
-2. 用户给的是本地文件，按 `AGENTS.md` 的「上传素材」传到自家 CDN；给的已是 CDN 链接就直接用。MDX 里只写完整 URL
-3. 要不到就保持纯文字，并告诉用户"这几条如果配图会更清楚"
+1. Ask the user for them: say which screen, which state, and whether light and dark versions are needed
+2. If the user gives local files, upload them to our CDN following "Uploading assets" in `AGENTS.md`; if they give CDN links, use those directly. Only write full URLs in MDX
+3. If you can't get them, keep it text-only and tell the user "these entries would be clearer with images"
 
-只有一种例外：用户明确要求做效果预览时，可以用 `/release-assets/_example/` 下的示例素材，并在交付时说明这是占位。
+There is exactly one exception: when the user explicitly asks for an effect preview, you may use the sample assets under `/release-assets/_example/`, and must state at hand-off that they are placeholders.
 
-改完执行 `bun run check:assets`，它会挑出不存在的素材、缺失的 alt 与外链图片。
+After editing, run `bun run check:assets`; it flags missing assets, missing alt text and external images.
 
-## 组件清单
+## Components
 
-这些组件在 MDX 里**直接使用，不需要 import**（详情页已经注入）。
+These components are **used directly in MDX without import** (the detail page injects them).
 
-| 组件 | 用在什么变化上 | 关键属性 |
+| Component | Use for this kind of change | Key props |
 | --- | --- | --- |
-| `<Figure>` | 新界面、新入口、结果截图 | `src` `alt`(必填) `caption` `width` `height` `zoom` `bare` |
-| `<Compare>` | 改版、重排、视觉升级——有"以前长这样"的对照 | `before` `after` `alt`(必填) `beforeLabel` `afterLabel` `caption` |
-| `<Video>` | 一段操作才讲得清的流程、动效本身就是卖点 | `src` `label`(必填) `poster` `caption` `autoplay` `loop` `controls` |
-| `<Steps>` + `<Step>` | 用户需要跟着做的配置、迁移、开启步骤 | `<Steps title>`，每个 `<Step title>` 一步 |
-| `<Demo>` | 能在网页里直接玩的功能 | `src` `title` `poster` `ratio` `caption` |
-| `<LinkPreview>` | 正文里要跳出去的链接：帮助中心、官网、文档 | `href` `label` `poster` `ratio` `preview` `newTab` |
-| `<Kbd>` | 快捷键 | `keys="⌘+K"` |
-| `<Callout>` | 升级须知、破坏性变更、限时说明 | `type="info｜warning｜success"` |
+| `<Figure>` | New UI, new entry point, result screenshot | `src` `alt` (required) `caption` `width` `height` `zoom` `bare` |
+| `<Compare>` | Redesigns, re-layouts, visual upgrades — anything with a "this is how it used to look" counterpart | `before` `after` `alt` (required) `beforeLabel` `afterLabel` `caption` |
+| `<Video>` | Flows that only make sense when shown as an action; motion that is itself the selling point | `src` `label` (required) `poster` `caption` `autoplay` `loop` `controls` |
+| `<Steps>` + `<Step>` | Setup, migration or enablement steps the user needs to follow | `<Steps title>`, one `<Step title>` per step |
+| `<Demo>` | Features that can be tried directly in the web page | `src` `title` `poster` `ratio` `caption` |
+| `<LinkPreview>` | Outbound links in the body: help center, website, docs | `href` `label` `poster` `ratio` `preview` `newTab` |
+| `<Kbd>` | Keyboard shortcuts | `keys="⌘+K"` |
+| `<Callout>` | Upgrade notes, breaking changes, time-limited notices | `type="info｜warning｜success"` |
 
-正文里的普通 Markdown 链接（`[文案](url)`）会自动套上 `<LinkPreview>`，**不用为了预览去改写法**；
-只有要指定 `poster`、`label` 或用 `preview={false}` 关掉预览时才手写这个标签。
+Plain Markdown links in the body (`[text](url)`) are automatically wrapped in `<LinkPreview>`, so **don't change how you write links just to get a preview**;
+write the tag by hand only when you need to set `poster` or `label`, or turn the preview off with `preview={false}`.
 
-选择顺序：**能截图就别只写字，有对照就用 Compare，要动起来才说得清就用 Video，能上手就用 Demo。**
+Order of preference: **if it can be a screenshot, don't just write words; if there's a before/after, use Compare; if it only makes sense in motion, use Video; if it can be tried, use Demo.**
 
-## 克制原则
+## Restraint
 
-这是更新日志，不是发布会落地页。
+This is a changelog, not a launch-event landing page.
 
-- 每个版本**最多 2-3 个**富媒体块，通常配在 `highlights` 对应的那几条上
-- 一条变更配一个媒体，不要同一功能又截图又视频
-- 纯修复、纯性能、纯后台改动**不配图**
-- `## 问题修复` 那一组基本都是纯文字
-- 正文段落、列表、标题的进场动画是全站自动的，不需要在 MDX 里做任何事
+- **At most 2-3** rich media blocks per version, usually on the entries that correspond to `highlights`
+- One media item per change; don't give the same feature both a screenshot and a video
+- Pure fixes, pure performance and pure backend changes get **no images**
+- The bug-fixes group (`## 问题修复` in zh-CN) is basically all text
+- Entrance animations for body paragraphs, lists and headings are automatic site-wide; nothing to do in MDX
 
-## 素材规范
+## Asset guidelines
 
-素材不进仓库，传到自家 CDN 后在 MDX 里写完整 URL。上传工具固定放在 `uploads/<随机 uuid>/<文件名>` 下，目录不能自定，所以靠文件名区分：
+Assets don't go into the repo; upload them to our CDN and write the full URL in MDX. The upload tool always places files under `uploads/<random uuid>/<filename>` and the directory can't be customized, so filenames are what tell assets apart:
 
 ```
-https://assets.lbkrs.com/uploads/<uuid>/quotes-list.png          截图
-https://assets.lbkrs.com/uploads/<uuid>/quotes-list-dark.png     暗色版（可选）
-https://assets.lbkrs.com/uploads/<uuid>/quotes-before.png        对比图
-https://assets.lbkrs.com/uploads/<uuid>/drag-layout.mp4          演示视频
+https://assets.lbkrs.com/uploads/<uuid>/quotes-list.png          screenshot
+https://assets.lbkrs.com/uploads/<uuid>/quotes-list-dark.png     dark version (optional)
+https://assets.lbkrs.com/uploads/<uuid>/quotes-before.png        comparison image
+https://assets.lbkrs.com/uploads/<uuid>/drag-layout.mp4          demo video
 ```
 
-- 截图宽度 1600-2400px，png；照片类用 jpg/webp
-- 单张图 < 500KB，视频 < 4MB、时长 < 15 秒、静音、循环得上
-- 给 `<Figure>` 传 `width` / `height`（原始像素），避免加载时页面跳动
-- 截图裁到相关区域，不要整屏带着无关的窗口和个人信息
-- **截图里不能有真实用户信息**：账号、手机号、真实持仓与金额一律替换成演示数据
+- Screenshots 1600-2400px wide, png; photos as jpg/webp
+- Single image < 500KB; video < 4MB, < 15 seconds, muted, loops cleanly
+- Pass `width` / `height` (original pixels) to `<Figure>` to avoid layout shift while loading
+- Crop screenshots to the relevant area; don't include the whole screen with unrelated windows and personal info
+- **No real user data in screenshots**: accounts, phone numbers, real holdings and amounts must all be replaced with demo data
 
-## 无障碍与性能
+## Accessibility and performance
 
-组件已经处理好懒加载、进入视口才播放、`prefers-reduced-motion`、键盘可用与灯箱。你只需要保证：
+The components already handle lazy loading, play-on-enter-viewport, `prefers-reduced-motion`, keyboard support and the lightbox. You only need to make sure:
 
-- `alt` 写这张图**说明了什么变化**，不是"截图"两个字
-- `<Video label>` 写这段演示在做什么
-- `caption` 是给所有人看的说明，`alt` 是给看不见图的人的替代，两者不要写成同一句
+- `alt` describes **what change the image shows**, not just "screenshot"
+- `<Video label>` describes what the demo is doing
+- `caption` is the description for everyone, `alt` is the replacement for people who can't see the image; don't make them the same sentence
 
-## 三语
+## Three locales
 
-素材共用，文字要翻：`alt` `caption` `<Steps>` 的标题与正文、`<Callout>` 内容都要按 `zh-CN` / `zh-HK` / `en` 各写一份。三个语言版本的媒体块数量和位置保持一致，读者切换语言时不会发现内容变多变少。
+Assets are shared, text is translated: `alt`, `caption`, `<Steps>` titles and body, and `<Callout>` content each need a version for `zh-CN` / `zh-HK` / `en`. Keep the number and position of media blocks identical across the three locales, so readers switching language don't see content appear or disappear.
 
-## 完整示例
+## Full example
+
+A zh-CN page (the copy stays in Chinese; the zh-HK and en files mirror the same blocks with translated text):
 
 ```mdx
 ## 新增功能
@@ -123,8 +125,8 @@ https://assets.lbkrs.com/uploads/<uuid>/drag-layout.mp4          演示视频
 <Callout type="warning">升级后原有的自定义布局需要重新保存一次。</Callout>
 ```
 
-## 收尾
+## Wrap-up
 
-1. `bun run check:assets` —— 素材与描述
-2. `bun run build` —— 构建能过
-3. 本地看一眼：`bun run dev`，确认图没裂、视频能播、对比滑块能拖、步骤能切
+1. `bun run check:assets` — assets and descriptions
+2. `bun run build` — the build passes
+3. Take a quick local look: `bun run dev`, confirm images aren't broken, videos play, comparison sliders drag, and steps switch

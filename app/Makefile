@@ -1,15 +1,15 @@
-# 发布不靠命令，靠合并：
+# Releases are deployed by merging, not by commands:
 #
-#   PR 合进 canary → GitHub Actions 部署测试环境（longbridge.xyz/<locale>/changelog）
-#   PR 合进 main   → GitHub Actions 部署生产    （longbridge.com/<locale>/changelog）
+#   PR merged into canary → GitHub Actions deploys staging    (longbridge.xyz/<locale>/changelog)
+#   PR merged into main   → GitHub Actions deploys production (longbridge.com/<locale>/changelog)
 #
-# 见 .github/workflows/deploy.yml。这里只留本地用的几条：
+# See .github/workflows/deploy.yml. Only local targets live here:
 #
-#   make check                               # 合 PR 前本地先过一遍 CI 的检查
-#   make build                               # 只构建站点，产物在 dist/
-#   make deploy:website-local                # 本地直传 OSS，应急或调试用，需要先 export OSS_* 变量（见 scripts/deploy.ts）
+#   make check                               # run the CI checks locally before merging a PR
+#   make build                               # build the site into dist/
+#   make deploy:website-local                # upload to OSS from this machine, for emergencies or debugging; export OSS_* first (see scripts/deploy.ts)
 #
-# 目标名里的冒号在 make 里要转义，命令行上照常写 make deploy:website-local。
+# The colon in the target name is escaped for make; on the command line just type make deploy:website-local.
 
 .PHONY: deploy\:website-local build check clean
 

@@ -1,68 +1,68 @@
-# 项目约定
+# Project conventions
 
-Longbridge 对外 Release Notes 站点。三段式内容流水线：抓取（脚本）→ 改写（skill + 人）→ 构建（Astro SSG）。
+The public Longbridge release notes site. A three-stage content pipeline: fetch (scripts) → rewrite (skills + people) → build (Astro SSG).
 
-这是**代码目录** `app/` 的开发约定，下文路径相对 `app/`，命令在 `app/` 下执行。仓库根只放 `README.md`、`AGENTS.md`（产品与 agent 的端到端流程）、原数据 `releases/` 和本目录；原数据路径写作 `releases/...`，指的是仓库根的那个。代码里用 `scripts/lib/paths.ts` 的 `REPO_ROOT` / `RAW_DIR` 定位，不要写死 `../`。
+These are the development conventions for the **code directory** `app/`. Paths below are relative to `app/` and commands run in `app/`. The repository root only holds the open-source docs, `AGENTS.md` (the end-to-end workflow for product managers and agents), the source notes in `releases/` and this directory. Source paths are written as `releases/...` and refer to the one at the repository root. In code, locate them with `REPO_ROOT` / `RAW_DIR` from `scripts/lib/paths.ts`; don't hard-code `../`.
 
-仓库托管在 GitHub 且公开：代码、注释、内容里不写内部域名、内部系统名、人名，部署目标（桶、路径、凭证）只放在 GitHub 的 Secrets / Variables 里。
+The repository is hosted on GitHub and public. Code, comments and content must not contain internal domains, internal system names or people's names. Deployment targets (bucket, path, credentials) live only in GitHub Secrets / Variables. Docs, code comments, commit messages and PR titles are in English; see `CONTRIBUTING.md` at the repository root for the commit convention.
 
-## 目录职责
+## Directory ownership
 
-| 目录 | 谁写 | 规则 |
+| Directory | Written by | Rules |
 | --- | --- | --- |
-| `config/` | 人 | 新增产品、仓库、语言只改这里 |
-| `releases/<product>/<version>.md`（仓库根） | 产品 | 手写的更新说明，无 frontmatter，`release-page-compose` 的输入。`releases/` 下只放产品线目录 |
-| `scripts/` | 人 | 抓取与转换的 CLI，Bun 运行 TS |
-| `releases/<product>/<tag>.<locale>.md`（仓库根） | `bun run fetch` | **不要手改**，重新抓取会覆盖。frontmatter 带 `fetchedAt`，`readRaw` 靠它和手写稿区分 |
-| `src/content/releases/` | `bun run transform` 生成初稿，之后由 skill / 人编辑 | transform 默认不覆盖已有文件 |
-| `src/content/majors/` | 人 / skill | 大版本总结，列表页展示的就是这一层；transform 只补空壳 |
-| `src/` 其余 | 人 | 站点代码 |
+| `config/` | People | Adding a product, repository or locale only touches this directory |
+| `releases/<product>/<version>.md` (repo root) | Product team | Handwritten notes, no frontmatter, input to `release-page-compose`. `releases/` only contains product directories |
+| `scripts/` | People | Fetch and transform CLIs, TypeScript run by Bun |
+| `releases/<product>/<tag>.<locale>.md` (repo root) | `bun run fetch` | **Don't edit by hand**; re-fetching overwrites them. The frontmatter has `fetchedAt`, which `readRaw` uses to tell them apart from handwritten notes |
+| `src/content/releases/` | First draft by `bun run transform`, then edited by skills / people | transform doesn't overwrite existing files by default |
+| `src/content/majors/` | People / skills | Major-version summaries, the layer the list page shows; transform only creates empty shells |
+| Rest of `src/` | People | Site code |
 
-## 常用命令
+## Common commands
 
 ```bash
-bun run fetch --product <id>      # 抓取
-bun run transform --locale en     # 生成指定语言初稿
-bun run dev                       # 预览（显示草稿），Astro 7 以守护进程运行
-bunx astro dev stop               # 停止 dev server
-bun run build                     # 生产构建，只输出 published
-SHOW_DRAFTS=1 bun run build       # 把草稿也打进去验收
-bun run check                     # 类型检查
-bun run check:assets              # 校验素材引用、无障碍描述与三语对齐
-bun run i18n:todo                 # 列出待翻译条目
-bun run preview:build             # 带草稿构建 + 预览报告，给产品验收
-# 发布靠合并：PR 合进 canary → 测试环境，合进 main → 生产（.github/workflows/deploy.yml）
+bun run fetch --product <id>      # fetch
+bun run transform --locale en     # generate first drafts for one locale
+bun run dev                       # preview (shows drafts); Astro 7 runs it as a daemon
+bunx astro dev stop               # stop the dev server
+bun run build                     # production build, published entries only
+SHOW_DRAFTS=1 bun run build       # include drafts for review
+bun run check                     # type check
+bun run check:assets              # asset references, accessible descriptions, locale parity
+bun run i18n:todo                 # list entries waiting for translation
+bun run preview:build             # build with drafts + preview report, for product review
+# Releasing is done by merging: PR into canary → staging, into main → production (.github/workflows/deploy.yml)
 ```
 
-## 内容规则
+## Content rules
 
-- 四个 skill 分工：`web-release`（入口：从零写一个版本页 → 本地预览 → PR 到 canary 测试 → PR 到 main 上线，不熟这个仓库先读它）、`release-page-compose`（产品给的 md → 完整页面，含版式配方与自定义组件扩展）、`release-notes-mdx`（抓取原文 → 对外口径与三语）、`release-notes-media`（给定稿配富媒体）。
-- **不要写不存在的素材路径。** 没有截图就保持纯文字并向用户索要，`bun run check:assets` 会把裂图挑出来。
-- 正文里的图片视频走自家 CDN 的完整 URL（`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`），素材不进仓库；`public/changelog/release-assets/` 只留组件预览页的示例图。
-- `status` 语义：`draft` 仅本地可见 / `published` 对外发布 / `skipped` 永不展示。
-- frontmatter 里 `product` `version` `tag` `releasedAt` `source` 由脚本维护，改写时不要动。
-- 站点分两层：列表页只展示**大版本**（版本号前两段，`0.20.1` → `0.20`，`2026.09.11` → `2026.09`），大版本页里按小版本分节，小版本没有独立 URL，锚点是 `#<文件名>`。
-- 一个版本要在站点上出现，小版本要 `published`，它所属的大版本总结也要三语 `published`——`bun run check:assets` 会拦住只做一半的。
-- 三语文件必须版本对齐：`src/content/releases/{zh-CN,zh-HK,en}/<product>/<tag>.mdx`。缺某个语言时，站点的语言切换会回落到该语言的产品页而不是 404；`bun run check:assets` 会把 `published` 却缺语言的条目挑出来。
-- **脚本不做机器翻译**。curated 来源缺语言时 transform 用最接近的语言占位、标 `translation.status: pending` 并保持 `draft`，`bun run i18n:todo` 能列出来；**非 curated 来源不生成占位**，另外两个语言的文件由 `release-notes-mdx` skill 在转 `published` 时自己建。
-- `curated` 的原文（`repo-docs` / `appstore`）已经是对外口径，转换后直接 `published`，不要再改写文案；只有内部口径的 Release 才需要重写。
-- 快捷键写成行内代码即可（`` `Cmd + K` ``），`src/lib/kbd-plugin.ts` 会渲染成键帽；识别规则是「+ 连接且含修饰键」或「单个按键名」，普通代码不受影响。
-- `highlights` 是人/AI 写的亮点短语，`topics` 是机械提取的模块标签——不要把模块名塞进 highlights。
+- The four skills: `web-release` (entry point: write a release page from scratch → local preview → PR to canary for staging → PR to main to go live; read it first if you're new to the repo), `release-page-compose` (product md → full page, including layout recipes and custom component extensions), `release-notes-mdx` (fetched source → public wording in three locales), `release-notes-media` (rich media for finalized copy).
+- **Never write asset paths that don't exist.** Without a screenshot, keep it text-only and ask the user for one; `bun run check:assets` catches broken images.
+- Images and videos in the body use full URLs on our own CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`); assets are not committed. `public/changelog/release-assets/` only holds sample images for the component preview page.
+- `status`: `draft` is visible locally only / `published` is public / `skipped` is never shown.
+- `product` `version` `tag` `releasedAt` `source` in the frontmatter are maintained by scripts; don't touch them when rewriting.
+- The site has two levels: the list page only shows **major versions** (first two parts of the version, `0.20.1` → `0.20`, `2026.09.11` → `2026.09`). A major-version page has one section per release; releases have no URL of their own, and the anchor is `#<filename>`.
+- For a version to appear on the site, the release must be `published` and its major-version summary must be `published` in all three locales. `bun run check:assets` blocks half-done releases.
+- Locale files must be aligned by version: `src/content/releases/{zh-CN,zh-HK,en}/<product>/<tag>.mdx`. When a locale is missing, the locale switcher falls back to that locale's product page instead of a 404; `bun run check:assets` reports `published` entries that are missing a locale.
+- **Scripts never machine-translate.** When a curated source lacks a locale, transform fills in the closest locale as a placeholder, marks `translation.status: pending` and keeps it `draft`; `bun run i18n:todo` lists these. **Non-curated sources get no placeholders**; the `release-notes-mdx` skill creates the other two locales when it flips the entry to `published`.
+- `curated` sources (`repo-docs` / `appstore`) are already public wording. They're `published` straight after transform; don't rewrite the copy. Only releases written in internal wording need rewriting.
+- Write keyboard shortcuts as inline code (`` `Cmd + K` ``) and `src/lib/kbd-plugin.ts` renders them as keycaps. It matches "joined by + and contains a modifier" or "a single key name"; ordinary code is unaffected.
+- `highlights` are highlight phrases written by people / AI; `topics` are mechanically extracted module tags. Don't put module names in highlights.
 
-## 代码约定
+## Code conventions
 
-- 包管理与脚本运行用 `bun`。
-- TypeScript 固定 6.x：7.x 的原生编译器还没暴露 `astro check` 依赖的 API。
-- Zod 从 `zod` 直接导入，不要用 `astro:content` 里已废弃的 `z`。
-- 路径别名：`@components/*` `@layouts/*` `@lib/*` `@config/*`，MDX 里也可用。
-- URL 片段等于 MDX 文件名（`content.config.ts` 里自定义了 `generateId`），不要改回默认 slug 化，否则 `v1.19.0` 会变成 `v1190` 并可能撞车。
-- 跨页动画依赖 `transition:name`，列表页与详情页的同一条目必须用 `releaseTitleId()` 生成同一个名字。
-- 样式用 Tailwind v4，颜色走 `src/styles/global.css` 里的 `@theme` token；产品主题色通过 `--accent` CSS 变量注入，不要写死。
-- MDX 可用组件在详情页的 `mdxComponents` 里注入，新增组件要同时加进那个映射，MDX 作者才不用 import。
-- 由脚本动态创建的元素（如 Steps 的切换按钮）拿不到 Astro 的 scoped 样式，它们的样式必须写在 `global.css`。
-- 客户端路由（`ClientRouter`）下组件脚本只执行一次：事件用委托绑定，初始化挂在 `astro:page-load`，并用 `dataset` 标记防重复。
-- 动效一律要在 `prefers-reduced-motion: reduce` 下退化为无动画。
-- 新增 MDX 组件要同步四处：详情页的 `mdxComponents`、`/[locale]/changelog/preview` 预览页、`release-notes-media` 的清单、README 的组件表。规范见 `release-page-compose` skill。
-- frontmatter schema 只在 `config/content.schema.ts` 定义一份，`src/content.config.ts` 与脚本都从这里导入；改字段先改它。
-- CI 在 `.github/workflows/`，job 统一 `working-directory: app`。PR 跑 `check.yml`；合进 `canary` / `main` 由 `deploy.yml` 分别部署测试 / 生产；`sync.yml` 定时抓取并开 PR 到 `main`。
-- 数据源只接公开渠道。新增要凭证的内网来源前先确认：抓到的原文会原样进公开仓库。
+- Use `bun` for package management and running scripts.
+- TypeScript is pinned to 6.x: the 7.x native compiler doesn't expose the APIs `astro check` depends on yet.
+- Import Zod from `zod` directly, not the deprecated `z` from `astro:content`.
+- Path aliases: `@components/*` `@layouts/*` `@lib/*` `@config/*`, also usable in MDX.
+- The URL fragment equals the MDX filename (`content.config.ts` defines a custom `generateId`). Don't revert to default slugification, or `v1.19.0` becomes `v1190` and may collide.
+- Cross-page animations rely on `transition:name`; the same entry on the list page and the detail page must get the same name from `releaseTitleId()`.
+- Styles use Tailwind v4 with colors from the `@theme` tokens in `src/styles/global.css`. The product accent color is injected via the `--accent` CSS variable; don't hard-code it.
+- MDX components are injected through `mdxComponents` on the detail page. Add new components to that map so MDX authors don't need imports.
+- Elements created by scripts (such as the Steps switcher buttons) don't get Astro's scoped styles; their styles must go in `global.css`.
+- Under client-side routing (`ClientRouter`) component scripts run only once: bind events by delegation, initialize on `astro:page-load`, and guard against double initialization with a `dataset` flag.
+- All motion must degrade to no animation under `prefers-reduced-motion: reduce`.
+- A new MDX component must be added in four places: `mdxComponents` on the detail page, the `/[locale]/changelog/preview` preview page, the list in the `release-notes-media` skill, and the component table in README. See the `release-page-compose` skill.
+- The frontmatter schema is defined once in `config/content.schema.ts`; `src/content.config.ts` and the scripts import it from there. Change fields there first.
+- CI lives in `.github/workflows/` and every job uses `working-directory: app`. PRs run `check.yml`; merges into `canary` / `main` are deployed to staging / production by `deploy.yml`; `sync.yml` fetches on a schedule and opens a PR to `main`.
+- Only public data sources. Before adding an internal source that needs credentials, confirm first: fetched text goes into the public repository verbatim.

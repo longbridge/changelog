@@ -1,7 +1,7 @@
-# 项目说明
+# Project instructions
 
-仓库根只放 README.md、AGENTS.md、原数据 releases/ 和代码 app/，所以项目级说明放在这里。
+The repository root only holds the open-source docs (README, CONTRIBUTING, LICENSE), AGENTS.md, the source notes in releases/ and the code in app/, so project-level instructions live here.
 
 @../AGENTS.md
 
-代码约定在 app/CLAUDE.md，处理 app/ 下的文件时会自动加载。
+Code conventions are in app/CLAUDE.md, which loads automatically when working on files under app/.

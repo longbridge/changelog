@@ -1,5 +1,5 @@
-# PR 检查：schema、类型、素材与三语对齐。不过就不能合。
-# 只检查、不出预览：预览在本地看（bun run preview:build），合并后才部署到对应环境，见 deploy.yml。
+# PR checks: schema, types, assets and locale parity. A PR can't be merged until they pass.
+# Checks only, no preview: preview locally with `bun run preview:build`; deployment happens after merge, see deploy.yml.
 name: check
 
 on:

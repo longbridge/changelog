@@ -1,0 +1,22 @@
+name: Site bug
+description: Something on the changelog site doesn't work or looks broken.
+labels: [bug]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: What you expected, what you saw, and how to reproduce it. Screenshots help.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and OS
+      placeholder: Chrome 140, macOS 26

@@ -1,100 +1,102 @@
 ---
 name: web-release
-description: 在这个仓库里从零写一个对外 Release Page，并在本地预览里看到它、最后经 canary 发上线的完整路径。当用户说「帮我写一个 release page」「加一个版本的更新日志」「这版更新怎么发到 release 站点」「我写完了怎么预览」「预览里看不到我刚写的版本」，或者是第一次接触这个仓库、不知道该从哪个文件动手时使用。
+description: The full path for writing a public Release Page in this repo from scratch, seeing it in the local preview, and finally shipping it via canary. Use when the user says things like 「帮我写一个 release page」「加一个版本的更新日志」「这版更新怎么发到 release 站点」「我写完了怎么预览」「预览里看不到我刚写的版本」 ("write a release page", "add a changelog entry for a version", "how do I preview this", "my new version doesn't show up in the preview"), or is new to this repo and doesn't know which file to start with.
 ---
 
-# 写一个 Release Page 并发上线
+# Write a Release Page and ship it
 
-这是入口 skill：一个 agent 在这个仓库里从零做出一个版本页面、看到它、把它发出去，需要知道的全部路径。
-具体怎么遣词、怎么配图、怎么排版另有三个 skill，这里只负责把你送到正确的那一个，并保证不漏步骤。
+This is the entry skill: everything an agent needs to know to build a version page in this repo from scratch, see it, and ship it.
+Wording, media, and layout are covered by three other skills; this one only routes you to the right one and makes sure no step is skipped.
 
-## 先分流
+## Route first
 
-| 手上有什么 | 去哪 |
+| What you have | Where to go |
 | --- | --- |
-| 产品给了一份 md（或放进了 `releases/<product>/<version>.md`） | 先读 `release-page-compose`（版式配方），再回这里走第 4 步起 |
-| `bun run fetch` 抓下来的内部原文 / `status: draft` 的初稿 | 先读 `release-notes-mdx`（对外口径与三语），再回这里走第 4 步起 |
-| 文案已经定稿，要配图配视频 | 读 `release-notes-media` |
-| 什么都没有，从零手写一个版本 | 就在这里，从第 1 步开始 |
+| A product manager's md (or one placed at `releases/<product>/<version>.md`) | Read `release-page-compose` (layout recipes) first, then come back here from step 4 |
+| Internal source fetched by `bun run fetch` / a `status: draft` first draft | Read `release-notes-mdx` (public voice and three locales) first, then come back here from step 4 |
+| Copy is final, needs images / video | Read `release-notes-media` |
+| Nothing; writing a version by hand from scratch | Stay here and start at step 1 |
 
-不管走哪条路，`release-notes-mdx/references/` 下的三份规则都适用：
+The handwritten md template uses English keys and sections (`Product` / `Version` / `Release date` / `Platforms`; `## Key message` / `## New` / `## Improved` / `## Fixed` / `## Heads-up` / `## Assets`); legacy Chinese keys are still accepted. Mapping: Key message → `summary` / `highlights`; New / Improved / Fixed → the three MDX groups; Heads-up → `<Callout>`; Assets → media. Details in `release-page-compose`.
 
-| 文件 | 管什么 |
+Whichever path you take, the three rule files under `release-notes-mdx/references/` apply:
+
+| File | Covers |
 | --- | --- |
-| [`classification.md`](../release-notes-mdx/references/classification.md) | 哪些改动该写进去（有上游原文时必读） |
-| [`brand-voice.md`](../release-notes-mdx/references/brand-voice.md) | 不说黑话、不说废话、不写长句，标题怎么写 |
-| [`examples.md`](../release-notes-mdx/references/examples.md) | 本仓库真实的原文 → 发布稿对照 |
+| [`classification.md`](../release-notes-mdx/references/classification.md) | Which changes belong in the notes (required reading when there's an upstream source) |
+| [`brand-voice.md`](../release-notes-mdx/references/brand-voice.md) | No jargon, no filler, no long sentences; how to write titles |
+| [`examples.md`](../release-notes-mdx/references/examples.md) | Real source → published pairs from this repo |
 
-返工基本都出在这三份上，动笔前先过一遍。
+Almost all rework traces back to these three; go through them before writing.
 
-三个 skill 都只管「写成什么样」。**从哪写、写完怎么看、怎么发出去，是这一篇的事。**
+All three skills only cover "what it should look like". **Where to write, how to view it, and how to ship it are this skill's job.**
 
-## 0 · 环境与红线
+## 0 · Environment and red lines
 
-仓库根只有原数据 `releases/` 和代码 `app/`。**下文的 `bun run` / `make` 命令都在 `app/` 下执行**，文件路径都相对仓库根。
+The repo root holds only source data `releases/` and code `app/`. **All `bun run` / `make` commands below run inside `app/`**; file paths are relative to the repo root.
 
 ```bash
 cd app && bun install
 ```
 
-写之前先确认这几条，踩了要返工：
+Confirm these before writing — violating them means rework:
 
-- **不要手改抓取原文** `releases/<product>/<tag>.<locale>.md`（frontmatter 带 `fetchedAt`），重新 `bun run fetch` 会原样覆盖。
-- **这是公开仓库**：不写内部系统名、内部链接、人名、未发布的功能。
-- **不要写不存在的素材路径。** 没有截图就保持纯文字并向用户索要，别编一个看起来合理的 URL。
-- 正文的图片视频一律用自家 CDN 的完整 URL（`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`），素材不进仓库。
-- `product` `version` `tag` `releasedAt` `source` 这几个 frontmatter 字段描述的是同一次发布，三语必须完全一致。
+- **Never hand-edit fetched sources** `releases/<product>/<tag>.<locale>.md` (frontmatter has `fetchedAt`); a re-run of `bun run fetch` overwrites them as-is.
+- **This is a public repo**: no internal system names, internal links, personal names, or unreleased features.
+- **Never write asset paths that don't exist.** No screenshot means stay text-only and ask the user for one; don't invent a plausible-looking URL.
+- Images and videos in the body always use full URLs on our own CDN (`assets.lbkrs.com` / `assets.lbctrl.com` / `pub.lbkrs.com`); assets never go into the repo.
+- The frontmatter fields `product` `version` `tag` `releasedAt` `source` describe the same release and must be identical across all three locales.
 
-## 1 · 定位：要动哪六个文件
+## 1 · Locate: the six files to touch
 
-站点分两层：**列表页只展示大版本，小版本是大版本页里的一节，没有独立 URL。**
-大版本 = 版本号前两段（`0.20.1` → `0.20`，日期版本 `2026.09.14` → `2026.09`）。
+The site has two layers: **the list page shows only major versions; a minor version is a section inside its major version page, with no URL of its own.**
+Major version = the first two segments of the version (`0.20.1` → `0.20`, date version `2026.09.14` → `2026.09`).
 
-所以一个版本要出现在站点上，**六个文件缺一不可**（三语 × 两层）：
+So for a version to appear on the site, **all six files are required** (3 locales × 2 layers):
 
 ```
-app/src/content/releases/{zh-CN,zh-HK,en}/<product>/<tag>.mdx    这一版做了什么
-app/src/content/majors/{zh-CN,zh-HK,en}/<product>/<major>.mdx     这一整个大版本带来了什么
+app/src/content/releases/{zh-CN,zh-HK,en}/<product>/<tag>.mdx    what this version did
+app/src/content/majors/{zh-CN,zh-HK,en}/<product>/<major>.mdx     what this whole major version brings
 ```
 
-- `<product>` 取 `app/config/products.config.ts` 里的 `id`，不要自己编。仓库里没有这个产品时先加配置，只改那个文件。
-- `<tag>` 就是 URL 锚点，也就是文件名。历史上用过 `v0.20.1` 与 `release-2026.08.14` 两种风格，**跟同产品已有文件保持一致**，别混。
-- 大版本总结如果已经存在（同月/同大版本之前发过版），不要新建，去补它。
+- `<product>` is the `id` from `app/config/products.config.ts`; don't make one up. If the product isn't in the repo yet, add its config first, touching only that file.
+- `<tag>` is the URL anchor and also the file name. Two styles have been used historically, `v0.20.1` and `release-2026.08.14`; **match the existing files for the same product**, don't mix.
+- If the major version summary already exists (an earlier release in the same month / major version), don't create a new one; update it.
 
-先确认落点再动笔：
+Confirm the location before writing:
 
 ```bash
-ls app/src/content/releases/zh-CN/<product>/     # 已有版本的命名风格
-ls app/src/content/majors/zh-CN/<product>/       # 这个大版本的总结在不在
+ls app/src/content/releases/zh-CN/<product>/     # naming style of existing versions
+ls app/src/content/majors/zh-CN/<product>/       # does this major version's summary exist
 ```
 
-## 2 · frontmatter 怎么填
+## 2 · Filling in frontmatter
 
-小版本 `app/src/content/releases/<locale>/<product>/<tag>.mdx`：
+Minor version `app/src/content/releases/<locale>/<product>/<tag>.mdx`:
 
-| 字段 | 从哪来 |
+| Field | Source |
 | --- | --- |
-| `product` `version` `tag` | 上游 tag / 产品给的版本号。`version` 是展示用的版本号，`tag` 是文件名 |
-| `locale` | 必须与所在目录一致 |
-| `releasedAt` | ISO 时间。有同版本的抓取原文 `releases/<product>/<tag>.<locale>.md` 就照抄，没有就用产品给的发布日期 |
-| `platforms` | 取 `products.config.ts` 里该来源的 `platforms`，如 `[Web]` |
-| `title` | 这版给用户带来了什么，一句话、不超过 16 字、不带句号。**不要只写版本号** |
-| `summary` | 一句话概括，不超过 60 字，列表页与 SEO 都会用 |
-| `highlights` | 2-5 条短语，每条不超过 20 字、不带句号。这是人写的亮点，**不要塞模块名** |
-| `status` | 先 `draft`，三语齐了再一起转 `published` |
-| `source` | 溯源信息，页面上不展示，但 schema 必填 |
+| `product` `version` `tag` | Upstream tag / version given by the product manager. `version` is the displayed version; `tag` is the file name |
+| `locale` | Must match its directory |
+| `releasedAt` | ISO time. Copy it from the fetched source `releases/<product>/<tag>.<locale>.md` if one exists for the same version; otherwise use the release date from the product manager |
+| `platforms` | The source's `platforms` in `products.config.ts`, e.g. `[Web]` |
+| `title` | What this release gives users: one sentence, max 16 characters, no trailing period. **Never just the version number** |
+| `summary` | One-sentence overview, max 60 characters; used by the list page and SEO |
+| `highlights` | 2-5 phrases, each max 20 characters, no trailing period. These are human-written highlights — **don't stuff module names in** |
+| `status` | Start as `draft`; switch all three locales to `published` together once complete |
+| `source` | Provenance; not shown on the page but required by the schema |
 
-`source` 有上游就照抄抓取原文里的那份；**纯手写、没有上游 tag 时**这样填：
+If there's an upstream, copy `source` from the fetched source; **for a purely handwritten release with no upstream tag**, fill it like this:
 
 ```yaml
 source:
   provider: manual
-  repo: releases/<product>/<version>.md   # 原始说明在哪，没有就写产品 id
-  url: https://longbridge.com               # 必须是合法 URL
+  repo: releases/<product>/<version>.md   # where the original notes live; if none, the product id
+  url: https://longbridge.com               # must be a valid URL
 ```
 
-大版本总结 `app/src/content/majors/<locale>/<product>/<major>.mdx` 只有 frontmatter，正文可以留空
-（细节就在下面的小版本分节里，重复一遍只会让页面变长）：
+The major version summary `app/src/content/majors/<locale>/<product>/<major>.mdx` has only frontmatter; the body can be empty
+(the details are in the minor version sections below it; repeating them only makes the page longer):
 
 ```yaml
 product: longbridge-web
@@ -102,102 +104,104 @@ major: '2026.09'
 locale: zh-CN
 title: 一句话，规则同小版本
 summary: 一句话，40 字以内，概括这个大版本最值得说的一到两件事
-highlights:              # 2-4 条，是整个大版本的亮点，不是某个小版本的
+highlights:              # 2-4 items; highlights of the whole major version, not of one minor version
   - 亮点短语
 status: draft
 ```
 
-新的小版本并进一个**已经发布**的大版本时，回头看一眼总结还准不准：新增了值得说的功能就补进 `highlights`，只是修复就不用动。
+(The zh-CN values above are placeholders: `title` follows the same rules as a minor version; `summary` is one sentence, max 40 characters, covering the one or two things most worth saying about this major version.)
 
-## 3 · 正文能写什么
+When merging a new minor version into a major version that's **already published**, recheck whether the summary is still accurate: if it adds a feature worth mentioning, add it to `highlights`; if it's only fixes, leave it.
 
-正文是 MDX，这些组件**直接写标签、不用 import**：`<Figure>` `<Compare>` `<Video>` `<Steps>`+`<Step>` `<Demo>` `<LinkPreview>` `<Kbd>` `<Callout>`。
-普通 Markdown 链接会自动套上 `<LinkPreview>`，不用为了预览改写法。
+## 3 · What the body can contain
 
-**每个组件长什么样、属性怎么写，站点自带一页预览**——写之前去看一眼，比猜属性名快：
+The body is MDX. These components are **written as tags directly, no import needed**: `<Figure>` `<Compare>` `<Video>` `<Steps>`+`<Step>` `<Demo>` `<LinkPreview>` `<Kbd>` `<Callout>`.
+Plain Markdown links are automatically wrapped in `<LinkPreview>`; no need to change how you write them to get a preview.
+
+**The site ships a preview page showing what each component looks like and how its props are written** — look at it before writing; it's faster than guessing prop names:
 
 ```bash
 bun run dev
 open http://localhost:4321/zh-CN/changelog/preview
 ```
 
-分组用 `## 新增功能` / `## 体验优化` / `## 问题修复`，没内容的分组直接删掉。
-每条一句话、20-40 字，只写用户能感知的变化，措辞按 brand-voice 那三条。选版式看 `release-page-compose`，配图克制原则看 `release-notes-media`。
+Group with `## 新增功能` / `## 体验优化` / `## 问题修复` (zh-CN headings for New / Improved / Fixed; use the equivalent translated headings in zh-HK and en). Delete any group with no content.
+One sentence per item, 20-40 characters, only changes users can notice, worded per the three brand-voice rules. For layout see `release-page-compose`; for restraint in media use see `release-notes-media`.
 
-## 4 · 校验
+## 4 · Validate
 
 ```bash
-bun run check          # 类型与 frontmatter schema
-bun run check:assets   # 素材在不在、alt 全不全、三语齐不齐、大版本总结跟没跟上
+bun run check          # types and frontmatter schema
+bun run check:assets   # assets exist, alt text complete, three locales complete, major summary keeping up
 ```
 
-`check:assets` 会把「只做了一半」的挑出来：小版本 `published` 但某个语言缺文件、或大版本总结还没 `published`——这两种情况页面在线上都是不出现的。
+`check:assets` catches "half-done" work: a minor version is `published` but a locale's file is missing, or the major version summary isn't `published` yet — in either case the page won't appear online.
 
-## 5 · 预览
+## 5 · Preview
 
-两种，按场景选。**没有线上预览链接**：合并前都在本地看，合并后才部署到对应环境。
+Two kinds; pick by situation. **There are no online preview links**: before merging, everything is viewed locally; only after merging is it deployed to the corresponding environment.
 
-| 场景 | 怎么做 |
+| Situation | How |
 | --- | --- |
-| 边写边看 | `bun run dev`，自动显示草稿。Astro 7 的 dev 是守护进程：`bunx astro dev status` / `stop` / `logs` |
-| 写完自查 / 给产品验收 | `bun run preview:build`，然后打开它最后打印的 `app/dist/preview/index.html` |
+| Viewing while writing | `bun run dev`, shows drafts automatically. Astro 7's dev server is a daemon: `bunx astro dev status` / `stop` / `logs` |
+| Self-check when done / handing to product for review | `bun run preview:build`, then open the `app/dist/preview/index.html` it prints at the end |
 
-`app/dist/preview/index.html` 是一张索引：本次改了哪些版本、三语齐不齐、素材缺不缺、哪几条还是草稿，
-每个语言标签直接链到大版本页里这一版的锚点。它统计的是「工作区里所有改动过的版本」，**没 commit、没 track 的新文件也算**，刚写完就能跑。
+`app/dist/preview/index.html` is an index: which versions changed, whether all three locales are present, whether assets are missing, which items are still drafts,
+with each locale label linking straight to this version's anchor on the major version page. It covers "every changed version in the working tree" — **uncommitted and untracked new files count too**, so you can run it right after writing.
 
-直接看某一版的地址长这样（小版本是锚点，不是独立页面）：
+The direct URL for a version looks like this (a minor version is an anchor, not a standalone page):
 
 ```
 http://localhost:4321/<locale>/changelog/<product>/<major>/#<tag>
-例：http://localhost:4321/zh-CN/changelog/longbridge-web/2026.09/#release-2026.09.14
+e.g.: http://localhost:4321/zh-CN/changelog/longbridge-web/2026.09/#release-2026.09.14
 ```
 
-### 预览里找不到刚写的版本？
+### Can't find the version you just wrote in the preview?
 
-按这个顺序查，命中率从高到低：
+Check in this order, from most to least likely:
 
-| 现象 | 原因 | 怎么办 |
+| Symptom | Cause | Fix |
 | --- | --- | --- |
-| 整版不见，列表页也没有 | **缺大版本总结**。小版本挂在大版本页下，没有 `app/src/content/majors/<locale>/<product>/<major>.mdx` 就整条不渲染 | 建那个文件。`bun run preview:report` 会把它报成阻断项 |
-| 本地看得到，`bun run build` 之后没了 | `status` 还是 `draft`，或大版本总结还是 `draft` | 两层都转 `published` |
-| 怎么都不出现 | `status: skipped` | 这个状态是「永不展示」，改掉 |
-| 切换语言跳回了产品页 | 那个语言的文件没建 | 三语补齐，`bun run i18n:todo` 能列出待办 |
-| 点预览索引上的链接 404 | dist 里还没有站点产物 | 跑 `bun run preview:build`，不要只跑 `preview:report` |
-| 图是裂的 | 素材路径不存在 | `bun run check:assets`，然后向用户要真实素材，**不要改成另一个猜的路径** |
+| Whole version missing, not on the list page either | **Missing major version summary.** Minor versions hang under the major version page; without `app/src/content/majors/<locale>/<product>/<major>.mdx` nothing renders | Create that file. `bun run preview:report` reports it as a blocker |
+| Visible locally, gone after `bun run build` | `status` is still `draft`, or the major version summary is still `draft` | Switch both layers to `published` |
+| Never appears no matter what | `status: skipped` | That status means "never shown"; change it |
+| Switching language jumps back to the product page | That locale's file wasn't created | Complete all three locales; `bun run i18n:todo` lists what's pending |
+| Links in the preview index 404 | dist has no site build yet | Run `bun run preview:build`, not just `preview:report` |
+| Broken images | Asset path doesn't exist | Run `bun run check:assets`, then ask the user for the real asset — **don't swap in another guessed path** |
 
-## 6 · 提交与上线
+## 6 · Commit and ship
 
-**分支即环境，合并就部署**：合进 `canary` 上测试环境（longbridge.xyz），合进 `main` 上生产（longbridge.com）。没有 tag，也没有 PR 预览。
+**Branch = environment, merge = deploy**: merging into `canary` deploys to the test environment (longbridge.xyz); merging into `main` deploys to production (longbridge.com). No tags, no PR previews.
 
-测试环境与生产是同一份构建，只展示 `published`——提 PR 前，小版本和大版本总结三语一起转 `published`。
+The test environment and production use the same build and show only `published` — before opening a PR, switch the minor version and the major version summary to `published` in all three locales together.
 
 ```bash
 git switch -c release/<product>-<version> origin/main
-git add app/src/content releases       # 在仓库根执行，只提内容，dist/ 不进仓库
-git commit -m "feat(<product>): <version> 更新日志"
+git add app/src/content releases       # run from the repo root; commit content only, dist/ never goes in the repo
+git commit -m "feat(<product>): release notes for <version>"
 git push -u origin HEAD
-gh pr create --base canary --title "feat(<product>): <version> 更新日志"
+gh pr create --base canary --title "feat(<product>): release notes for <version>"
 ```
 
-PR 的 check（`check` + `check:assets`）通过后合并，deploy 跑完在 `longbridge.xyz/<locale>/changelog/...` 验收。
-有问题就继续往这个分支推，再合一次 canary。验收通过后，**用同一个分支**再开一条到 `main` 的 PR：
+Merge once the PR checks (`check` + `check:assets`) pass; after deploy finishes, verify at `longbridge.xyz/<locale>/changelog/...`.
+If something's wrong, keep pushing to this branch and merge into canary again. Once verified, open a PR to `main` **from the same branch**:
 
 ```bash
-gh pr create --base main --title "feat(<product>): <version> 更新日志"
+gh pr create --base main --title "feat(<product>): release notes for <version>"
 ```
 
-不要把 `canary` 合进 `main`：上面可能有别人还没验收的版本。
+Never merge `canary` into `main`: it may contain other people's versions that haven't been verified yet.
 
-## 交付前清单
+## Pre-delivery checklist
 
-- [ ] 这一版说的事不超过 3 件（大版本总结不超过 4 件）
-- [ ] 这一版值得单独成节（只有一两条纯修复的，三语一起标 `skipped` 并入相邻版本）
-- [ ] 六个文件齐了：三语小版本 + 三语大版本总结
-- [ ] 通读一遍没有黑话、没有废话、没有超过 30 字的句子，标题回答了「用户现在能做什么」
-- [ ] `bun run check` 与 `bun run check:assets` 通过
-- [ ] `bun run preview:build` 里这一版**没有红色阻断项**
-- [ ] 打开预览索引，逐个语言点进去确认页面真的在、图没裂、`title` 不是版本号
-- [ ] 三语结构一致：媒体块数量与位置、列表条数、`highlights` 条数一一对应
-- [ ] 定稿后小版本与大版本总结的 `status` **一起**转 `published`
-- [ ] 没有编造任何素材路径
-- [ ] 没有内部系统名、内部链接、人名（公开仓库）
+- [ ] This release says no more than 3 things (major version summary no more than 4)
+- [ ] This release deserves its own section (if it's only one or two pure fixes, mark it `skipped` in all three locales and fold it into an adjacent version)
+- [ ] All six files exist: three-locale minor version + three-locale major version summary
+- [ ] Read-through finds no jargon, no filler, no sentence over 30 characters; the title answers "what can users do now"
+- [ ] `bun run check` and `bun run check:assets` pass
+- [ ] `bun run preview:build` shows **no red blockers** for this release
+- [ ] Open the preview index and click into each locale to confirm the page really exists, images aren't broken, and `title` isn't a version number
+- [ ] Three locales share the same structure: media block count and position, list item count, and `highlights` count all match
+- [ ] Once final, switch `status` of the minor version and the major version summary to `published` **together**
+- [ ] No asset path was invented
+- [ ] No internal system names, internal links, or personal names (public repo)
