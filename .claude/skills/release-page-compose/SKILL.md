@@ -133,8 +133,8 @@ source:
 
 ```mdx
 <Compare
-  before="https://assets.lbkrs.com/release-notes/<product>/<version>/x-before.png"
-  after="https://assets.lbkrs.com/release-notes/<product>/<version>/x-after.png"
+  before="https://assets.lbkrs.com/uploads/<uuid>/x-before.png"
+  after="https://assets.lbkrs.com/uploads/<uuid>/x-after.png"
   alt="说明改了什么"
   caption="拖动分隔线对比改版前后"
 />
