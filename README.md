@@ -62,7 +62,7 @@ See [`app/README.md`](app/README.md) for the content pipeline, configuration, MD
 
 1. Write the release notes as `releases/<product>/<version>.md` using the [template](CONTRIBUTING.md#release-notes-template).
 2. Open [Claude Code](https://claude.com/claude-code) (or another coding agent) at the repository root and ask it to publish the file, e.g. `Publish releases/longbridge-pro/1.1.0.md`.
-3. The agent rewrites the copy, produces all three locales and a local preview, and **stops for your review**. After you approve, it opens a PR and sends you the online preview link; after you approve that, it merges the PR to go live.
+3. The agent rewrites the copy, produces all three locales and a local preview, and **stops for your review**. After you approve, it opens a PR and sends you the online preview link; after you approve that, it sets the PR to merge automatically once a code owner approves it, and the merge takes it live.
 
 The full agent workflow, including its review gates, is in [`AGENTS.md`](AGENTS.md).
 
