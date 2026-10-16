@@ -63,7 +63,7 @@ Workflows live in `../.github/workflows/`:
 | File | Trigger | What it does |
 | --- | --- | --- |
 | `check.yml` | PR to `main` | `check` + `check:assets`; must pass to merge |
-| `preview.yml` | PR to `main` | Build with drafts + preview report → Cloudflare Pages → sticky PR comment with the links. When the PR is closed or merged, deletes all of its preview deployments |
+| `preview.yml` | PR to `main` | Build with drafts → Cloudflare Pages → sticky PR comment with the link to the site root. When the PR is closed or merged, deletes all of its preview deployments |
 | `deploy.yml` | Push to `main` | Check → build → upload to OSS with `bun run deploy` |
 | `sync.yml` | Daily schedule, or manual | Fetch + transform; if anything changed, open (or update) a PR from the `sync/releases` branch. Never auto-merges |
 
@@ -160,7 +160,7 @@ Add or remove them in `LOCALES` in `config/site.config.ts`. The default is three
 | `bun run check:assets` | Checks that assets exist, images and videos have descriptions, no unreliable external images, published entries exist in all three locales, titles aren't still script placeholders, and major-version summaries are up to date |
 | `bun run i18n:todo` | Lists untranslated entries with the translation and source paths |
 | `bun run preview:report` | Lists versions changed in this branch (compared with `main`, including uncommitted files), missing locales and assets; writes `dist/preview/index.html` |
-| `bun run preview:build` | Build with drafts + preview report; the same build the PR preview deploys |
+| `bun run preview:build` | Build with drafts + preview report, for local review. The PR preview deploys the same build without the report |
 | `bun run deploy` | Upload `dist/` to OSS, target from the `OSS_*` environment variables; `--dry-run` only prints the commands |
 
 ## MDX frontmatter

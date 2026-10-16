@@ -93,7 +93,7 @@ After the user confirms:
   ```
 
 - Wait for the `check` and `preview` workflows (`gh pr checks --watch`). The preview bot comments the link on the PR. Give the user:
-  - the review report: `https://pr-<number>.<project>.pages.dev/preview/`
+  - the site: `https://pr-<number>.<project>.pages.dev`
   - direct links to this release, one per locale: `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/<major>#<tag>`
 
   Then **stop and wait for confirmation**. If they want changes, edit, re-run step 3, commit and push to the same branch; the preview URL stays the same.

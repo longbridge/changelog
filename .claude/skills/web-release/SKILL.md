@@ -145,7 +145,7 @@ Three kinds; pick by situation.
 | --- | --- |
 | Viewing while writing | `bun run dev`, shows drafts automatically. Astro 7's dev server is a daemon: `bunx astro dev status` / `stop` / `logs` |
 | Self-check when done / handing to product for review | `bun run preview:build`, then open the `app/dist/preview/index.html` it prints at the end |
-| Online review after the PR is open | The `preview` workflow deploys every PR to `main` (drafts included) to Cloudflare Pages and comments the link: `https://pr-<number>.<project>.pages.dev`, review report at `/preview/`. See step 6 |
+| Online review after the PR is open | The `preview` workflow deploys every PR to `main` (drafts included) to Cloudflare Pages and comments the link to the site root: `https://pr-<number>.<project>.pages.dev`. See step 6 |
 
 `app/dist/preview/index.html` is an index: which versions changed, whether all three locales are present, whether assets are missing, which items are still drafts,
 with each locale label linking straight to this version's anchor on the major version page. It covers "every changed version in the working tree" — **uncommitted and untracked new files count too**, so you can run it right after writing.
@@ -186,7 +186,7 @@ git push -u origin HEAD
 gh pr create --base main --title "feat(<product>): release notes for <version>"
 ```
 
-Wait for `check` and `preview` (`gh pr checks --watch`). The preview bot comments the link on the PR; review at `https://pr-<number>.<project>.pages.dev/preview/` and `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/<major>#<tag>`.
+Wait for `check` and `preview` (`gh pr checks --watch`). The preview bot comments the link on the PR; review at `https://pr-<number>.<project>.pages.dev` and `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/<major>#<tag>`.
 If something's wrong, keep pushing to this branch; the preview URL stays the same.
 
 Merge only after the user explicitly says to go live:
