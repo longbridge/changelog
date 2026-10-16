@@ -52,9 +52,9 @@ Longbridge 各产品对外的更新日志：<https://longbridge.com/zh-CN/change
 
 ## 素材
 
-每条变更对应的截图 / 录屏，写清楚是哪一条。贴 CDN 链接（assets.lbkrs.com / assets.lbctrl.com / pub.lbkrs.com），
-素材不进仓库；没有就留空，页面先出纯文字版。
-- 自选列表：改版前后各一张 https://assets.lbkrs.com/...
+每条变更对应的截图 / 录屏，写清楚是哪一条。写本地文件路径就行，agent 会帮你上传换成 CDN 链接；
+已经有 CDN 链接（assets.lbkrs.com / assets.lbctrl.com / pub.lbkrs.com）就直接贴。素材不进仓库；没有就留空，页面先出纯文字版。
+- 自选列表：改版前后各一张 ~/Desktop/watchlist-before.png ~/Desktop/watchlist-after.png
 ```
 
 不确定的字段留空就行，agent 会来问。同一个版本要改内容，直接改原文件再让 agent 跑一遍。

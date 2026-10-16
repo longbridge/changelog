@@ -20,7 +20,7 @@ description: 给已经定稿的 Release Notes MDX 加上图片、视频、前后
 没有素材时，按这个顺序处理：
 
 1. 问用户要：说明需要哪一屏、什么状态、明暗两版要不要
-2. 拿到图后请用户传到自家 CDN，你在 MDX 里写返回的完整 URL
+2. 用户给的是本地文件，按 `AGENTS.md` 的「上传素材」传到自家 CDN；给的已是 CDN 链接就直接用。MDX 里只写完整 URL
 3. 要不到就保持纯文字，并告诉用户"这几条如果配图会更清楚"
 
 只有一种例外：用户明确要求做效果预览时，可以用 `/release-assets/_example/` 下的示例素材，并在交付时说明这是占位。
@@ -59,17 +59,13 @@ description: 给已经定稿的 Release Notes MDX 加上图片、视频、前后
 
 ## 素材规范
 
-素材不进仓库，传到自家 CDN 后在 MDX 里写完整 URL。建议按产品与版本分目录：
+素材不进仓库，传到自家 CDN 后在 MDX 里写完整 URL。上传工具固定放在 `uploads/<随机 uuid>/<文件名>` 下，目录不能自定，所以靠文件名区分：
 
 ```
-https://assets.lbkrs.com/release-notes/<product>/<version>/
-  quotes-list.png          截图
-  quotes-list-dark.png     暗色版（可选）
-  quotes-before.png        对比图
-  quotes-after.png
-  drag-layout.mp4          演示视频
-  drag-layout.webm         同名 webm 会被自动当作备选源
-  drag-layout-poster.jpg   视频封面
+https://assets.lbkrs.com/uploads/<uuid>/quotes-list.png          截图
+https://assets.lbkrs.com/uploads/<uuid>/quotes-list-dark.png     暗色版（可选）
+https://assets.lbkrs.com/uploads/<uuid>/quotes-before.png        对比图
+https://assets.lbkrs.com/uploads/<uuid>/drag-layout.mp4          演示视频
 ```
 
 - 截图宽度 1600-2400px，png；照片类用 jpg/webp
@@ -98,8 +94,8 @@ https://assets.lbkrs.com/release-notes/<product>/<version>/
 - 自选列表支持直接查看当日走势
 
 <Compare
-  before="https://assets.lbkrs.com/release-notes/longbridge-pro/2.4.0/watchlist-before.png"
-  after="https://assets.lbkrs.com/release-notes/longbridge-pro/2.4.0/watchlist-after.png"
+  before="https://assets.lbkrs.com/uploads/<uuid>/watchlist-before.png"
+  after="https://assets.lbkrs.com/uploads/<uuid>/watchlist-after.png"
   alt="自选列表从纯数字改为带走势图的卡片"
   caption="拖动分隔线对比改版前后"
   width={1600}
@@ -109,8 +105,8 @@ https://assets.lbkrs.com/release-notes/<product>/<version>/
 - 支持拖拽调整多屏布局
 
 <Video
-  src="https://assets.lbkrs.com/release-notes/longbridge-pro/2.4.0/drag-layout.mp4"
-  poster="https://assets.lbkrs.com/release-notes/longbridge-pro/2.4.0/drag-layout-poster.jpg"
+  src="https://assets.lbkrs.com/uploads/<uuid>/drag-layout.mp4"
+  poster="https://assets.lbkrs.com/uploads/<uuid>/drag-layout-poster.jpg"
   label="把行情窗口拖到第二块屏幕并自动吸附对齐"
   caption="窗口会自动吸附到网格"
 />

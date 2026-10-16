@@ -46,7 +46,7 @@ app/                              全部代码，命令都在这里执行（cd a
 - 加载 `web-release` skill（入口，讲清要动哪六个文件），再按它的指引用 `release-page-compose` 选版式、写 zh-CN。
 - 文案规则看 `.claude/skills/release-notes-mdx/references/brand-voice.md`：不造词、不喊口号，标题、摘要、亮点只用原文里的说法。
 - 出 zh-HK 和 en，三语结构一致。
-- 素材：只用产品给的 CDN 链接。**没有就保持纯文字**，绝不编路径。飞书链接要先找产品拿到 CDN 地址。
+- 素材：MDX 里只能写 CDN 链接（`assets.lbkrs.com` 等）。产品给的是**本地文件**，按下面「上传素材」换成链接；给的是飞书链接，请产品下载到本地再按本地文件处理。**没有素材就保持纯文字**，绝不编路径。
 - `source` 填 `provider: manual`、`repo: releases/<product>/<version>.md`、`url: https://longbridge.com`。
 - 这一步所有文件都是 `status: draft`。
 
@@ -100,6 +100,19 @@ gh pr create --base main --head release/<product>-<version> --title "feat(<produ
 
 合并后 deploy 自动上生产；如果仓库给 production 环境配了审批，告诉产品去 Actions 页面找谁批。不要用任何方式绕过。
 上线后给出线上地址，任务结束。
+
+## 上传素材（CLI 出来之前）
+
+产品给了本地图片 / 视频时，在**提交之前**换成 CDN 链接，这样本地预览就能看到图。上传走公司内部的素材后台，用产品自己浏览器里的登录态。
+
+1. **上传页面地址**读环境变量 `RELEASE_NOTES_UPLOAD_URL`。没有就问产品要（内部地址，**不要写进仓库**）。
+2. **检查 `my-chrome` 工具**（`.mcp.json` 里的 `chrome-devtools-mcp --autoConnect`，连产品已经打开的 Chrome）：
+   - 能列出标签页：先告诉产品要传哪几个文件，然后把文件复制到 `app/.uploads/`（git 忽略；工具只能上传项目目录里的文件）→ 打开上传页面（已有就复用那个标签）→ 点「Asset 上传」→ 选文件 → 提交 → 等到「所有文件上传成功」→ 从「最新上传」里读出链接，形如 `https://assets.lbkrs.com/uploads/<uuid>/<文件名>`。
+   - 用不了：`open "$RELEASE_NOTES_UPLOAD_URL"` 打开页面，请产品自己点「Asset 上传」，传完把链接贴回来。不要为此去改浏览器或 MCP 配置。
+3. 图片用 `sips -g pixelWidth -g pixelHeight <文件>` 取宽高写进 `<Figure width height>`，视频用 `<Video>`。
+4. 传完删掉 `app/.uploads/` 里的副本。
+
+注意：上传后的文件**立即公开且永久缓存**，传错了无法撤回。文件名会出现在公开 URL 里，用英文、不带内部信息。只用「Asset 上传」这一个功能，不碰后台其他页面，目标文件夹保持默认。
 
 ## 红线
 
