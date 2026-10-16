@@ -122,7 +122,7 @@ Images and videos live in the repository and are deployed together with the site
 2. Rename them: lowercase English, digits, `-` `_` `.` only, describing the content (`watchlist-before.png`). **The filename is part of a public URL**: nothing internal, no people's names.
 3. Reference them in MDX as `/assets/<product>/<version>/<file>`, e.g. `<Figure src="/assets/longbridge-pro/1.1.0/watchlist-after.png" …>`. The components add the `/changelog` prefix.
 4. For images, get the size with `sips -g pixelWidth -g pixelHeight <file>` and set `<Figure width height>`. Use `<Video>` for videos.
-5. Keep them small: images under 500 KB, videos under 4 MB (hard limit 20 MB). Compress before committing; the repository keeps every version forever.
+5. Keep them small: images under 500 KB, videos under 4 MB. Check sizes before the first commit and compress oversized files yourself (commands in the `release-notes-media` skill, "Asset guidelines"); `bun run check:assets` fails on new files over these limits. Once a file is on `main` it can't be replaced.
 6. **Never replace a file that is already on `main`.** Assets are cached for a year, so a changed file won't reach users. Use a new filename instead. `bun run check:assets` enforces this.
 
 Screenshots must not contain real user data: accounts, phone numbers, real holdings and amounts must be demo data.

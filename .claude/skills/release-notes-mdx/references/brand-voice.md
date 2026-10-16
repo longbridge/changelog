@@ -158,6 +158,24 @@ One sentence, at most 16 characters in Chinese or 60 characters in English, no t
 
 If a release touches several areas, pick the one or two most worth saying and leave the rest to `summary`.
 
+## English style
+
+English copy follows standard documentation style (Apple, Google and Microsoft style guides; the changelogs of GitHub or Stripe), not marketing-headline style.
+
+- **Sentence case everywhere**: `title`, `summary`, `highlights`, every `##` / `###` heading and `<Step title>`. Capitalize only the first word and proper nouns. Group headings are `New features`, `Improvements`, `Bug fixes`.
+- **Proper nouns keep their capitals**: product names (Longbridge, LongbridgeAI, Longbridge Pro, Longbridge App), feature names exactly as the product UI shows them (Dream Memory, My Agents, Touch ID), acronyms (AI, PDF, US), file formats and apps (Word, Markdown).
+- Use the serial comma (Word, PDF, and Markdown), US spelling, and no trailing period in titles and headings.
+
+```
+✓ Have the AI build web pages you can open online
+✓ Download online documents as Word, PDF, or Markdown
+✓ My Agents and workflow building
+✗ Have the AI Build Web Pages You Can Open Online      ← Title Case
+✗ New Features / Bug Fixes                            ← use New features / Bug fixes
+```
+
+`bun run check:assets` warns about English titles and headings that look like Title Case.
+
 ## Numbers only with facts
 
 Never invent performance numbers, user counts, accuracy rates, or time saved. If there's a measurement, use it; if not, use a vague phrasing like 「更快」 ("faster"). **Don't compute a multiplier yourself.**
@@ -178,5 +196,6 @@ Likewise, 「更快」 itself needs a basis — seeing a perf commit doesn't mea
 - [ ] Read it through: any words you can't point to in the UI (jargon)?
 - [ ] Does deleting each sentence's adjectives change the meaning? If not, they're filler
 - [ ] Any sentence over 30 characters?
+- [ ] English titles, highlights and headings in sentence case?
 - [ ] Does the title answer "what can the user do now"?
 - [ ] Can every number be traced to evidence?

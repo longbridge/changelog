@@ -54,6 +54,18 @@ const publishedMajors = new Set<string>()
 /** 已经 published 的小版本，用来核对大版本总结在不在 */
 const publishedReleases: { file: string; locale: string; product: string; major: string }[] = []
 
+/** 英文正文里在句中以大写出现过的词：产品名、功能名、模型名等专有名词，标题大小写检查时不计 */
+const properNouns = new Set<string>()
+for (const file of files) {
+  if (!file.includes('/en/')) continue
+  const prose = (await fs.readFile(file, 'utf8'))
+    .replace(/^---[\s\S]*?\n---/, '')
+    .split('\n')
+    .filter((line) => !/^#{1,6}\s/.test(line))
+    .join('\n')
+  for (const match of prose.matchAll(/[a-z,]\s+([A-Z][\w-]*)/g)) properNouns.add(match[1])
+}
+
 for (const file of files) {
   const relative = path.relative(ROOT, file)
   const source = await fs.readFile(file, 'utf8')
@@ -113,6 +125,27 @@ for (const file of files) {
   for (const match of source.matchAll(/<Video\b([^>]*)>/g)) {
     if (!/\blabel=/.test(match[1])) issues.push({ file: relative, message: '<Video> 缺少 label' })
   }
+
+  // 英文标题用句首大写（sentence case），不是每个词首字母大写。专有名词无法穷举，
+  // 用上面收集的 properNouns 排除；只提醒不拦
+  if (locale === 'en') {
+    const frontmatter = /^---[\s\S]*?\n---/.exec(source)?.[0] ?? ''
+    const body = source.slice(frontmatter.length)
+    const candidates = [
+      ...frontmatter.matchAll(/^(?:title|summary):\s*["']?(.+?)["']?\s*$/gm),
+      ...frontmatter.matchAll(/^\s+-\s+["']?(.+?)["']?\s*$/gm),
+      ...body.matchAll(/^#{2,4}\s+(.+?)\s*$/gm),
+    ].map((match) => match[1])
+    for (const text of new Set(candidates)) {
+      const words = text
+        .split(/[\s,]+/)
+        .slice(1)
+        .filter((word) => /^[A-Za-z][a-z]{3,}/.test(word) && !properNouns.has(word))
+      if (words.length >= 2 && words.every((word) => /^[A-Z]/.test(word))) {
+        warnings.push({ file: relative, message: `英文标题像是每词大写，应改成句首大写：${text}` })
+      }
+    }
+  }
 }
 
 // 三语必须一起发：缺哪个语言，站点的语言切换就会静默回落到产品页。
@@ -151,6 +184,15 @@ async function walkAll(dir: string): Promise<string[]> {
   return out
 }
 
+// 已经在 main 上的素材改不了（见下面的替换检查），超过建议体积只能提醒；
+// 这次新加的还来得及压缩，直接拦下。拿不到 main 时一律按已上线处理
+const onMain = await run('git', ['ls-tree', '-r', '--name-only', 'origin/main', '--', path.relative(REPO_ROOT, ASSETS_DIR)], {
+  cwd: REPO_ROOT,
+  maxBuffer: 16 * 1024 * 1024,
+})
+  .then(({ stdout }) => new Set(stdout.split('\n').filter(Boolean)))
+  .catch(() => null)
+
 for (const file of await walkAll(ASSETS_DIR)) {
   const relative = path.relative(REPO_ROOT, file)
   const name = path.basename(file)
@@ -162,9 +204,15 @@ for (const file of await walkAll(ASSETS_DIR)) {
   }
   const { size } = await fs.stat(file)
   const sizeText = `${(size / MB).toFixed(1)} MB`
+  const isNew = onMain !== null && !onMain.has(relative)
+  const oversize = (message: string) =>
+    (isNew ? issues : warnings).push({
+      file: relative,
+      message: isNew ? `${message}，提交前先压缩（命令见 release-notes-media skill）` : message,
+    })
   if (size > 20 * MB) issues.push({ file: relative, message: `${sizeText}，超过 20 MB 上限，先压缩` })
-  else if (IMAGE.test(name) && size > 0.5 * MB) warnings.push({ file: relative, message: `图片 ${sizeText}，建议压到 500 KB 以内` })
-  else if (VIDEO.test(name) && size > 4 * MB) warnings.push({ file: relative, message: `视频 ${sizeText}，建议压到 4 MB 以内` })
+  else if (IMAGE.test(name) && size > 0.5 * MB) oversize(`图片 ${sizeText}，超过 500 KB`)
+  else if (VIDEO.test(name) && size > 4 * MB) oversize(`视频 ${sizeText}，超过 4 MB`)
 }
 
 // 素材不带内容哈希，线上按一年缓存：已经在 main 上的文件改了内容，用户看到的还是旧的。
