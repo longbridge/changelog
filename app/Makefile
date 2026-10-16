@@ -1,6 +1,6 @@
 # Releases are deployed by merging, not by commands:
 #
-#   PR merged into canary → GitHub Actions deploys staging    (longbridge.xyz/<locale>/changelog)
+#   PR opened to main     → GitHub Actions deploys a Cloudflare Pages preview (.github/workflows/preview.yml)
 #   PR merged into main   → GitHub Actions deploys production (longbridge.com/<locale>/changelog)
 #
 # See .github/workflows/deploy.yml. Only local targets live here:

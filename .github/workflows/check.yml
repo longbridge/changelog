@@ -1,10 +1,10 @@
 # PR checks: schema, types, assets and locale parity. A PR can't be merged until they pass.
-# Checks only, no preview: preview locally with `bun run preview:build`; deployment happens after merge, see deploy.yml.
+# The preview deployment for each PR is in preview.yml; production deploys on merge, see deploy.yml.
 name: check
 
 on:
   pull_request:
-    branches: [main, canary]
+    branches: [main]
 
 defaults:
   run:
@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # check:assets compares assets/ with origin/main to catch replaced files
+          fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.14
