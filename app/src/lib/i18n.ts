@@ -18,6 +18,14 @@ export function localePath(locale: Locale, ...segments: Array<string | undefined
   return `${base}/${parts.join('/')}`.replace(/\/{2,}/g, '/')
 }
 
+/** 大版本页的 URL 段带 v：1.4 → v1.4，日期版本 2026.09 → v2026.09 */
+export const majorSegment = (major: string): string => `v${major}`
+
+/** 大版本页地址：/<locale>/changelog/<product>/v<major> */
+export function majorPath(locale: Locale, product: string, major: string): string {
+  return localePath(locale, product, majorSegment(major))
+}
+
 export function formatDate(date: Date, locale: Locale): string {
   return new Intl.DateTimeFormat(LOCALE_META[locale].dateLocale, {
     year: 'numeric',

@@ -72,7 +72,7 @@ Fix every error until all checks pass. If you can't fix something, tell the user
 Start `bun run dev` (it runs as a daemon; stop it with `bunx astro dev stop`) and give the user:
 
 - The preview index: `app/dist/preview/index.html` (which versions changed, whether all three locales are present, what's missing)
-- Direct links to this release, one per locale: `http://localhost:4321/<locale>/changelog/<product>/<major>/#<tag>`
+- Direct links to this release, one per locale: `http://localhost:4321/<locale>/changelog/<product>/v<major>#<tag>` (e.g. `/zh-CN/changelog/longbridge-ai/v1.4#v1.4.1`)
 - A short note: which layout you chose, which source wording you changed and why, and which items would be clearer with a screenshot that isn't available yet
 
 Then **stop** and ask: "Does this look right? Once you confirm, I'll open a PR and send you the online preview." If they want changes, make them and go back to step 3.
@@ -96,7 +96,7 @@ After the user confirms:
 
 - Wait for the `check` and `preview` workflows (`gh pr checks --watch`). The preview bot comments the link on the PR. Give the user:
   - the site: `https://pr-<number>.<project>.pages.dev`
-  - direct links to this release, one per locale: `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/<major>#<tag>`
+  - direct links to this release, one per locale: `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/v<major>#<tag>`
 
   Then **stop and wait for confirmation**. If they want changes, edit, re-run step 3, commit and push to the same branch; the preview URL stays the same.
 - If the preview job skipped the deployment (no Cloudflare token configured), say so and fall back to the local preview. Don't treat it as passed.

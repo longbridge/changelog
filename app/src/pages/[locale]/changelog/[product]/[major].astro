@@ -18,7 +18,7 @@ import LinkPreview from '@components/release/LinkPreview.astro'
 /** MDX 正文里可以直接使用这些组件，无需在每篇里 import */
 /** 正文里的 Markdown 链接也走 LinkPreview，不用每条外链都手写标签 */
 const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd, LinkPreview, a: LinkPreview }
-import { LOCALES, formatDate, localePath, t, type Locale } from '@lib/i18n'
+import { LOCALES, formatDate, localePath, majorPath, majorSegment, t, type Locale } from '@lib/i18n'
 import { getProduct } from '@config/products.config'
 import { listMajors, majorSlugOf, type MajorGroup } from '@lib/majors'
 import { majorTitleId, slugOf } from '@lib/releases'
@@ -27,14 +27,14 @@ export const getStaticPaths = (async () => {
   const byLocale = new Map<Locale, MajorGroup[]>()
   for (const locale of LOCALES) byLocale.set(locale, await listMajors(locale))
 
-  return LOCALES.flatMap((locale) => {
+  const pages = LOCALES.flatMap((locale) => {
     const groups = byLocale.get(locale) ?? []
     return groups.map((group) => {
       const siblings = groups.filter((item) => item.product.id === group.product.id)
       const position = siblings.indexOf(group)
       const major = majorSlugOf(group.entry)
       return {
-        params: { locale, product: group.product.id, major },
+        params: { locale, product: group.product.id, major: majorSegment(major) },
         props: {
           group,
           siblings,
@@ -52,7 +52,27 @@ export const getStaticPaths = (async () => {
       }
     })
   })
+  // 旧地址不带 v（/longbridge-pro/1.0），已经分享出去的链接跳到新地址
+  const legacy = LOCALES.flatMap((locale) =>
+    (byLocale.get(locale) ?? []).map((group) => ({
+      params: { locale, product: group.product.id, major: majorSlugOf(group.entry) },
+      props: { redirectTo: majorPath(locale, group.product.id, majorSlugOf(group.entry)) },
+    })),
+  )
+  return [...pages, ...legacy]
 }) satisfies GetStaticPaths
+
+// 跳转页自己写：Astro.redirect 的 meta refresh 会丢掉 #v1.4.1 这样的小版本锚点
+if ('redirectTo' in Astro.props) {
+  const to = Astro.props.redirectTo as string
+  const canonical = new URL(to, Astro.site).toString()
+  return new Response(
+    `<!doctype html><meta charset="utf-8"><title>Redirecting…</title><meta name="robots" content="noindex">` +
+      `<link rel="canonical" href="${canonical}"><meta http-equiv="refresh" content="0;url=${to}">` +
+      `<script>location.replace(${JSON.stringify(to)} + location.hash)</script><a href="${to}">${canonical}</a>`,
+    { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+  )
+}
 
 const locale = Astro.params.locale as Locale
 const { group, siblings, newer, older, translated } = Astro.props as {
@@ -82,7 +102,7 @@ const rail: RailItem[] = siblings.flatMap((item) => {
   const head: RailItem = {
     label: item.entry.data.major,
     date: item.releasedAt.toISOString().slice(0, 10),
-    href: localePath(locale, item.product.id, slug),
+    href: majorPath(locale, item.product.id, slug),
     title: `${item.entry.data.title} · ${formatDate(item.releasedAt, locale)}`,
     isCurrent,
     isDraft: item.entry.data.status === 'draft',
@@ -109,7 +129,7 @@ const alternates = Object.fromEntries(
   LOCALES.map((item) => [
     item,
     translated.includes(item)
-      ? localePath(item, group.product.id, majorSlugOf(group.entry))
+      ? majorPath(item, group.product.id, majorSlugOf(group.entry))
       : localePath(item, group.product.id),
   ]),
 )
@@ -223,7 +243,7 @@ const alternates = Object.fromEntries(
     {
       newer ? (
         <a
-          href={localePath(locale, newer.product.id, majorSlugOf(newer.entry))}
+          href={majorPath(locale, newer.product.id, majorSlugOf(newer.entry))}
           class="group text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
         >
           <span class="block text-[0.75rem]">← {t.newer[locale]}</span>
@@ -238,7 +258,7 @@ const alternates = Object.fromEntries(
     {
       older && (
         <a
-          href={localePath(locale, older.product.id, majorSlugOf(older.entry))}
+          href={majorPath(locale, older.product.id, majorSlugOf(older.entry))}
           class="group text-[0.8125rem] text-ink-soft transition-colors hover:text-ink sm:text-right"
         >
           <span class="block text-[0.75rem]">{t.older[locale]} →</span>

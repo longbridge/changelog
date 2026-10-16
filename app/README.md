@@ -83,7 +83,7 @@ The `production` environment can also require reviewers, so someone has to appro
 Before uploading, `bun run deploy` verifies asset paths in the build output, then uploads in three passes: hashed static assets are cached for a year; HTML, sitemap and RSS are not cached.
 Emergency upload from a local machine: export the five variables above and run `make deploy:website-local`.
 
-Public URLs put the locale first: `longbridge.com/en/changelog/<product>/<major>`. The build base is `/`, and `changelog` is a route segment (`src/pages/[locale]/changelog/`, defined by `SITE_SEGMENT` in `config/site.config.ts`). The main site's reverse proxy forwards these paths:
+Public URLs put the locale first and prefix the major version with `v`: `longbridge.com/en/changelog/<product>/v<major>`, e.g. `/zh-CN/changelog/longbridge-ai/v1.4` (built by `majorPath()` in `src/lib/i18n.ts`). The old URLs without `v` are redirect pages that keep the `#<tag>` anchor and stay out of the sitemap. The build base is `/`, and `changelog` is a route segment (`src/pages/[locale]/changelog/`, defined by `SITE_SEGMENT` in `config/site.config.ts`). The main site's reverse proxy forwards these paths:
 
 | Path | Content |
 | --- | --- |
@@ -146,7 +146,7 @@ Set `RELEASE_NOTES_GH_TOKEN` to raise the GitHub API rate limit; CI uses the wor
 
 ### Locales
 
-Add or remove them in `LOCALES` in `config/site.config.ts`. The default is three locales, `en` `zh-HK` `zh-CN` (also the order in the language switcher), with routes like `/zh-HK/changelog/longbridge-pro/2.1`. `/changelog` redirects based on the main site's `locale` cookie and falls back to the default locale (`en`).
+Add or remove them in `LOCALES` in `config/site.config.ts`. The default is three locales, `en` `zh-HK` `zh-CN` (also the order in the language switcher), with routes like `/zh-HK/changelog/longbridge-pro/v2.1`. `/changelog` redirects based on the main site's `locale` cookie and falls back to the default locale (`en`).
 
 ## Commands
 
@@ -225,7 +225,7 @@ bun run preview:build          # build with drafts + report
 open dist/preview/index.html
 ```
 
-The index lists which versions changed, whether all three locales are present, which assets are missing and which entries are still drafts. Each locale tag links to that release's anchor on its major-version page (`…/<major>/index.html#<tag>`).
+The index lists which versions changed, whether all three locales are present, which assets are missing and which entries are still drafts. Each locale tag links to that release's anchor on its major-version page (`…/v<major>/index.html#<tag>`).
 It covers **every changed version in the working tree**, including uncommitted and untracked files, so you can run it right after writing.
 `preview:report` alone doesn't build, so `dist/` has no pages and the links 404; it reminds you at the end.
 

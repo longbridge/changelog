@@ -153,7 +153,7 @@ with each locale label linking straight to this version's anchor on the major ve
 The direct URL for a version looks like this (a minor version is an anchor, not a standalone page):
 
 ```
-http://localhost:4321/<locale>/changelog/<product>/<major>/#<tag>
+http://localhost:4321/<locale>/changelog/<product>/v<major>#<tag>
 e.g.: http://localhost:4321/zh-CN/changelog/longbridge-web/2026.09/#release-2026.09.14
 ```
 
@@ -188,7 +188,7 @@ git push -u origin HEAD
 gh pr create --base main --title "feat(<product>): release notes for <version>"
 ```
 
-Wait for `check` and `preview` (`gh pr checks --watch`). The preview bot comments the link on the PR; review at `https://pr-<number>.<project>.pages.dev` and `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/<major>#<tag>`. The project is the repo variable `CLOUDFLARE_PAGES_PROJECT`, currently `longbridge-changelog`.
+Wait for `check` and `preview` (`gh pr checks --watch`). The preview bot comments the link on the PR; review at `https://pr-<number>.<project>.pages.dev` and `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/v<major>#<tag>`. The project is the repo variable `CLOUDFLARE_PAGES_PROJECT`, currently `longbridge-changelog`.
 If something's wrong, keep pushing to this branch; the preview URL stays the same. When the PR is closed or merged, the `cleanup` job deletes its previews and the link returns 404.
 
 Merge only after the user explicitly says to go live:

@@ -1,6 +1,6 @@
 import rss from '@astrojs/rss'
 import type { APIRoute, GetStaticPaths } from 'astro'
-import { LOCALES, localePath, type Locale } from '@lib/i18n'
+import { LOCALES, localePath, majorPath, type Locale } from '@lib/i18n'
 import { siteConfig } from '@config/site.config'
 import { getProduct, majorOf } from '@config/products.config'
 import { listReleases, slugOf } from '@lib/releases'
@@ -25,7 +25,7 @@ export const GET: APIRoute = async ({ params, site }) => {
       description: entry.data.summary || entry.data.highlights.join(' · '),
       pubDate: entry.data.releasedAt,
       // 小版本没有独立页面，链接指向大版本页里它那一节
-      link: `${localePath(locale, entry.data.product, majorOf(entry.data.version))}#${slugOf(entry)}`,
+      link: `${majorPath(locale, entry.data.product, majorOf(entry.data.version))}#${slugOf(entry)}`,
     })),
   })
 }

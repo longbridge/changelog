@@ -1,5 +1,5 @@
 ---
-import { formatDate, localePath, t, type Locale } from '@lib/i18n'
+import { formatDate, majorPath, t, type Locale } from '@lib/i18n'
 import { majorSlugOf, type MajorGroup } from '@lib/majors'
 import { majorTitleId } from '@lib/releases'
 
@@ -29,7 +29,7 @@ const { title, summary, highlights = [], cover, coverAlt, status } = group.entry
       class:list={['major-card__title', featured ? 'major-card__title--lg' : '']}
       transition:name={majorTitleId(product.id, slug)}
     >
-      <a href={localePath(locale, product.id, slug)} class="after:absolute after:inset-0">
+      <a href={majorPath(locale, product.id, slug)} class="after:absolute after:inset-0">
         {title}
       </a>
     </h2>
