@@ -109,7 +109,7 @@ Only when the user explicitly says "go live / ship to production":
 gh pr merge <number> --auto --merge --delete-branch
 ```
 
-`main` requires an approving review from a code owner (`.github/CODEOWNERS`), and the PR author can't approve their own PR. `--auto` merges the PR as soon as the approval arrives. Tell the user it's waiting for a code owner's approval and give them the PR link to pass on. Never try to get around the review: no admin merge, no asking for the rule to be relaxed. A push after approval dismisses it, so avoid pushing once the user has said "go live".
+`main` requires an approving review from a code owner (`.github/CODEOWNERS`), and the PR author can't approve their own PR. `--auto` merges the PR as soon as the approval arrives, and the `notify` workflow pings the code owner on Slack. Tell the user it's waiting for a code owner's approval and give them the PR link. Never try to get around the review: no admin merge, no asking for the rule to be relaxed. A push after approval dismisses it, so avoid pushing once the user has said "go live".
 
 Merging deploys production automatically. If the `production` environment requires approval, tell the user to find the approver on the Actions page. Never bypass it.
 After the deploy finishes, give the production URL. The task is done.

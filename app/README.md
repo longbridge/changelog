@@ -64,6 +64,7 @@ Workflows live in `../.github/workflows/`:
 | --- | --- | --- |
 | `check.yml` | PR to `main` | `check` + `check:assets`; must pass to merge |
 | `preview.yml` | PR to `main` | Build with drafts → Cloudflare Pages → sticky PR comment with the link to the site root. When the PR is closed or merged, deletes all of its preview deployments |
+| `notify.yml` | PR set to auto-merge | Posts a Slack message asking the code owner to approve, with the preview and PR links. Needs the `SLACK_WEBHOOK_URL` secret (optional `SLACK_APPROVER_ID` to @mention) |
 | `deploy.yml` | Push to `main` | Check → build → upload to OSS with `bun run deploy` |
 | `sync.yml` | Daily schedule, or manual | Fetch + transform; if anything changed, open (or update) a PR from the `sync/releases` branch. Never auto-merges |
 
