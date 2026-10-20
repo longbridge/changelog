@@ -85,6 +85,32 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
     {/* 客户端路由：页面间淡入淡出，标题做共享元素过渡（只在列表点进详情时，见下面的脚本） */}
     <ClientRouter />
     <script>
+      // 在别名域名（如 longbridge.cn）上打开时，把指向主站的链接换成当前域名，见 siteConfig.domainAliases。
+      // 链接预览读的是 data-preview-src，一起换，换完与当前页同源才能内嵌预览
+      import { siteConfig } from '@config/site.config'
+
+      const aliases = siteConfig.domainAliases[location.hostname.replace(/^www\./, '')]
+
+      function localizeLinks() {
+        if (!aliases) return
+        for (const element of document.querySelectorAll('a[href^="https://"], [data-preview-src^="https://"]')) {
+          for (const attribute of ['href', 'data-preview-src']) {
+            const value = element.getAttribute(attribute)
+            if (!value) continue
+            try {
+              const url = new URL(value)
+              const host = aliases[url.hostname]
+              if (!host) continue
+              url.hostname = host
+              element.setAttribute(attribute, url.toString())
+            } catch {}
+          }
+        }
+      }
+
+      document.addEventListener('astro:page-load', localizeLinks)
+    </script>
+    <script>
       /**
        * 共享元素过渡只留给「列表 → 详情」这一步：点哪条，哪条的标题飞进详情页。
        * 其余方向必须关掉——
