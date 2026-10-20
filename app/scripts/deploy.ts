@@ -86,6 +86,7 @@ await upload('静态资源（缓存 1 年）', [
   '--exclude', '.gitkeep',
   '--exclude', '*.html',
   '--exclude', '*.xml',
+  '--exclude', '*.json',
   '--exclude', '*.map',
   '--meta', 'Cache-Control:max-age=31536000',
 ])
@@ -100,6 +101,12 @@ await upload('HTML（不缓存）', [
 await upload('sitemap / rss（不缓存）', [
   '--include', '*.xml',
   '--meta', 'Cache-Control:no-cache#Content-type:application/xml;charset=utf-8',
+])
+
+// rss.json（JSON Feed）同理
+await upload('rss.json（不缓存）', [
+  '--include', '*.json',
+  '--meta', 'Cache-Control:no-cache#Content-type:application/json;charset=utf-8',
 ])
 
 console.log(`\n${c.green('✓')} 上传完成`)

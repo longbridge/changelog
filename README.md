@@ -11,7 +11,7 @@ Source of the public release notes for Longbridge products, published at **[long
 The site is a static [Astro](https://astro.build) build in three locales (English, Simplified Chinese, Traditional Chinese). Release notes are either fetched from public sources or written by the product team, rewritten into MDX, reviewed on a per-PR preview, and deployed on merge.
 
 - **Live site:** [English](https://longbridge.com/en/changelog) · [简体中文](https://longbridge.com/zh-CN/changelog) · [繁體中文](https://longbridge.com/zh-HK/changelog)
-- **RSS:** `https://longbridge.com/<locale>/changelog/rss.xml`
+- **Feeds:** RSS `https://longbridge.com/<locale>/changelog/rss.xml`, [JSON Feed](https://www.jsonfeed.org/version/1.1/) `https://longbridge.com/<locale>/changelog/rss.json` (latest 50 releases)
 
 ## Table of contents
 
