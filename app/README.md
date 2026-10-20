@@ -81,14 +81,14 @@ The repository is public, so **bucket names, paths and credentials are never in 
 
 The `production` environment can also require reviewers, so someone has to approve the upload after a merge into `main`.
 
-Before uploading, `bun run deploy` verifies asset paths in the build output, then uploads in three passes: hashed static assets are cached for a year; HTML, sitemap and RSS are not cached.
+Before uploading, `bun run deploy` verifies asset paths in the build output, then uploads in four passes: hashed static assets are cached for a year; HTML, sitemap, RSS (`rss.xml`) and JSON Feed (`rss.json`) are not cached.
 Emergency upload from a local machine: export the five variables above and run `make deploy:website-local`.
 
 Public URLs put the locale first and prefix the major version with `v`: `longbridge.com/en/changelog/<product>/v<major>`, e.g. `/zh-CN/changelog/longbridge-ai/v1.4` (built by `majorPath()` in `src/lib/i18n.ts`). The old URLs without `v` are redirect pages that keep the `#<tag>` anchor and stay out of the sitemap. The build base is `/`, and `changelog` is a route segment (`src/pages/[locale]/changelog/`, defined by `SITE_SEGMENT` in `config/site.config.ts`). The main site's reverse proxy forwards these paths:
 
 | Path | Content |
 | --- | --- |
-| `/<locale>/changelog/**` | Pages and RSS |
+| `/<locale>/changelog/**` | Pages, RSS (`rss.xml`) and JSON Feed (`rss.json`) |
 | `/changelog/_astro/**` | Built JS / CSS (`build.assets`) |
 | `/changelog/sitemap-*.xml` | Sitemap |
 | `/changelog` | Redirects to a locale based on the main site's `locale` cookie |

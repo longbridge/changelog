@@ -79,6 +79,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
       )
     }
     <link rel="alternate" type="application/rss+xml" title={siteConfig.name[locale]} href={localePath(locale, 'rss.xml')} />
+    <link rel="alternate" type="application/feed+json" title={siteConfig.name[locale]} href={localePath(locale, 'rss.json')} />
     <JsonLd locale={locale} breadcrumbs={breadcrumbs} />
 
     {/* 客户端路由：页面间淡入淡出，标题做共享元素过渡（只在列表点进详情时，见下面的脚本） */}
