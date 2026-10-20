@@ -95,6 +95,8 @@ Public URLs put the locale first and prefix the major version with `v`: `longbri
 
 Changing `SITE_SEGMENT` requires the same change in the main site's proxy configuration.
 
+The same build is also served under `longbridge.cn/<locale>/changelog`. There, a small script in `BaseLayout.astro` rewrites links to the main site (`longbridge.com`, `open.longbridge.com`) to the `.cn` hosts, as listed in `domainAliases` in `config/site.config.ts`. Canonical URLs, hreflang, the sitemap and the feeds always use `longbridge.com`.
+
 ## Configuration
 
 ### Adding a product

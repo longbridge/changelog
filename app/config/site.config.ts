@@ -33,6 +33,17 @@ export const siteConfig = {
   base: '/',
   /** 品牌主站，header/footer 的 Longbridge 入口指向这里 */
   brandUrl: 'https://longbridge.com',
+  /**
+   * 同一份构建也挂在别的域名下（nginx 反代）。在这些域名上打开时，页面里指向主站的链接
+   * 换成对应域名，用户不会被带出当前站（BaseLayout 里的脚本按 location.hostname 替换）。
+   * canonical、hreflang、sitemap、订阅源这些给搜索引擎和阅读器的地址仍用 url。
+   */
+  domainAliases: {
+    'longbridge.cn': {
+      'longbridge.com': 'longbridge.cn',
+      'open.longbridge.com': 'open.longbridge.cn',
+    },
+  } as Record<string, Record<string, string>>,
   /** 顶栏的开发者平台外链。英文在根路径，中文按语言分目录 */
   developers: (locale: Locale) =>
     locale === 'en' ? 'https://open.longbridge.com' : `https://open.longbridge.com/${locale}`,
