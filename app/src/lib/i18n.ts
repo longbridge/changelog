@@ -81,6 +81,7 @@ export const t = {
   allProducts: { 'zh-CN': '全部产品', 'zh-HK': '全部產品', en: 'All products' },
   allReleaseNotes: { 'zh-CN': '全部更新日志', 'zh-HK': '全部更新日誌', en: 'All release notes' },
   developers: { 'zh-CN': '开发者平台', 'zh-HK': '開發者平台', en: 'Developers' },
+  helpCenter: { 'zh-CN': '帮助中心', 'zh-HK': '幫助中心', en: 'Support' },
   latestRelease: { 'zh-CN': '最新版本', 'zh-HK': '最新版本', en: 'Latest release' },
   releaseHistory: { 'zh-CN': '历史版本', 'zh-HK': '歷史版本', en: 'Release history' },
   versions: { 'zh-CN': '个版本', 'zh-HK': '個版本', en: 'releases' },
