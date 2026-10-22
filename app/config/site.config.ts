@@ -26,13 +26,16 @@ export const LOCALE_META: Record<Locale, { label: string; htmlLang: string; date
  */
 export const SITE_SEGMENT = 'changelog'
 
+/** 品牌主站的根地址。站内所有指向主站的链接都从这里拼，不要再手写域名 */
+const BRAND_URL = 'https://longbridge.com'
+
 export const siteConfig = {
   /** 生产环境站点的域名，用于 sitemap / canonical / RSS，正式地址是 longbridge.com/<locale>/changelog */
-  url: 'https://longbridge.com',
+  url: BRAND_URL,
   /** 构建的 base。线上、测试环境与本地都是 '/' */
   base: '/',
   /** 品牌主站，header/footer 的 Longbridge 入口指向这里 */
-  brandUrl: 'https://longbridge.com',
+  brandUrl: BRAND_URL,
   /**
    * 同一份构建也挂在别的域名下（nginx 反代）。在这些域名上打开时，页面里指向主站的链接
    * 换成对应域名，用户不会被带出当前站（BaseLayout 里的脚本按 location.hostname 替换）。
@@ -47,6 +50,8 @@ export const siteConfig = {
   /** 顶栏的开发者平台外链。英文在根路径，中文按语言分目录 */
   developers: (locale: Locale) =>
     locale === 'en' ? 'https://open.longbridge.com' : `https://open.longbridge.com/${locale}`,
+  /** 顶栏的帮助中心外链。主站会再按地区跳到 /<region>/<locale>/support，这里不写死地区 */
+  helpCenter: (locale: Locale) => `${BRAND_URL}/${locale}/support`,
   logo: 'https://assets.wbrks.com/assets/logo/logo1.png',
   /** 预连接的域名：logo 与 favicon 都在这个 CDN 上 */
   preconnect: ['https://assets.wbrks.com'],
@@ -60,10 +65,10 @@ export const siteConfig = {
    * 按语言分目录，三语都可直达。
    */
   footerLinks: (locale: Locale) => [
-    { key: 'news', href: `https://longbridge.com/${locale}/news` },
-    { key: 'community', href: `https://longbridge.com/${locale}/topics` },
-    { key: 'longbridgeAI', href: `https://longbridge.com/${locale}/ai` },
-    { key: 'markets', href: `https://longbridge.com/${locale}/markets` },
+    { key: 'news', href: `${BRAND_URL}/${locale}/news` },
+    { key: 'community', href: `${BRAND_URL}/${locale}/topics` },
+    { key: 'longbridgeAI', href: `${BRAND_URL}/${locale}/ai` },
+    { key: 'markets', href: `${BRAND_URL}/${locale}/markets` },
   ] as const,
   name: {
     'zh-CN': 'Longbridge 更新日志',

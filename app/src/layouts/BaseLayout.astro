@@ -28,6 +28,11 @@ const meta = LOCALE_META[locale]
 const pageTitle = title === siteConfig.name[locale] ? title : `${title} · ${siteConfig.name[locale]}`
 const pageDescription = description || siteConfig.description[locale]
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
+/** 顶栏的站外入口，顺序即展示顺序。arrow 标记要不要带「离开本站」的小箭头 */
+const externalLinks = [
+  { href: siteConfig.helpCenter(locale), label: t.helpCenter[locale], arrow: false },
+  { href: siteConfig.developers(locale), label: t.developers[locale], arrow: true },
+]
 ---
 
 <!doctype html>
@@ -268,15 +273,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
             {t.allReleaseNotes[locale]}
           </a>
           {/* 站外链接：带个小箭头，读者知道点了会离开更新日志 */}
-          <a
-            href={siteConfig.developers(locale)}
-            target="_blank"
-            rel="noopener"
-            class="nav-link inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-ink transition-colors hover:bg-rule/50"
-          >
-            {t.developers[locale]}
-            <svg aria-hidden="true" viewBox="0 0 12 12" class="h-2.5 w-2.5 opacity-60" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h6v6M10 2 3 9" /></svg>
-          </a>
+          {externalLinks.map(({ href, label, arrow }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener"
+              class="nav-link inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-ink transition-colors hover:bg-rule/50"
+            >
+              {label}
+              {arrow && (
+                <svg aria-hidden="true" viewBox="0 0 12 12" class="h-2.5 w-2.5 opacity-60" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h6v6M10 2 3 9" /></svg>
+              )}
+            </a>
+          ))}
         </nav>
 
         <div class="ml-auto flex items-center gap-1.5">
