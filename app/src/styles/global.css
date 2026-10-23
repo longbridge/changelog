@@ -247,6 +247,16 @@ body {
   color: var(--color-ink);
 }
 
+/* 小版本节的版本号：等宽小字，和日期并排，与侧栏里的版本号对得上 */
+.version-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  background: var(--color-rule);
+  color: var(--color-ink);
+}
+
 /* 预览版角标：用产品强调色区分于草稿的警示色，它是对外内容 */
 .prerelease-badge {
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
