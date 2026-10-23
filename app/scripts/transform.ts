@@ -137,6 +137,8 @@ for (const group of groups.values()) {
     if (needsTranslation) {
       frontmatter.translation = { from, status: 'pending' }
     }
+    // 默认 false，只在预发布版本上写出来，正式版的 frontmatter 不多这一行
+    if (release.prerelease) frontmatter.prerelease = true
 
     await fs.mkdir(path.dirname(file), { recursive: true })
     await fs.writeFile(file, stringifyFrontmatter(frontmatter, body), 'utf8')

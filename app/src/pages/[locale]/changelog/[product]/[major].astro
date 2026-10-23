@@ -212,6 +212,7 @@ const alternates = Object.fromEntries(
                 releasedAt={release.data.releasedAt}
                 isDraft={release.data.status === 'draft'}
                 draftLabel={t.draftBadge[locale]}
+                prereleaseLabel={release.data.prerelease ? t.prereleaseBadge[locale] : undefined}
               />
             </div>
             {release.data.summary && (

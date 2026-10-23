@@ -60,6 +60,11 @@ export interface RepoDocsSource extends SourceBase {
   ignore?: string[]
   /** 缺失语言从哪个语言翻译，默认按 paths 的第一个 */
   preferredSource?: Locale
+  /**
+   * 这些目录里的都是预发布版本（如官网单独维护的 preview 目录）。
+   * 抓下来的版本标成 prerelease，站点上带「预览版」角标；设了它就不用再设 includePrerelease
+   */
+  prerelease?: boolean
 }
 
 export interface AppStoreSource extends SourceBase {
@@ -170,6 +175,25 @@ export const products: ProductConfig[] = [
         filePattern: '^v(?<version>\\d+\\.\\d+\\.\\d+)\\.md$',
         ignore: ['index.md'],
         preferredSource: 'zh-CN',
+        platforms: ['macOS', 'Windows', 'Linux'],
+        limit: 100,
+      },
+      {
+        // 同一个仓库的 preview 目录：预览版，正式版发布前先在这里公开。
+        // 历史上的预览版已被各自的正式版覆盖，只从 1.0.0 的预览版开始收
+        provider: 'repo-docs',
+        repo: 'longbridge/longbridge-desktop-website',
+        ref: 'main',
+        paths: {
+          en: 'docs/release-notes/preview',
+          'zh-CN': 'docs/zh-CN/release-notes/preview',
+          'zh-HK': 'docs/zh-HK/release-notes/preview',
+        },
+        filePattern: '^v(?<version>\\d+\\.\\d+\\.\\d+-preview\\.\\d+)\\.md$',
+        ignore: ['index.md'],
+        preferredSource: 'zh-CN',
+        prerelease: true,
+        since: '2026-09-01',
         platforms: ['macOS', 'Windows', 'Linux'],
         limit: 100,
       },

@@ -256,7 +256,7 @@ async function fetchRepoDocs(source: RepoDocsSource): Promise<RawRelease[]> {
         body,
         publishedAt: extractDate(body, new Date(0).toISOString()),
         url: `https://github.com/${source.repo}/blob/${ref}/${dir}/${file.name}`,
-        prerelease: false,
+        prerelease: source.prerelease ?? false,
         draft: false,
         locale,
         curated: true,

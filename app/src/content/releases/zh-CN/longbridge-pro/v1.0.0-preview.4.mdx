@@ -1,0 +1,38 @@
+---
+product: longbridge-pro
+version: 1.0.0-preview.4
+tag: v1.0.0-preview.4
+locale: zh-CN
+title: "港股、新加坡股票可下碎股单，财报日历来了"
+summary: "港股、新加坡股票可直接买卖零散股数；财报日历按周 / 月查看各市场的财报安排。"
+highlights: []
+topics:
+  - 交易
+  - 市场
+  - 自动更新
+releasedAt: 2026-10-22T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/preview/v1.0.0-preview.4.md
+prerelease: true
+---
+
+## 新增
+
+- **交易**：港股、新加坡股票支持碎股单，零散股数可以直接买卖；数量不符合整手时会提示并引导切换为碎股单。
+- **交易**：卡券按所选交易时段匹配（如盘中、盘前盘后、夜盘），并结合本单预估费用推荐抵扣最多的那张，不再浪费面额大的卡。
+- **市场**：新增财报日历，按周 / 月查看各市场的财报发布安排，点击个股即可查看历史业绩与市场预期，方便提前做好财报季准备。
+- **自动更新**：发现新版本后默认在后台下载并安装，完成后在标题栏提示重启，不再打断操作；可在「设置 > 常规」中关闭。
+
+## 优化
+
+- 组合期权下单时逐腿校验风险披露，卖出期权腿时正确弹出卖空提醒；卖空期权提醒新增「下次不再提示」选项。
+- 修复了切换账户后，交易面板的订单类型和数量单位仍沿用旧账户的问题。
+- 修复了盈亏排行排序与翻页异常、今日统计切换账户后显示旧数据、持仓详情显示为 `--` 等问题。
+- 修复了本地数据库文件损坏时应用启动即崩溃的问题，现会自动备份并重建；修复了触控 ID 不可用时点击指纹按钮导致的崩溃。
