@@ -63,6 +63,7 @@ jobs:
             --commit-hash=${{ github.event.pull_request.head.sha }}
             --commit-dirty=true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      # The @mention notifies the author once, when the comment is first created; later pushes only edit it
       - name: Comment preview links
         if: steps.deploy.outcome == 'success'
         uses: marocchino/sticky-pull-request-comment@v2
@@ -71,6 +72,7 @@ jobs:
           message: |
             ### Preview
 
+            @${{ github.event.pull_request.user.login }} the preview is ready, please check it:
             ${{ steps.deploy.outputs.pages-deployment-alias-url }}
 
             Drafts are included. This link always shows the latest commit of this PR and stops working when the PR is closed.
