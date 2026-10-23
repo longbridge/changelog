@@ -1,0 +1,27 @@
+---
+product: longbridge-pro
+version: 0.18.2-preview.1
+tag: v0.18.2-preview.1
+locale: zh-CN
+title: "MACD 指标参数可以正常编辑了"
+summary: "开关 VPN / 代理后会自动重连，不再无响应；自选股按周涨跌幅排序正确了。"
+highlights: []
+topics: []
+releasedAt: 2026-07-28T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/preview/v0.18.2-preview.1.md
+prerelease: true
+---
+
+## 优化
+
+- 修复了含颜色参数的指标脚本（如 MACD）解析失败的问题，MACD 的指标设置面板现在可正常编辑参数。
+- 优化系统代理变化检测，「不使用系统代理」模式下开关 VPN / 代理工具后自动重建网络连接，避免请求长时间无响应。
+- 修复了自选股按「周涨跌幅」列排序结果不正确的问题。

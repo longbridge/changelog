@@ -1,0 +1,30 @@
+---
+product: longbridge-pro
+version: 0.19.0-preview.1
+tag: v0.19.0-preview.1
+locale: zh-HK
+title: "量化指標可設縮寫，止盈止損加減號不再抹掉小數"
+summary: "網格交易通知會顯示歸屬帳戶；Windows 上網格下單視窗的關閉按鈕回來了。"
+highlights: []
+topics:
+  - 量化
+releasedAt: 2026-08-19T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-HK/release-notes/preview/v0.19.0-preview.1.md
+prerelease: true
+---
+
+## 優化
+
+- **量化**：指標設定面板新增「縮寫」輸入項，支援唯一性校驗、儲存後鎖定，不再只能以指標名稱作為標識提交。
+- 修復止盈止損盈虧率點擊加減號時小數位被抹掉的問題（如 10.23 點加號後變成 11 而非 11.23）。
+- 網格交易推送通知底部現會顯示歸屬帳戶，多帳戶下可分清推送來源；「暫停」通知改為成功樣式，不再顯示為警告。
+- 修復網格交易下單視窗在 Windows 上缺少最小化/最大化/關閉按鈕的問題。
+- 修復股票篩選器首頁描述過長時不換行溢出、網格交易提交成功提示不顯示文案的問題。

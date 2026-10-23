@@ -1,0 +1,37 @@
+---
+product: longbridge-pro
+version: 0.2.3-preview.0
+tag: v0.2.3-preview.0
+locale: zh-CN
+title: "Cmd+H 隐藏窗口，自选无行情标的不再拉高 CPU"
+summary: "Cmd+H 隐藏窗口，自选无行情标的不再拉高 CPU；新旧版本的数据设置不共享。"
+highlights: []
+topics: []
+releasedAt: 2025-05-29T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/preview/v0.2.3-preview.0.md
+prerelease: true
+---
+
+## 新增
+- 现在支持通过 `Cmd + h` 快捷键快速隐藏窗口，提升工作区管理效率。
+
+## 优化
+- 修复自选列表中无行情标的导致的系统 CPU 占用过高问题，提升运行效率。
+- 优化图表渲染机制，提升绘制精度与性能。
+- 优化鼠标悬停和拖拽操作的响应速度，确保流畅体验。
+- 优化图表指标设置布局，提升用户界面友好性。
+- 优化股票行情刷新频率，提升数据展示及时性。
+- 修复网络重连后图表范围切换错误问题，确保显示准确。
+- 修复首次启动时多次触发更新检查的问题，优化启动流程。
+- 修复多账户切换时模拟账户初次登录仍需输入交易密码的问题，提升多账户体验。
+- 优化存储机制，提升应用稳定性。
+  > **新旧版本数据设置不共享**, 当首次打开新版本（v0.2.3-preview.0 及以后）时，老版本打开的个股标签页会同步一次到新版本。此后老版本（v0.2.3-preview.0 以前）再次打开的个股标签页将不会在新版本中显示。新版本打开的个股标签页也不会在老版本中显示。
+- 修复少量导致界面卡顿的性能问题，确保更流畅的体验。

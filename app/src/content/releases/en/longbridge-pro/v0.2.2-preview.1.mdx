@@ -1,0 +1,40 @@
+---
+product: longbridge-pro
+version: 0.2.2-preview.1
+tag: v0.2.2-preview.1
+locale: en
+title: "Keyboard shortcuts for switching tabs on macOS"
+summary: "On macOS, Cmd-1 to Cmd-9 switch main tabs and Ctrl-1 to Ctrl-9 switch stock detail tabs; option depth data push is available too."
+highlights: []
+topics: []
+releasedAt: 2025-05-16T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/release-notes/preview/v0.2.2-preview.1.md
+prerelease: true
+---
+
+## New Features
+
+- Added shortcuts on macOS: Cmd-1 to Cmd-9 for switching main tabs, and Ctrl-1 to Ctrl-9 for switching stock detail tabs.
+- Added tooltips for the short sell chart.
+- Added subscription for option depth data push.
+
+## Optimizations
+
+- Improved chart data loading logic to correctly reload chart when trade status changes.
+- Enhanced chart rendering performance using GPUI rendering paths.
+  - Optimized indices chart rendering.
+  - Optimized flow chart rendering.
+  - Optimized distribution chart rendering.
+  - Optimized short sell and position charts.
+- Optimized initial stock list selection logic.
+- Fixed timeline flash point position to ensure proper display.
+- Improved bar chart rendering for better visualization.
+- Fixed panel resizing issues for smoother user experience.

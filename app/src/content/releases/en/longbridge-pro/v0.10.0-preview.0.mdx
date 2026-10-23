@@ -1,0 +1,47 @@
+---
+product: longbridge-pro
+version: 0.10.0-preview.0
+tag: v0.10.0-preview.0
+locale: en
+title: "Today's Statistics panel, plus trading in a separate window"
+summary: "The Today's Statistics panel in the portfolio tab gives a clear view of daily profit and loss; the trading window now opens as a separate window for multi-screen setups."
+highlights: []
+topics:
+  - Portfolio
+releasedAt: 2025-11-20T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/release-notes/preview/v0.10.0-preview.0.md
+prerelease: true
+---
+
+## New Features
+
+- **Portfolio**: Added "Today's Statistics" panel to the portfolio tab, providing a clearer overview of daily profit and loss data.
+
+## Optimizations
+
+#### Trading
+
+- Optimized trading window display from modal to independent window mode, offering more flexible multi-screen operation experience.
+- Optimized post-order status notification mechanism to ensure reminders only occur after trading is activated.
+- Fixed duplicate order error notifications to avoid misleading repeated alerts.
+- Fixed issue where clearing stock codes in order filters was not working.
+
+#### Login
+
+- Optimized country/region selection list search feature in login window, making it more convenient to find and select countries or regions.
+- Fixed app update status error when login window is closed.
+
+#### Others
+
+- Optimized intraday chart background transparency details, enhancing visual effects.
+- Optimized custom workspace tab initialization timing, improving loading speed for custom workspaces.
+- Added success and failure status icons during app updates, making update progress more intuitive.
+- Fixed issue where market index quote details were not reloaded after network reconnection, ensuring data remains up-to-date.
