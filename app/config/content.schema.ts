@@ -28,6 +28,8 @@ export const releaseSchema = z.object({
   topics: z.array(z.string()).default([]),
   releasedAt: z.coerce.date(),
   platforms: z.array(z.string()).default([]),
+  /** 预发布版本（preview / beta）：照常展示，带「预览版」角标，同一天里排在正式版后面 */
+  prerelease: z.boolean().default(false),
   /** draft 仅本地可见；skipped 永不展示（原文无对外价值） */
   status: z.enum(STATUSES).default('draft'),
   /** 这份内容是从别的语言占位来的，pending 表示还没翻译 */

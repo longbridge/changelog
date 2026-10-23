@@ -95,6 +95,7 @@ export const t = {
     en: 'No release notes published yet.',
   },
   draftBadge: { 'zh-CN': '草稿', 'zh-HK': '草稿', en: 'Draft' },
+  prereleaseBadge: { 'zh-CN': '预览版', 'zh-HK': '預覽版', en: 'Preview' },
   draftNotice: {
     'zh-CN': '本地预览模式：以下包含尚未定稿的草稿内容，不会出现在正式站点。',
     'zh-HK': '本地預覽模式：以下包含尚未定稿的草稿內容，不會出現在正式網站。',

@@ -4,15 +4,27 @@ import { formatDate, type Locale } from '@lib/i18n'
 interface Props {
   locale: Locale
   releasedAt: Date
+  /** 小版本号。大版本页一页里排着好几个小版本，每一节都标上，滚到哪里都知道在看哪一版 */
+  version?: string
   isDraft?: boolean
   draftLabel?: string
+  /** 预发布版本的角标文案，正式版不传 */
+  prereleaseLabel?: string
 }
 
-const { locale, releasedAt, isDraft, draftLabel } = Astro.props
+const { locale, releasedAt, version, isDraft, draftLabel, prereleaseLabel } = Astro.props
 ---
 
 <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[0.8125rem] text-ink-soft">
+  {version && <span class="version-chip tnum">v{version}</span>}
   <time datetime={releasedAt.toISOString()} class="tnum">{formatDate(releasedAt, locale)}</time>
+  {
+    prereleaseLabel && (
+      <span class="prerelease-badge rounded-md border px-1.5 py-0.5 text-[0.75rem]">
+        {prereleaseLabel}
+      </span>
+    )
+  }
   {
     isDraft && (
       <span class="draft-badge rounded-md border px-1.5 py-0.5 text-[0.75rem]">

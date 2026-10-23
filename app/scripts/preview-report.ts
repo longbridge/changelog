@@ -4,9 +4,12 @@
  *   bun run preview:report                 # 与 main 比较
  *   bun run preview:report --base develop
  *   bun run preview:report --all           # 不比较，列出所有非 published 的内容
+ *   bun run preview:report --site https://pr-12.example.pages.dev --links links.md
+ *                                          # 另外把改动版本的三语直达链接写成 Markdown，给 PR 评论用
  *
  * 产出：
  *   dist/preview/index.html   本地预览的入口页，逐条链到对应版本页
+ *   --links 指定的文件         每个改动版本一行，链到 --site 上对应语言的页面
  */
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -224,6 +227,29 @@ function inspect(group: Group): Problem[] {
 const report = ordered.map((group) => ({ group, problems: inspect(group) }))
 const errorCount = report.reduce((n, item) => n + item.problems.filter((p) => p.level === 'error').length, 0)
 const warnCount = report.reduce((n, item) => n + item.problems.filter((p) => p.level === 'warn').length, 0)
+
+// ---------- PR 评论里的直达链接 ----------
+
+// preview 工作流把这份 Markdown 贴进 PR 评论：审核的人点一下就到改动的那一版，不用自己拼地址。
+// 比较不出变更集、或这次没动版本内容（纯代码改动）时写空文件，评论里就只剩站点根地址。
+const linksFile = typeof flags.links === 'string' ? flags.links : undefined
+if (linksFile) {
+  const site = (typeof flags.site === 'string' ? flags.site : '').replace(/\/$/, '')
+  const lines = changed
+    ? report.map(({ group }) => {
+        const product = getProduct(group.product)?.name[DEFAULT_LOCALE] ?? group.product
+        const major = majorOf(group.version)
+        const links = LOCALES.map((locale) => {
+          const entry = group.byLocale[locale]
+          if (!entry) return `~~${locale}~~`
+          return `[${locale}](${site}/${locale}/${SITE_SEGMENT}/${group.product}/v${major}#${entry.slug})`
+        })
+        return `- **${product} ${group.version}** · ${links.join(' · ')}`
+      })
+    : []
+  const markdown = lines.length ? `Changed in this PR:\n\n${lines.join('\n')}\n` : ''
+  await fs.writeFile(linksFile, markdown, 'utf8')
+}
 
 // ---------- 预览入口页 ----------
 

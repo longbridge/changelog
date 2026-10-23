@@ -247,6 +247,23 @@ body {
   color: var(--color-ink);
 }
 
+/* 小版本节的版本号：等宽小字，和日期并排，与侧栏里的版本号对得上 */
+.version-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  background: var(--color-rule);
+  color: var(--color-ink);
+}
+
+/* 预览版角标：用产品强调色区分于草稿的警示色，它是对外内容 */
+.prerelease-badge {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, white);
+  color: var(--color-ink);
+}
+
 /* 关掉这一次导航的共享元素过渡，理由见 BaseLayout 里的说明。
    用 CSS 盖掉而不是摘 scope 属性——属性摘了页面落地后就再也长不回来 */
 html[data-no-shared-transition] [data-astro-transition-scope] {
@@ -922,6 +939,9 @@ html[data-no-shared-transition] [data-astro-transition-scope] {
 .version-rail__version {
   font-size: 0.8125rem;
   font-weight: 500;
+  /* 1.0.0-preview.4 这种带后缀的版本号别折成两行，列表的节奏会乱。
+     预览版在这里不再加角标：后缀本身已经说明了，栏宽也放不下 */
+  white-space: nowrap;
 }
 
 .version-rail__date {

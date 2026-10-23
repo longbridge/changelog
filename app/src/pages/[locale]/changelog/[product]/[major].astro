@@ -209,9 +209,11 @@ const alternates = Object.fromEntries(
             <div class="mt-2">
               <Meta
                 locale={locale}
+                version={release.data.version}
                 releasedAt={release.data.releasedAt}
                 isDraft={release.data.status === 'draft'}
                 draftLabel={t.draftBadge[locale]}
+                prereleaseLabel={release.data.prerelease ? t.prereleaseBadge[locale] : undefined}
               />
             </div>
             {release.data.summary && (

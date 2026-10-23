@@ -15,9 +15,13 @@ export const isVisible = (entry: Release): boolean =>
 
 export const hasDrafts = showDrafts
 
-/** 0.9.0 要排在 0.10.0 前面，字符串比较做不到，按段比 */
+/**
+ * 0.9.0 要排在 0.10.0 前面，字符串比较做不到，按段比。
+ * 预发布的后缀（1.0.0-preview.4 的 preview）算作 -1：同一天里正式版 1.0.0 排在它的预览版前面
+ */
 function compareVersion(a: string, b: string): number {
-  const parse = (value: string) => value.split(/[.\-+]/).map((part) => Number(part) || 0)
+  const parse = (value: string) =>
+    value.split(/[.\-+]/).map((part) => (/^\d+$/.test(part) ? Number(part) : -1))
   const left = parse(a)
   const right = parse(b)
   for (let i = 0; i < Math.max(left.length, right.length); i++) {

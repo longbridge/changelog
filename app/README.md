@@ -144,6 +144,8 @@ A `repo-docs` configuration looks like this:
 }
 ```
 
+Add `prerelease: true` for a directory that only holds preview builds (Longbridge Pro keeps them in `docs/<locale>/release-notes/preview/`): the entries are fetched, shown with a "Preview" badge and, within the same day, sorted after the stable release. `since: 'YYYY-MM-DD'` limits a source to versions released on or after that date.
+
 `<video>` and `<img>` in the source are replaced with the site's `<Video>` / `<Figure>` components, and the source site's `<style>` and layout wrappers are dropped.
 Set `RELEASE_NOTES_GH_TOKEN` to raise the GitHub API rate limit; CI uses the workflow's built-in token.
 
