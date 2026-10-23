@@ -1,0 +1,38 @@
+---
+product: longbridge-pro
+version: 0.2.2-preview.1
+tag: v0.2.2-preview.1
+locale: zh-CN
+title: "macOS 可用快捷键切换标签页和个股页"
+summary: "Cmd 加数字切换主标签页，Ctrl 加数字切换个股页；期权深度行情可订阅推送。"
+highlights: []
+topics: []
+releasedAt: 2025-05-16T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/preview/v0.2.2-preview.1.md
+prerelease: true
+---
+
+## 新增
+
+- 新增在 macOS 上使用 Cmd-1 至 Cmd-9 快捷方式切换主标签页，使用 Ctrl-1 至 Ctrl-9 快捷方式切换股票详情页。
+- 新增针对空头交易图表的工具提示。
+- 新增订阅期权深度推送数据功能。
+
+## 优化
+
+- 优化图表数据加载逻辑，当交易状态发生变化时能正确重新加载图表。
+- 优化图表绘制，支持 GPUI 渲染路径以改善性能。
+  - 优化指数图表绘制。
+  - 优化流量图表绘制。
+  - 优化分布图表绘制。
+  - 优化空头交易和持仓图表。
+- 优化初始选中股票列表逻辑。
+- 优化面板尺寸调整问题，改善用户体验。

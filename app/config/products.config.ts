@@ -179,8 +179,7 @@ export const products: ProductConfig[] = [
         limit: 100,
       },
       {
-        // 同一个仓库的 preview 目录：预览版，正式版发布前先在这里公开。
-        // 历史上的预览版已被各自的正式版覆盖，只从 1.0.0 的预览版开始收
+        // 同一个仓库的 preview 目录：预览版，正式版发布前先在这里公开
         provider: 'repo-docs',
         repo: 'longbridge/longbridge-desktop-website',
         ref: 'main',
@@ -193,7 +192,6 @@ export const products: ProductConfig[] = [
         ignore: ['index.md'],
         preferredSource: 'zh-CN',
         prerelease: true,
-        since: '2026-09-01',
         platforms: ['macOS', 'Windows', 'Linux'],
         limit: 100,
       },

@@ -1,0 +1,43 @@
+---
+product: longbridge-pro
+version: 0.16.0-preview.0
+tag: v0.16.0-preview.0
+locale: zh-CN
+title: "图表可单独缩放价格区间，期权链里能查财报"
+summary: "主图右键可直接切 K 线和复权；个股和自选股能看最近公司行动，「融资状态」改版。"
+highlights: []
+topics:
+  - 图表
+  - 行情
+  - 期权链
+  - 资产
+  - 公告
+releasedAt: 2026-04-30T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/preview/v0.16.0-preview.0.md
+prerelease: true
+---
+
+## 新增
+
+- **图表**：新增 Y 轴缩放，支持独立缩放价格区间，方便回看大波动行情。
+- **图表**：在主行情图表上新增右键菜单，可直接切换 K 线类型 / 复权方式 / 分时模式 / 打开交易 / 图表设置，无需跳转到全局设置。
+- **行情**：新增活动，在个股详情和自选股列表里可一眼看到最近的公司行动或重要资讯。
+- **期权链**：在期权链中新增财报面板，看期权的同时也能查基本面，无需来回切换。
+- **资产**：全新的「融资状态」界面，支持更多融资相关信息查看和调额功能。
+- **公告**：新增系统公告功能。
+- **登录**：新增重置密码功能。
+
+## 优化
+
+- 订单推送通知新增账户名展示，并对模拟账户静音成交提示音，避免把模拟单误认为实盘。
+- 修复了快捷改单多订单快速改单时的状态干扰。
+- 优化交易密码流程，撤单等功能校验成功后无需重复操作。
+- 修复从需要交易密码的账户切到不需要密码的账户后，资产数据无法显示的问题
