@@ -1,0 +1,89 @@
+---
+product: longbridge-ai
+version: 1.6.0
+tag: v1.6.0
+locale: en
+title: "Connect accounts and load live data on demand"
+summary: "Load live data in web pages, manage connector accounts and filter conversations that need attention."
+highlights:
+  - "Load live data on demand"
+  - "Manage connector accounts"
+  - "Filter conversations"
+releasedAt: 2026-11-02T00:00:00.000Z
+platforms: [Web]
+status: published
+source:
+  provider: manual
+  repo: releases/longbridge-ai/1.6.0.md
+  url: https://longbridge.com
+---
+
+Unless otherwise noted, these interface updates are available on Web; AI embedded in the App will receive them through upcoming App releases. Answer improvements to stock identification, Chinese character variants, market time zones, news links and generated-file checks are now available on Web and in AI embedded in the Hong Kong and Singapore Apps, excluding the US App.
+
+## Highlights
+
+### Read live data on demand in web pages
+
+AI-generated pages in the artifact panel or My artifacts, as well as online pages, can load live data on demand, with public quotes following the selected security or period and online pages supporting action buttons. Account data uses each viewer’s authorization and data-fetch parameters are fixed at publication; changed button settings require another click and confirmation, data coverage is unchanged, and buttons cannot place orders or publish public posts.
+
+<Figure src="/assets/longbridge-ai/1.6.0/live-page-en.webp" alt="Read public quotes in a web artifact" caption="View public quotes in the artifact preview" width={2400} height={1069} />
+
+### Manage multiple connector accounts
+
+Add accounts to supported connectors and rename them, set a primary account, reauthorize or disconnect them under Connected accounts. Mention an account nickname or email in conversation to use it; otherwise the primary account is used, and only the expired account needs reauthorization.
+
+<Figure src="/assets/longbridge-ai/1.6.0/notion-en.webp" alt="Manage two accounts in one connector" caption="View two connected Notion accounts and their account management menus" width={2400} height={1069} />
+
+### Filter conversations that need attention
+
+Switch to Needs attention in the sidebar to filter conversations that are generating, have new replies, await confirmation or have failed, with a pending count that excludes scheduled-task conversations. The view returns to all conversations when items are handled, and the toggle is hidden when statuses do not differ.
+
+<Figure src="/assets/longbridge-ai/1.6.0/filter-en.webp" alt="Filter chats in progress" caption="Filter conversations by their running status" width={2400} height={1069} />
+
+## LongbridgeAI
+
+**New features:**
+
+1. **Links to original news articles**: Ask for an original news article, and AI can provide a news link from its query results so you can read further. Existing restrictions on links and buttons within the App remain unchanged.
+2. **Open the full conversation page from the website**: From the top of the AI embedded in the Longbridge website, you can open the full version in a new tab.
+
+**Improvements:**
+
+1. **Stock identification in questions**: Ask about a company or stock by name, and AI identifies the relevant security first to reduce repeated questions about its listing market. Companies listed in multiple markets are handled by their primary listing; A-share and Hong Kong listings are shown together when a company has both.
+2. **Schedule tasks at any minute**: When creating or editing a scheduled task on Web, you can select any minute from 00:00–23:59 instead of only quarter-hour intervals. Failed task runs display a notification. After you create or edit a scheduled task through conversation, the reply no longer shows an internal task ID.
+
+3. **Market sessions and time zones**: Market answers distinguish the latest intraday price from the closing price, as well as US pre-market, after-hours and overnight sessions. Trading dates include the market's time zone, with Beijing time added where needed.
+4. **Use simplified or traditional Chinese on request**: Ask for simplified or traditional Chinese in a conversation, and the answer uses the requested character form; otherwise, it follows the interface language.
+5. **Keep drafts and attachments after refreshing**: Unsent drafts and uploaded attachments in the conversation input remain available after you refresh the page. Attachments are saved separately for each conversation.
+6. **Attachment uploads and input controls**: You can preview attachments in the input area and retry failed uploads in place. Before sending, you will be asked to confirm any failed attachments; duplicates are removed automatically. Pasted long text can be expanded for editing. Manual text edits made during voice input are no longer overwritten, and denied microphone permission is explained.
+7. **Question and order confirmation cards**: Confirmation cards use a consistent layout for questions, options and progress. Selecting a single-choice answer or strategy advances directly to the next step; multiple-choice answers and free text still require confirmation. Order confirmation groups the side, symbol, quantity, price, order type and validity, among other details. Limit orders also show an estimated amount excluding fees for review before submission.
+8. **Answer display and status indicators**: A newly sent question scrolls into view if it is obscured. Large bursts of answer text no longer flicker, and unfinished heading and list markers remain hidden. Reasoning shows elapsed time. Stopped answers are labeled as stopped, and you are notified when requests are too frequent. Images, charts and code also show their loading failure states.
+9. **View plans, usage and bills**: The current plan in settings, plan page, usage page and billing page have updated layouts. Subscriptions purchased through another App indicate where to cancel them.
+10. **Links and questions in conversations**: Click an obscured question to expand it. Email and telephone links in answers open the corresponding applications.
+11. **Content checks for generated files**: When you ask AI to generate an artifact file, it adds a step to read and check the contents before delivery, then describes what the file contains.
+12. **Handling guest questions**: Visitors eligible to ask questions without signing in receive a sign-in prompt for account-related requests, while the parts of the same question that can be answered directly are still handled. Existing eligibility and question limits remain unchanged.
+
+**Bug fixes:**
+
+1. **Switching conversations and reading answers**: New conversations no longer briefly show the previous artifact panel, and citation cards no longer disappear on hover. Fixed the display order after stopping parallel tools and active conversations being replaced by a loading screen. Reading a long answer no longer forces you to the bottom.
+
+**Usage changes:**
+
+1. **Resume monthly renewal before expiry**: If you have canceled automatic renewal, you can renew directly before your subscription expires without purchasing again. Renewing restores automatic monthly renewal.
+2. **Connector authorization on older desktop versions**: Longbridge desktop versions before 1.1.0 no longer open connector authorization. To authorize a connector, use connector management on Web.
+3. **Scope of watchlist hotspot answers**: The watchlist hotspot entry answers preset questions without using personal memory or account data; answers to the same question may be reused for 15 minutes. Follow-up questions return to the main conversation entry.
+
+## My Agents and workflow building
+
+**New features:**
+
+1. **Display Agents by the reader's language**: Enable automatic marketplace translation in Agent publishing settings to translate the name and description the next time you publish. The marketplace filters Agents by the reader's language.
+2. **More model choices**: Agent model selection includes gpt-6.1-terra and deepseek-v4.1-flash-1017. Usage is charged at the selected model's model-card prices.
+
+**Improvements:**
+
+1. **Search knowledge in a specific document**: Knowledge retrieval can be limited to a specified document. Results include file names so you can check their sources.
+
+**Bug fixes:**
+
+1. **Workflow confirmations and run logs**: Fixed the outer workflow getting stuck when a parallel branch awaits human confirmation. LLM nodes output all content before signaling completion. Run logs display questions and answers correctly, and title and answer searches are case-insensitive. Statistics fixes address errors caused by missing values, old data briefly appearing when switching, and date-language issues.
