@@ -191,100 +191,33 @@ When creating or editing a scheduled task on Web, you can select any minute from
 
 <Figure src="/assets/longbridge-ai/1.6.0/minute-en.webp" alt="Schedule tasks to the minute" caption="Set the daily task time to 09:17" width={2400} height={1069} />
 
-## More updates
-
-### Use simplified or traditional Chinese on request
-
-Specify simplified or traditional Chinese in your conversation to use that character form. Otherwise, the answer follows the interface language.
-
-<details>
-<summary>Usage details</summary>
-
-Ask for simplified or traditional Chinese in a conversation, and the answer uses the requested character form; otherwise, it follows the interface language. This change concerns character forms and does not imply a switch between written and colloquial styles.
-
-</details>
-
-### Attachment uploads and input controls
-
-Preview attachments in the input area and retry failed uploads in place. Expand pasted long text to edit it.
-
-<details>
-<summary>Usage details</summary>
-
-You can preview attachments in the input area and retry failed uploads in place. Before sending, you will be asked to confirm any failed attachments; duplicates are removed automatically. Pasted long text can be expanded for editing. Manual text edits made during voice input are no longer overwritten, and denied microphone permission is explained.
-
-</details>
-
-### Search knowledge in a specific document
-
-Limit knowledge retrieval to a specified document. Results show file names for checking sources.
-
-<details>
-<summary>Usage details</summary>
-
-Knowledge retrieval can be limited to a specified document. Results include file names so you can check their sources.
-
-</details>
-
-### Handling guest questions
-
-Guest questions that involve an account receive a sign-in prompt. Parts that can be answered directly are still handled.
-
-<details>
-<summary>Usage details</summary>
-
-Visitors eligible to ask questions without signing in receive a sign-in prompt for account-related requests, while the parts of the same question that can be answered directly are still handled. Existing eligibility and question limits remain unchanged.
-
-</details>
-
-### Resume monthly renewal before expiry
-
-Renew a subscription with canceled automatic renewal before it expires. Renewing restores automatic monthly renewal.
-
-<details>
-<summary>Usage details</summary>
-
-If you have canceled automatic renewal, you can renew directly before your subscription expires without purchasing again. Renewing restores automatic monthly renewal.
-
-</details>
-
-### Scope of watchlist hotspot answers
-
-Watchlist hotspots provide shared answers to preset questions without using personal memory or account data. Follow-up questions return to the main conversation entry.
-
-<details>
-<summary>Usage details</summary>
-
-The watchlist hotspot entry answers preset questions without using personal memory or account data; answers to the same question may be reused for 15 minutes. Follow-up questions return to the main conversation entry.
-
-</details>
-
 ## LongbridgeAI
 
 **Improvements:**
 
-
-1. **Answer display and status indicators**: A newly sent question scrolls into view if it is obscured. Large bursts of answer text no longer flicker, and unfinished heading and list markers remain hidden. Reasoning shows elapsed time. Stopped answers are labeled as stopped, and you are notified when requests are too frequent. Images, charts and code also show their loading failure states.
-
-
-2. **Links and questions in conversations**: Click an obscured question to expand it. Email and telephone links in answers open the corresponding applications.
-
-
-3. **Content checks for generated files**: When you ask AI to generate an artifact file, it adds a step to read and check the contents before delivery, then describes what the file contains.
+1. **Use simplified or traditional Chinese on request**: Ask for simplified or traditional Chinese in a conversation, and the answer uses the requested character form; otherwise, it follows the interface language. This change concerns character forms and does not imply a switch between written and colloquial styles.
+2. **Attachment uploads and input controls**: You can preview attachments in the input area and retry failed uploads in place. Before sending, you will be asked to confirm any failed attachments; duplicates are removed automatically. Pasted long text can be expanded for editing. Manual text edits made during voice input are no longer overwritten, and denied microphone permission is explained.
+3. **Answer display and status indicators**: A newly sent question scrolls into view if it is obscured. Large bursts of answer text no longer flicker, and unfinished heading and list markers remain hidden. Reasoning shows elapsed time. Stopped answers are labeled as stopped, and you are notified when requests are too frequent. Images, charts and code also show their loading failure states.
+4. **Links and questions in conversations**: Click an obscured question to expand it. Email and telephone links in answers open the corresponding applications.
+5. **Content checks for generated files**: When you ask AI to generate an artifact file, it adds a step to read and check the contents before delivery, then describes what the file contains.
+6. **Handling guest questions**: Visitors eligible to ask questions without signing in receive a sign-in prompt for account-related requests, while the parts of the same question that can be answered directly are still handled. Existing eligibility and question limits remain unchanged.
 
 **Bug fixes:**
-
 
 1. **Switching conversations and reading answers**: New conversations no longer briefly show the previous artifact panel, and citation cards no longer disappear on hover. Fixed the display order after stopping parallel tools and active conversations being replaced by a loading screen. Reading a long answer no longer forces you to the bottom.
 
 **Usage changes:**
 
-
-1. **Connector authorization on older desktop versions**: Longbridge desktop versions before 1.1.0 no longer open connector authorization. To authorize a connector, use connector management on Web.
+1. **Resume monthly renewal before expiry**: If you have canceled automatic renewal, you can renew directly before your subscription expires without purchasing again. Renewing restores automatic monthly renewal.
+2. **Connector authorization on older desktop versions**: Longbridge desktop versions before 1.1.0 no longer open connector authorization. To authorize a connector, use connector management on Web.
+3. **Scope of watchlist hotspot answers**: The watchlist hotspot entry answers preset questions without using personal memory or account data; answers to the same question may be reused for 15 minutes. Follow-up questions return to the main conversation entry.
 
 ## My Agents and workflow building
 
-**Bug fixes:**
+**Improvements:**
 
+1. **Search knowledge in a specific document**: Knowledge retrieval can be limited to a specified document. Results include file names so you can check their sources.
+
+**Bug fixes:**
 
 1. **Workflow confirmations and run logs**: Fixed the outer workflow getting stuck when a parallel branch awaits human confirmation. LLM nodes output all content before signaling completion. Run logs display questions and answers correctly, and title and answer searches are case-insensitive. Statistics fixes address errors caused by missing values, old data briefly appearing when switching, and date-language issues.
