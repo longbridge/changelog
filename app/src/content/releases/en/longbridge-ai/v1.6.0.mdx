@@ -1,0 +1,290 @@
+---
+product: longbridge-ai
+version: 1.6.0
+tag: v1.6.0
+locale: en
+title: "Connect accounts and check market times and news sources"
+summary: "Manage multiple connector accounts, see market sessions and time zones in answers, and request links to original news articles."
+highlights:
+  - "Manage multiple connector accounts"
+  - "Market sessions and time zones"
+  - "Links to original news articles"
+releasedAt: 2026-11-02T00:00:00.000Z
+platforms: [Web]
+status: published
+source:
+  provider: manual
+  repo: releases/longbridge-ai/1.6.0.md
+  url: https://longbridge.com
+---
+
+Stock identification, Chinese character forms, market time zones, news sources, file checks and task replies are conversation updates; guest and watchlist hotspot updates apply to their respective entries. Other LongbridgeAI interface and interaction updates apply to Web. Interface updates for H5 mobile web and App will be announced separately for each platform.
+
+## Highlights
+
+### Manage multiple connector accounts
+
+Manage multiple accounts for supported third-party connectors. Name an account in your conversation to have AI use it.
+
+<details>
+<summary>Usage details</summary>
+
+Add multiple accounts to supported third-party connectors. In connected accounts, you can rename an account, set it as primary, reauthorize it or disconnect it. Mention its nickname or email address in a conversation to have AI use that account. Otherwise, AI uses the primary account. If authorization expires, only the affected account needs reauthorization.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/notion-en.webp" alt="Manage two accounts in one connector" caption="View two connected Notion accounts and their account management menus" width={2400} height={1069} />
+
+### Links to original news articles
+
+Ask AI for the original news article to get a link from its query results. Follow the link to read the source.
+
+<details>
+<summary>Usage details</summary>
+
+Ask for an original news article, and AI can provide a news link from its query results so you can read further. Existing restrictions on links and buttons within the App remain unchanged.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/news-en.webp" alt="Open the original news article" caption="Follow the link in an answer to read the original article" width={2400} height={1069} />
+
+### Read live data on demand in web pages
+
+Artifact pages can request live data on demand. Online websites can also connect to live data and action buttons.
+
+<details>
+<summary>Usage details</summary>
+
+AI-generated web pages in the conversation's artifact panel or My artifacts can request live data on demand. Online websites can also connect to live data and action buttons. Public market data can follow the symbol or time range selected on the page. Account data still uses the viewer's own authorization, with retrieval parameters fixed at publication. Changes to an action button's configuration require another click and confirmation. Data coverage is unchanged, and page buttons cannot place orders or perform public actions such as posting.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/live-page-en.webp" alt="Read public quotes in a web artifact" caption="View public quotes in the artifact preview" width={2400} height={1069} />
+
+### Filter conversations that need attention
+
+Filter conversations by status in the sidebar to find those needing attention. The pending count changes as you handle them.
+
+<details>
+<summary>Usage details</summary>
+
+Use the attention view in the sidebar to find conversations that are generating, have new replies, await confirmation or have failed, along with a count of pending conversations. The view returns to all conversations once they are handled. Conversations from scheduled tasks are excluded from the count. The view switch is hidden when there is no distinction between statuses.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/filter-en.webp" alt="Filter chats in progress" caption="Filter conversations by their running status" width={2400} height={1069} />
+
+### Display Agents by the reader's language
+
+Enable automatic translation for an Agent’s name and description to be translated the next time you publish. The marketplace filters Agents by the reader’s language.
+
+<details>
+<summary>Usage details</summary>
+
+Enable automatic marketplace translation in Agent publishing settings to translate the name and description the next time you publish. The marketplace filters Agents by the reader's language.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/gallery-en.webp" alt="View localized agent names and descriptions" caption="The same Agent appears in each marketplace language" width={2400} height={1069} />
+
+### More model choices
+
+Choose gpt-6.1-terra or deepseek-v4.1-flash-1017 in your Agent.
+
+<details>
+<summary>Usage details</summary>
+
+Agent model selection includes gpt-6.1-terra and deepseek-v4.1-flash-1017. Usage is charged at the selected model's model-card prices.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/models-en.webp" alt="Choose new models in ChatFlow" caption="Choose a model from the model list" width={2400} height={1069} />
+
+### Open the full conversation page from the website
+
+Open the full conversation page in a new tab from the top of the AI embedded in the website.
+
+<details>
+<summary>Usage details</summary>
+
+From the top of the AI embedded in the Longbridge website, you can open the full version in a new tab.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/fullpage-en.webp" alt="Open an embedded conversation in a full page" caption="Open the full conversation from the top of the embedded AI" width={2400} height={1069} />
+
+### Market sessions and time zones
+
+Market answers distinguish the latest price from the closing price and identify the trading session. Trading dates include the market's time zone to help you compare times across markets.
+
+<details>
+<summary>Usage details</summary>
+
+Market answers distinguish the latest intraday price from the closing price, as well as US pre-market, after-hours and overnight sessions. Trading dates include the market's time zone, with Beijing time added where needed.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/time-en.webp" alt="Distinguish sessions and time zones" caption="Answers label market sessions and their corresponding times" width={2400} height={1069} />
+
+### Keep drafts and attachments after refreshing
+
+Unsent drafts and uploaded attachments remain after refreshing. Attachments are saved separately for each conversation.
+
+<details>
+<summary>Usage details</summary>
+
+Unsent drafts and uploaded attachments in the conversation input remain available after you refresh the page. Attachments are saved separately for each conversation.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/draft-en.webp" alt="Keep drafts in an existing conversation" caption="Unsent text remains after refreshing an existing conversation" width={2400} height={1069} />
+
+### Question and order confirmation cards
+
+Confirmation cards group questions, options, and progress. Order confirmation lists quantity, price, and other details for review before submission.
+
+<details>
+<summary>Usage details</summary>
+
+Confirmation cards use a consistent layout for questions, options and progress. Selecting a single-choice answer or strategy advances directly to the next step; multiple-choice answers and free text still require confirmation. Order confirmation groups the side, symbol, quantity, price, order type and validity, among other details. Limit orders also show an estimated amount excluding fees for review before submission.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/question-en.webp" alt="Choose research sections with a question card" caption="Select a research question in the card to continue" width={2400} height={1069} />
+
+### View plans, usage and bills
+
+View your plan, usage, and bills in settings. Subscriptions purchased through another App indicate where to cancel them.
+
+<details>
+<summary>Usage details</summary>
+
+The current plan in settings, plan page, usage page and billing page have updated layouts. Subscriptions purchased through another App indicate where to cancel them.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/usage-en.webp" alt="View Starter usage" caption="Check weekly usage and capacity limits in settings" width={2400} height={1069} />
+
+### Stock identification in questions
+
+Ask about a company or stock by name with fewer repeated questions about its listing market. Multiple listings are handled by the primary listing or by showing both A-share and Hong Kong listings.
+
+<details>
+<summary>Usage details</summary>
+
+Ask about a company or stock by name, and AI identifies the relevant security first to reduce repeated questions about its listing market. Companies listed in multiple markets are handled by their primary listing; A-share and Hong Kong listings are shown together when a company has both.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/stock-en.webp" alt="Identify A- and H-share listings" caption="Answers list the A-share and Hong Kong codes for the same company" width={2400} height={1069} />
+
+### Schedule tasks at any minute
+
+Scheduled tasks on Web can run at any minute and show a notification when a run fails. Replies after creating or editing a task through conversation no longer show an internal ID.
+
+<details>
+<summary>Usage details</summary>
+
+When creating or editing a scheduled task on Web, you can select any minute from 00:00–23:59 instead of only quarter-hour intervals. Failed task runs display a notification. After you create or edit a scheduled task through conversation, the reply no longer shows an internal task ID.
+
+</details>
+
+<Figure src="/assets/longbridge-ai/1.6.0/minute-en.webp" alt="Schedule tasks to the minute" caption="Set the daily task time to 09:17" width={2400} height={1069} />
+
+## More updates
+
+### Use simplified or traditional Chinese on request
+
+Specify simplified or traditional Chinese in your conversation to use that character form. Otherwise, the answer follows the interface language.
+
+<details>
+<summary>Usage details</summary>
+
+Ask for simplified or traditional Chinese in a conversation, and the answer uses the requested character form; otherwise, it follows the interface language. This change concerns character forms and does not imply a switch between written and colloquial styles.
+
+</details>
+
+### Attachment uploads and input controls
+
+Preview attachments in the input area and retry failed uploads in place. Expand pasted long text to edit it.
+
+<details>
+<summary>Usage details</summary>
+
+You can preview attachments in the input area and retry failed uploads in place. Before sending, you will be asked to confirm any failed attachments; duplicates are removed automatically. Pasted long text can be expanded for editing. Manual text edits made during voice input are no longer overwritten, and denied microphone permission is explained.
+
+</details>
+
+### Search knowledge in a specific document
+
+Limit knowledge retrieval to a specified document. Results show file names for checking sources.
+
+<details>
+<summary>Usage details</summary>
+
+Knowledge retrieval can be limited to a specified document. Results include file names so you can check their sources.
+
+</details>
+
+### Handling guest questions
+
+Guest questions that involve an account receive a sign-in prompt. Parts that can be answered directly are still handled.
+
+<details>
+<summary>Usage details</summary>
+
+Visitors eligible to ask questions without signing in receive a sign-in prompt for account-related requests, while the parts of the same question that can be answered directly are still handled. Existing eligibility and question limits remain unchanged.
+
+</details>
+
+### Resume monthly renewal before expiry
+
+Renew a subscription with canceled automatic renewal before it expires. Renewing restores automatic monthly renewal.
+
+<details>
+<summary>Usage details</summary>
+
+If you have canceled automatic renewal, you can renew directly before your subscription expires without purchasing again. Renewing restores automatic monthly renewal.
+
+</details>
+
+### Scope of watchlist hotspot answers
+
+Watchlist hotspots provide shared answers to preset questions without using personal memory or account data. Follow-up questions return to the main conversation entry.
+
+<details>
+<summary>Usage details</summary>
+
+The watchlist hotspot entry answers preset questions without using personal memory or account data; answers to the same question may be reused for 15 minutes. Follow-up questions return to the main conversation entry.
+
+</details>
+
+## LongbridgeAI
+
+**Improvements:**
+
+
+1. **Answer display and status indicators**: A newly sent question scrolls into view if it is obscured. Large bursts of answer text no longer flicker, and unfinished heading and list markers remain hidden. Reasoning shows elapsed time. Stopped answers are labeled as stopped, and you are notified when requests are too frequent. Images, charts and code also show their loading failure states.
+
+
+2. **Links and questions in conversations**: Click an obscured question to expand it. Email and telephone links in answers open the corresponding applications.
+
+
+3. **Content checks for generated files**: When you ask AI to generate an artifact file, it adds a step to read and check the contents before delivery, then describes what the file contains.
+
+**Bug fixes:**
+
+
+1. **Switching conversations and reading answers**: New conversations no longer briefly show the previous artifact panel, and citation cards no longer disappear on hover. Fixed the display order after stopping parallel tools and active conversations being replaced by a loading screen. Reading a long answer no longer forces you to the bottom.
+
+**Usage changes:**
+
+
+1. **Connector authorization on older desktop versions**: Longbridge desktop versions before 1.1.0 no longer open connector authorization. To authorize a connector, use connector management on Web.
+
+## My Agents and workflow building
+
+**Bug fixes:**
+
+
+1. **Workflow confirmations and run logs**: Fixed the outer workflow getting stuck when a parallel branch awaits human confirmation. LLM nodes output all content before signaling completion. Run logs display questions and answers correctly, and title and answer searches are case-insensitive. Statistics fixes address errors caused by missing values, old data briefly appearing when switching, and date-language issues.
