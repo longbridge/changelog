@@ -38,6 +38,7 @@ interface Meta {
   highlights?: string[]
   status: 'draft' | 'published' | 'skipped'
   releasedAt: string
+  prerelease?: boolean
 }
 
 interface Entry {
@@ -242,7 +243,11 @@ if (linksFile) {
         const links = LOCALES.map((locale) => {
           const entry = group.byLocale[locale]
           if (!entry) return `~~${locale}~~`
-          return `[${locale}](${site}/${locale}/${SITE_SEGMENT}/${group.product}/v${major}#${entry.slug})`
+          // Previews have their own page, which works whether or not the preview is still listed
+          const href = entry.meta.prerelease
+            ? `${site}/${locale}/${SITE_SEGMENT}/${group.product}/v${major}/${entry.slug}`
+            : `${site}/${locale}/${SITE_SEGMENT}/${group.product}/v${major}#${entry.slug}`
+          return `[${locale}](${href})`
         })
         return `- **${product} ${group.version}** · ${links.join(' · ')}`
       })
@@ -266,7 +271,10 @@ const rows = report
     const links = LOCALES.map((locale) => {
       const entry = group.byLocale[locale]
       if (!entry) return `<span class="lang lang--missing">${locale}</span>`
-      return `<a class="lang" href="../${locale}/${SITE_SEGMENT}/${group.product}/v${major}/index.html#${entry.slug}">${locale}</a>`
+      const href = entry.meta.prerelease
+        ? `../${locale}/${SITE_SEGMENT}/${group.product}/v${major}/${entry.slug}/index.html`
+        : `../${locale}/${SITE_SEGMENT}/${group.product}/v${major}/index.html#${entry.slug}`
+      return `<a class="lang" href="${href}">${locale}</a>`
     }).join('')
 
     const primary = group.byLocale[DEFAULT_LOCALE] ?? Object.values(group.byLocale)[0]

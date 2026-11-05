@@ -27,7 +27,9 @@ export default defineConfig({
         LOCALES.some((locale) => new URL(page).pathname.includes(`/${locale}/${SITE_SEGMENT}`)) &&
         !page.includes('/preview') &&
         // 不带 v 的旧大版本地址只是跳转页
-        !new RegExp(`/${SITE_SEGMENT}/[^/]+/\\d[^/]*/?$`).test(new URL(page).pathname),
+        !new RegExp(`/${SITE_SEGMENT}/[^/]+/\\d[^/]*/?$`).test(new URL(page).pathname) &&
+        // Preview pages are reachable by link only, see previewPath()
+        !new RegExp(`/${SITE_SEGMENT}/[^/]+/v[^/]+/[^/]+/?$`).test(new URL(page).pathname),
       // 地址统一成不带尾斜杠
       serialize: (item) => ({ ...item, url: item.url.replace(/\/$/, '') }),
       i18n: {

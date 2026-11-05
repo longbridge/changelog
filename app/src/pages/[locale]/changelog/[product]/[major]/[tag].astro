@@ -1,0 +1,110 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { render } from 'astro:content'
+import BaseLayout from '@layouts/BaseLayout.astro'
+import Meta from '@components/Meta.astro'
+import Callout from '@components/Callout.astro'
+import Figure from '@components/release/Figure.astro'
+import Video from '@components/release/Video.astro'
+import Compare from '@components/release/Compare.astro'
+import Steps from '@components/release/Steps.astro'
+import Step from '@components/release/Step.astro'
+import Demo from '@components/release/Demo.astro'
+import Kbd from '@components/release/Kbd.astro'
+import LinkPreview from '@components/release/LinkPreview.astro'
+import { LOCALES, localePath, majorSegment, previewPath, t, type Locale } from '@lib/i18n'
+import { getProduct, majorOf } from '@config/products.config'
+import { listPreviews, slugOf, type Release } from '@lib/releases'
+
+/** Same map as the major page, so preview MDX renders the same here */
+const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd, LinkPreview, a: LinkPreview }
+
+/**
+ * Every preview gets a page of its own, listed or not, so its URL works from the day it ships.
+ * Lists and major pages only show the newest preview (see splitPreviews in @lib/releases);
+ * older ones are reachable only through this URL.
+ */
+export const getStaticPaths = (async () => {
+  const byLocale = new Map<Locale, Release[]>()
+  for (const locale of LOCALES) byLocale.set(locale, await listPreviews(locale))
+
+  return LOCALES.flatMap((locale) =>
+    (byLocale.get(locale) ?? []).map((release) => {
+      const slug = slugOf(release)
+      const major = majorOf(release.data.version)
+      return {
+        params: { locale, product: release.data.product, major: majorSegment(major), tag: slug },
+        props: {
+          release,
+          // The language switcher goes to the same preview where it exists, otherwise the product page
+          alternates: Object.fromEntries(
+            LOCALES.map((item) => [
+              item,
+              (byLocale.get(item) ?? []).some(
+                (candidate) =>
+                  candidate.data.product === release.data.product && slugOf(candidate) === slug,
+              )
+                ? previewPath(item, release.data.product, major, slug)
+                : localePath(item, release.data.product),
+            ]),
+          ),
+        },
+      }
+    }),
+  )
+}) satisfies GetStaticPaths
+
+const locale = Astro.params.locale as Locale
+const { release, alternates } = Astro.props as {
+  release: Release
+  alternates: Partial<Record<Locale, string>>
+}
+const product = getProduct(release.data.product)
+const productName = product?.name[locale] ?? release.data.product
+const { Content } = await render(release)
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${productName} ${release.data.version} · ${release.data.title}`}
+  description={release.data.summary || product?.summary[locale]}
+  alternates={alternates}
+  accent={product?.accent}
+  activeProduct={release.data.product}
+  noindex
+  breadcrumbs={[
+    { name: t.allProducts[locale], path: localePath(locale) },
+    { name: productName, path: localePath(locale, release.data.product) },
+    { name: release.data.title },
+  ]}
+>
+  <a
+    href={localePath(locale, release.data.product)}
+    class="mb-4 inline-block text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
+    >← {productName}</a
+  >
+
+  <article id={slugOf(release)}>
+    <h1 class="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-[2rem]">
+      {release.data.title}
+    </h1>
+    <div class="mt-3">
+      <Meta
+        locale={locale}
+        version={release.data.version}
+        releasedAt={release.data.releasedAt}
+        isDraft={release.data.status === 'draft'}
+        draftLabel={t.draftBadge[locale]}
+        prereleaseLabel={t.prereleaseBadge[locale]}
+      />
+    </div>
+    {
+      release.data.summary && (
+        <p class="mt-5 text-[1.0625rem] leading-relaxed text-ink-soft">{release.data.summary}</p>
+      )
+    }
+    <div class="prose mt-8">
+      <Content components={mdxComponents} />
+    </div>
+  </article>
+</BaseLayout>
