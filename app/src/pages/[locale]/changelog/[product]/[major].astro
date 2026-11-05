@@ -18,10 +18,10 @@ import LinkPreview from '@components/release/LinkPreview.astro'
 /** MDX 正文里可以直接使用这些组件，无需在每篇里 import */
 /** 正文里的 Markdown 链接也走 LinkPreview，不用每条外链都手写标签 */
 const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd, LinkPreview, a: LinkPreview }
-import { LOCALES, formatDate, localePath, majorPath, majorSegment, t, type Locale } from '@lib/i18n'
-import { getProduct } from '@config/products.config'
+import { LOCALES, formatDate, localePath, majorPath, majorSegment, previewPath, t, type Locale } from '@lib/i18n'
+import { getProduct, majorOf } from '@config/products.config'
 import { listMajors, majorSlugOf, type MajorGroup } from '@lib/majors'
-import { majorTitleId, slugOf } from '@lib/releases'
+import { listUnlistedPreviews, majorTitleId, slugOf } from '@lib/releases'
 
 export const getStaticPaths = (async () => {
   const byLocale = new Map<Locale, MajorGroup[]>()
@@ -120,6 +120,20 @@ const rail: RailItem[] = siblings.flatMap((item) => {
     })),
   ]
 })
+
+// Previews a newer release has replaced have no section here any more; links to their
+// old anchors (/v1.0#v1.0.0-preview.4) are forwarded to the preview's own page
+const movedPreviews = Object.fromEntries(
+  (await listUnlistedPreviews(locale))
+    .filter(
+      (release) =>
+        release.data.product === group.product.id && majorOf(release.data.version) === major,
+    )
+    .map((release) => [
+      slugOf(release),
+      previewPath(locale, group.product.id, major, slugOf(release)),
+    ]),
+)
 
 // 页签与分享卡片要能认出是哪一版
 const seoTitle = `${product?.name[locale] ?? group.product.id} ${major} · ${group.entry.data.title}`
@@ -271,6 +285,14 @@ const alternates = Object.fromEntries(
       )
     }
   </nav>
+  {
+    Object.keys(movedPreviews).length > 0 && (
+      <script is:inline data-astro-rerun define:vars={{ movedPreviews }}>
+        const to = movedPreviews[decodeURIComponent(location.hash.slice(1))]
+        if (to) location.replace(to)
+      </script>
+    )
+  }
 </BaseLayout>
 
 <script>

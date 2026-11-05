@@ -26,6 +26,15 @@ export function majorPath(locale: Locale, product: string, major: string): strin
   return localePath(locale, product, majorSegment(major))
 }
 
+/**
+ * A preview's own page: /<locale>/changelog/<product>/v<major>/<tag>.
+ * It stays valid after a newer release takes the preview off the major page,
+ * and is where the old /desktop/release-notes/preview/<tag> links should point.
+ */
+export function previewPath(locale: Locale, product: string, major: string, slug: string): string {
+  return localePath(locale, product, majorSegment(major), slug)
+}
+
 export function formatDate(date: Date, locale: Locale): string {
   return new Intl.DateTimeFormat(LOCALE_META[locale].dateLocale, {
     year: 'numeric',
