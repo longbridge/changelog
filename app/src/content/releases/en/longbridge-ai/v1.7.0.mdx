@@ -1,0 +1,99 @@
+---
+product: longbridge-ai
+version: 1.7.0
+tag: v1.7.0
+locale: en
+title: "Choose how AI responds"
+summary: "Customize responses, pin frequent conversations, and download more types of generated files."
+highlights:
+  - "Customize how AI responds"
+  - "Pin conversations and find past answers"
+  - "Download more types of generated files"
+releasedAt: 2026-11-06T00:00:00.000Z
+platforms: [Web]
+status: published
+source:
+  provider: manual
+  repo: releases/longbridge-ai/1.7.0.md
+  url: https://longbridge.com
+---
+
+Unless otherwise noted, the following updates apply to the LongbridgeAI web version.
+
+## Highlights
+
+### Customize how AI responds
+
+Choose a response style and tone in Settings → Personalization and describe how you want AI to respond. Custom instructions take priority over memory, requests in the current conversation take precedence, and the instructions are not saved to memory.
+
+<Figure src="/assets/longbridge-ai/1.7.0/custom-instructions-en.webp" alt="Example custom instructions, nickname and occupation settings" caption="Set your preferred response style and instructions" width={2400} height={1091} />
+
+### Pin conversations and find past answers
+
+Pin up to 20 conversations, keep scheduled-task conversations in their own group, and search titles, questions, and answers in All conversations. Filter by status and select multiple conversations; Mark all as read applies to every conversation.
+
+<Figure src="/assets/longbridge-ai/1.7.0/conversation-pins-en.webp" alt="Pinned conversations and the conversation search control" caption="Keep frequent conversations and past answers within reach" width={2400} height={1091} />
+
+### Download more types of generated files
+
+Ask AI to generate more downloadable file types and view source code in the artifacts panel. Executables and installation packages are excluded; unregistered types are download-only and skipped with a notice when sharing a conversation, and Jupyter notebooks must be downloaded and opened in Jupyter.
+
+<Figure src="/assets/longbridge-ai/1.7.0/file-downloads-en.webp" alt="File download controls in the artifacts panel" caption="Download generated files for use outside the conversation" width={2400} height={1091} />
+
+## LongbridgeAI
+
+**New features:**
+
+1. **Preview documents and spreadsheets directly**: In the artifacts panel or My Artifacts, preview PDFs, Word documents, Excel spreadsheets, images, CSV/TSV files, text, and code. Switch between table and source views for CSV/TSV files or between worksheets in Excel. Note: PPT/PPTX and legacy .doc/.xls files still require downloading; you can also download the original if a file is too large or its preview fails.
+
+**Improvements:**
+
+1. **Track each step of a plan**: When AI follows a plan, expand the plan card to see each step’s status, elapsed time, description, and tools used. The card also summarizes progress and where execution stopped. Note: Step descriptions, timings, and other details are not backfilled for older messages that did not record them.
+
+2. **See memory updates and preference save status**: After submitting content in memory settings, see whether each item was remembered, updated, deleted, or merged. Preference changes also show their save status.
+
+**Bug fixes:**
+
+1. **Reasoning timers and source icons**: While you follow an answer, reasoning and plan timers no longer move backward or add an extra second, and reasoning time includes thinking time. Source icons also display their website icons instead of repeatedly falling back to a generic globe.
+
+2. **Switch conversations after sending a message**: After sending the first question in a conversation, switching away no longer pulls you back or replaces the conversation you are viewing, and sent text is cleared from the input. Attachments sent from the home page no longer remain in the conversation input, and the expand-sidebar tooltip disappears after you collapse the sidebar.
+
+3. **Reduce unnecessary spacing in large spreadsheets**: When you upload large Excel or CSV files, spacing added for alignment no longer takes up the content AI can read. This applies across platforms; note that content exceeding the reading budget is still truncated and unavailable to AI.
+
+4. **See a clear notice when an answer is blocked**: If content moderation blocks your question, you are prompted to revise it and try again. If a model provider filters the final answer, the conversation reports a failure instead of showing success without an answer; this applies across platforms.
+
+5. **Keep subscription access during a renewal grace period**: For Stripe auto-renewals, a 2-hour grace period preserves your subscription benefits after expiry. Delayed payment results are treated as renewals; this applies to Stripe subscriptions on the web and mobile web versions.
+
+**Usage changes:**
+
+1. **How home-page suggested questions are answered**: After sign-in, the hot-topic Agent answers the first question from home-page suggestions and curated questions on campaign landing pages; general chat handles follow-ups. The first answer from home-page suggestions does not use personal data. Answers to the same question with the same language and thinking level may be reused across users, with no quota deducted for that turn when an existing answer is reused. When an answer is generated, the person asking is charged quota based on the model actually used and their plan multiplier; the unit rate may differ from general chat, and access and quota checks follow the hot-topic Agent. Note: This change does not apply to guest questions.
+
+## My Agents and workflow building
+
+The following updates apply to My Agents and workflow building; Agent card interface changes apply to the web version.
+
+**New features:**
+
+1. **Get advance notice of model retirement**: For models used by an Agent, reminders are sent 14, 3, and 1 days before retirement and again when retired. Model selection marks models as retiring soon or unavailable and shows a replacement recommendation when provided; note that recommendations do not change Agent settings automatically, so you must replace the model yourself. Reminders arrive through Longbridge App push notifications and inbox messages, not email, for Agent creators, workspace owners, and members who retain edit permission; only Longbridge accounts are eligible, excluding enterprise-tenant members, guests, and externally issued identities. Hong Kong and Singapore Apps are covered together without duplicate delivery; notifications for the US are delivered to the US App, with at most 1 delivery of the same notification per person per minute.
+
+2. **Receive notifications when workflows fail**: When a published workflow fails during a production run, Longbridge App push notifications and inbox messages notify the Agent creator, workspace owner, and members who retain edit permission; no email is sent. Production runs include scheduled, Webhook, API, and manual runs from the run page, with at most 1 notification per workflow per person per minute. Note: Only Longbridge accounts are eligible, excluding enterprise-tenant members, guests, and externally issued identities; Hong Kong and Singapore Apps are covered together without duplicate delivery, while notifications for the US are delivered to the US App.
+
+**Improvements:**
+
+1. **Check an Agent’s publication and visibility**: Cards in My Agents show publication or editing dates, visibility, and copy counts. Unpublished edits are flagged so you can distinguish saved changes from published changes.
+
+**Bug fixes:**
+
+1. **Preserve other settings when editing an Agent**: Saving one Agent setting no longer unexpectedly disables other switches. The lock state can only be changed through the lock control.
+
+2. **Handle workflow variables and invalid parameters**: Workflows run without a conversation, such as through an API, use the declared initial values for conversation variables. Invalid node parameters return an error instead of being treated as 0.
+
+3. **See clear document parsing status**: Knowledge-base documents are queued for parsing, with up to 2 processed at a time. A timeout is shown as a failure instead of remaining on Indexing, and documents deleted while queued are not processed.
+
+**Usage changes:**
+
+1. **Replace the retired direct-access model**: Anthropic’s direct-access `claude-sonnet-4-5` was retired on November 2. Agents still using it are not migrated automatically; replace it manually, preferably with `claude-sonnet-5-5`, with usage charged at the new model’s model-card rates. Note: This change does not affect the same model offered through AWS Bedrock.
+
+2. **Select RequestUserForm separately**: To ask users to fill in information, select `RequestUserForm` in your Agent’s tool list. Turning on human interaction alone no longer enables the tool; note that it is not selected automatically for existing Agents, so authors who relied on that switch must select it manually.
+
+3. **Task-management limits during scheduled runs**: During a scheduled task run, an Agent cannot create, edit, or delete scheduled tasks. Workflows can use `sys.is_scheduled_task` to identify a scheduled run; review any workflows that depend on these actions.
