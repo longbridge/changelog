@@ -25,7 +25,7 @@ defaults:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","Packager"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

@@ -7,6 +7,13 @@
 #   Credentials            organization-wide FE_LB_ASSET_ACCESS_KEY_* by default;
 #                          set OSS_ACCESS_KEY_ID / OSS_ACCESS_KEY_SECRET on production to override
 # The production environment can also require reviewers.
+#
+# Runners: every workflow here runs on the org's self-hosted Linux runner, because GitHub-hosted runners
+# stop starting once the org's spending limit is reached (jobs then sit in "queued" forever).
+# LINUX_RUNNER (repository or org variable) takes a JSON array of runner labels and defaults to
+# ["self-hosted","Linux","Packager"], the Ubuntu 24.04 machine. The runner group must allow public repositories.
+# This repository is public: only jobs that can't run code from a fork use it. preview and notify skip fork
+# PRs, and check sends fork PRs to ubuntu-latest.
 name: deploy
 
 on:
@@ -25,7 +32,7 @@ defaults:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","Packager"]') }}
     environment: production
     env:
       OSS_BUCKET: ${{ vars.OSS_BUCKET }}
@@ -42,9 +49,12 @@ jobs:
         working-directory: ${{ runner.temp }}
         run: |
           curl -sSL -o ossutil.zip https://github.com/aliyun/ossutil/releases/download/v1.7.17/ossutil-v1.7.17-linux-amd64.zip
-          unzip -q ossutil.zip
-          sudo install ossutil-v1.7.17-linux-amd64/ossutil /usr/local/bin/ossutil
-          ossutil --version
+          unzip -qo ossutil.zip
+          # Self-hosted runners keep state between jobs and may have no sudo: install into this job's temp dir
+          mkdir -p bin
+          install ossutil-v1.7.17-linux-amd64/ossutil bin/ossutil
+          echo "$PWD/bin" >> "$GITHUB_PATH"
+          bin/ossutil --version
       - run: bun install --frozen-lockfile
       - run: bun run check
       - run: bun run check:assets

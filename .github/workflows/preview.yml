@@ -35,7 +35,7 @@ defaults:
 jobs:
   preview:
     if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","Packager"]') }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
@@ -100,7 +100,7 @@ jobs:
   # Management API calls are free; the rate limit is 1200 requests per 5 minutes.
   cleanup:
     if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","Packager"]') }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

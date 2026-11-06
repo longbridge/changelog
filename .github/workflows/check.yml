@@ -12,7 +12,11 @@ defaults:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Fork PRs run untrusted code, so they stay on GitHub-hosted runners; see the note in deploy.yml
+    runs-on: >-
+      ${{ github.event.pull_request.head.repo.full_name == github.repository
+      && fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","Packager"]')
+      || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
