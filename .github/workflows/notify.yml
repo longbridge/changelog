@@ -18,7 +18,7 @@ permissions:
 jobs:
   approval:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       SLACK_APPROVER_ID: ${{ secrets.SLACK_APPROVER_ID }}

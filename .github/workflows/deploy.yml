@@ -25,7 +25,7 @@ defaults:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
     environment: production
     env:
       OSS_BUCKET: ${{ vars.OSS_BUCKET }}
@@ -42,9 +42,11 @@ jobs:
         working-directory: ${{ runner.temp }}
         run: |
           curl -sSL -o ossutil.zip https://github.com/aliyun/ossutil/releases/download/v1.7.17/ossutil-v1.7.17-linux-amd64.zip
-          unzip -q ossutil.zip
-          sudo install ossutil-v1.7.17-linux-amd64/ossutil /usr/local/bin/ossutil
-          ossutil --version
+          unzip -q -o ossutil.zip
+          # No sudo on self-hosted runners: install into the job's temp directory and put it on PATH
+          install -D ossutil-v1.7.17-linux-amd64/ossutil "$RUNNER_TEMP/bin/ossutil"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/bin/ossutil" --version
       - run: bun install --frozen-lockfile
       - run: bun run check
       - run: bun run check:assets

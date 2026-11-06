@@ -1,5 +1,8 @@
 # PR checks: schema, types, assets and locale parity. A PR can't be merged until they pass.
 # The preview deployment for each PR is in preview.yml; production deploys on merge, see deploy.yml.
+#
+# All workflows run on the organization's self-hosted Linux runners. To switch, set the repository variable
+# LINUX_RUNNER to a JSON runs-on value, e.g. '["self-hosted","Linux","X64"]' (default) or '"ubuntu-latest"'.
 name: check
 
 on:
@@ -12,7 +15,9 @@ defaults:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # This repository is public: PRs from forks run untrusted code (bun install scripts), so they stay on a
+    # GitHub-hosted runner and only branches of this repository use the self-hosted one
+    runs-on: ${{ github.event.pull_request.head.repo.full_name == github.repository && fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
