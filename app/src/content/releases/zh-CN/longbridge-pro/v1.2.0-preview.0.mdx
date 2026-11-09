@@ -1,0 +1,43 @@
+---
+product: longbridge-pro
+version: 1.2.0-preview.0
+tag: v1.2.0-preview.0
+locale: zh-CN
+title: "新增消息中心，自选股支持导入导出"
+summary: "标题栏新增消息中心；个股详情新增「ETF」标签页；自选股支持 CSV / Excel 导入导出。"
+highlights: []
+topics:
+  - 消息中心
+  - 个股详情
+  - 自选股
+  - 财报日历
+  - 图表
+releasedAt: 2026-11-09T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/zh-CN/release-notes/preview/v1.2.0-preview.0.md
+prerelease: true
+---
+
+## 新增
+
+- **消息中心**：标题栏新增消息中心入口，各类通知集中在独立窗口查看，订单消息可直接打开订单详情；从消息跳转长桥网页时自动登录，无需再输入账号。
+- **个股详情**：新增「ETF」标签页，可查看与该股票相关的 ETF、杠杆及反向 ETF，并按市场筛选；杠杆 / 反向 ETF 详情页同时显示所追踪的正股，方便对照走势。
+- **自选股**：支持通过 CSV / Excel 导入导出自选股，导入前可按分组预览变化，方便从其他平台迁移或批量整理。
+- **财报日历**：新增行业和类型筛选，并展示同比数据，更快找到关注公司的财报。
+- **图表**：分时图标出当日最高价和最低价；水平线类画线在价格轴上显示对应价格，读数更直观。
+- **LongbridgeAI**：输入框自动 @ 当前查看的标的，打开即可直接提问。
+- **导航**：支持鼠标侧键前进 / 后退，在页面间切换更顺手。
+
+## 优化
+
+- 标题栏更新入口改为图标，用颜色区分下载中、安装中、待重启和失败状态；点击「待重启」直接重启完成更新。
+- 「关于」和「更新日志」改为独立窗口打开，未登录时也能查看。
+- 修复了主单成交后，止盈止损附加单不在 K 线图上显示、无法拖拽改价的问题。
+- 修复了 Windows 系统唤醒后、部分 Windows 设备启动时，以及策略编辑器解析脚本时可能崩溃的问题。

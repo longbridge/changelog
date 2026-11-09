@@ -1,0 +1,43 @@
+---
+product: longbridge-pro
+version: 1.2.0-preview.0
+tag: v1.2.0-preview.0
+locale: en
+title: "Message Center, plus watchlist import and export"
+summary: "Adds a Message Center to the title bar, an ETF tab in stock details, and watchlist import and export via CSV / Excel."
+highlights: []
+topics:
+  - Message Center
+  - Stock Details
+  - Watchlist
+  - Earnings Calendar
+  - Chart
+releasedAt: 2026-11-09T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: repo-docs
+  repo: longbridge/longbridge-desktop-website
+  url: https://github.com/longbridge/longbridge-desktop-website/blob/main/docs/release-notes/preview/v1.2.0-preview.0.md
+prerelease: true
+---
+
+## New Features
+
+- **Message Center**: Added a message center entry to the title bar. Notifications are gathered in a standalone window, and order messages open the order details directly; Longbridge web pages opened from a message sign you in automatically, so there is no need to enter your account again.
+- **Stock Details**: Added an "ETF" tab that lists ETFs and leveraged and inverse ETFs related to the stock, with a market filter; leveraged and inverse ETF details also show the stock they track, making it easy to compare their moves.
+- **Watchlist**: Added watchlist import and export via CSV / Excel, with a per-group preview of the changes before importing, making it easy to migrate from other platforms or reorganize in bulk.
+- **Earnings Calendar**: Added industry and type filters and year-over-year figures, so you can find the earnings of companies you follow faster.
+- **Chart**: Timeline charts now mark the day's high and low; horizontal drawings show their price on the price axis for easier reading.
+- **LongbridgeAI**: The input box automatically @ mentions the symbol you are viewing, so you can ask right away.
+- **Navigation**: Added support for mouse back / forward buttons, making it easier to move between pages.
+
+## Improvements
+
+- The title bar update entry is now an icon, with colors distinguishing downloading, installing, pending restart and failed states; clicking "Pending restart" restarts right away to finish the update.
+- "About" and "Release Notes" now open in standalone windows and can be viewed without signing in.
+- Fixed an issue where attached take-profit / stop-loss orders disappeared from the candlestick chart and could not be dragged to change price after the parent order was filled.
+- Fixed possible crashes after Windows wakes from sleep, at startup on some Windows devices, and when the strategy editor parses a script.
