@@ -104,6 +104,8 @@ export const t = {
     en: 'No release notes published yet.',
   },
   tryPreview: { 'zh-CN': '体验预览版', 'zh-HK': '體驗預覽版', en: 'Try the preview' },
+  downloadPreview: { 'zh-CN': '下载预览版', 'zh-HK': '下載預覽版', en: 'Download preview' },
+  otherPackages: { 'zh-CN': '其他安装包', 'zh-HK': '其他安裝包', en: 'Other packages' },
   draftBadge: { 'zh-CN': '草稿', 'zh-HK': '草稿', en: 'Draft' },
   prereleaseBadge: { 'zh-CN': '预览版', 'zh-HK': '預覽版', en: 'Preview' },
   draftNotice: {

@@ -118,6 +118,14 @@ export function sourceLocales(source: RepoSource): Locale[] {
   return [source.sourceLocale ?? 'zh-CN']
 }
 
+export interface PreviewDownload {
+  os: 'macos' | 'windows' | 'linux'
+  /** macOS 区分芯片，选包时 arm 为默认 */
+  arch?: 'arm' | 'x64'
+  label: string
+  url: string
+}
+
 export interface ProductConfig {
   /** 唯一 id，同时作为 URL 片段与数据目录名，用 kebab-case */
   id: string
@@ -134,6 +142,8 @@ export interface ProductConfig {
   homepage?: string
   /** homepage 按钮的文案：客户端是下载，网页版是访问。默认 download */
   homepageAction?: 'download' | 'visit'
+  /** 预览版安装包，展示在预览页的下载按钮上。`{version}` 会换成该预览版的版本号；按钮按访问者系统选第一个匹配项 */
+  previewDownloads?: PreviewDownload[]
   /** 一个产品可以由多个仓库共同产出版本（如 iOS / Android 分仓） */
   sources: RepoSource[]
   /** 设为 true 时抓取照常、站点不展示，用于尚未对外的产品；显示草稿的构建（dev、MR 预览）里照常展示，方便验收 */
@@ -151,6 +161,13 @@ export const products: ProductConfig[] = [
     accent: '#00b8b8',
     logo: 'https://assets.lbkrs.com/uploads/2e476c46-8bb9-4689-a800-54877351520e/app-icon.svg',
     homepage: 'https://longbridge.com/{locale}/desktop',
+    previewDownloads: [
+      { os: 'windows', label: 'Windows x86_64', url: 'https://assets.lbkrs.com/github/release/longbridge-desktop/preview/longbridge-v{version}-windows-x86_64.exe' },
+      { os: 'macos', arch: 'arm', label: 'macOS ARM', url: 'https://assets.lbkrs.com/github/release/longbridge-desktop/preview/longbridge-v{version}-macos-aarch64.dmg' },
+      { os: 'macos', arch: 'x64', label: 'macOS x86_64', url: 'https://assets.lbkrs.com/github/release/longbridge-desktop/preview/longbridge-v{version}-macos-x86_64.dmg' },
+      { os: 'linux', label: 'Linux x64 (Debian)', url: 'https://assets.lbkrs.com/github/release/longbridge-desktop/preview/longbridge-v{version}-linux-x86_64.deb' },
+      { os: 'linux', label: 'Linux x64 (Tarball)', url: 'https://assets.lbkrs.com/github/release/longbridge-desktop/preview/longbridge-v{version}-linux-x86_64.tar.gz' },
+    ],
     name: {
       'zh-CN': 'Longbridge Pro',
       'zh-HK': 'Longbridge Pro',
