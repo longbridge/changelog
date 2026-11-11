@@ -13,7 +13,7 @@ import Demo from '@components/release/Demo.astro'
 import Kbd from '@components/release/Kbd.astro'
 import LinkPreview from '@components/release/LinkPreview.astro'
 import { LOCALES, localePath, majorSegment, previewPath, t, type Locale } from '@lib/i18n'
-import { getProduct, majorOf } from '@config/products.config'
+import { getProduct, homepageUrl, majorOf } from '@config/products.config'
 import { listPreviews, slugOf, type Release } from '@lib/releases'
 
 /** Same map as the major page, so preview MDX renders the same here */
@@ -61,6 +61,12 @@ const { release, alternates } = Astro.props as {
 const product = getProduct(release.data.product)
 const productName = product?.name[locale] ?? release.data.product
 const { Content } = await render(release)
+const downloads = (product?.previewDownloads ?? []).map((item) => ({
+  ...item,
+  url: item.url.replace('{version}', release.data.version),
+}))
+// Used until the script picks the visitor's system, and when it can't (no JS, phones)
+const defaultDownload = downloads.find((item) => item.arch === 'arm') ?? downloads[0]
 ---
 
 <BaseLayout
@@ -77,11 +83,56 @@ const { Content } = await render(release)
     { name: release.data.title },
   ]}
 >
-  <a
-    href={localePath(locale, release.data.product)}
-    class="mb-4 inline-block text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
-    >← {productName}</a
-  >
+  <div class="mb-4 flex items-center justify-between gap-4">
+    <a
+      href={localePath(locale, release.data.product)}
+      class="inline-block text-[0.8125rem] text-ink-soft transition-colors hover:text-ink"
+      >← {productName}</a
+    >
+    {
+      downloads.length > 0 ? (
+        <div class="preview-download">
+          <a
+            href={defaultDownload?.url}
+            download
+            data-preview-download
+            class="inline-flex shrink-0 items-center gap-1.5 rounded-l-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
+            style="background:var(--accent)"
+          >
+            {t.downloadPreview[locale]}
+          </a>
+          <details class="preview-download__more">
+            <summary
+              class="inline-flex cursor-pointer list-none items-center rounded-r-lg border-l border-white/40 px-2 py-1.5 text-[0.8125rem] text-white"
+              style="background:var(--accent)"
+              aria-label={t.otherPackages[locale]}
+              title={t.otherPackages[locale]}>▾</summary
+            >
+            <ul class="preview-download__list">
+              {downloads.map((item) => (
+                <li>
+                  <a href={item.url} data-os={item.os} data-arch={item.arch} download>
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      ) : (
+        product?.homepage && (
+          <a
+            href={homepageUrl(product, locale)}
+            class="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
+            style="background:var(--accent)"
+          >
+            {t[product.homepageAction ?? 'download'][locale]}
+            <span aria-hidden="true">↗</span>
+          </a>
+        )
+      )
+    }
+  </div>
 
   <article id={slugOf(release)}>
     <h1 class="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-[2rem]">
@@ -107,3 +158,75 @@ const { Content } = await render(release)
     </div>
   </article>
 </BaseLayout>
+
+<style>
+  .preview-download {
+    position: relative;
+    display: inline-flex;
+  }
+  .preview-download__more summary::-webkit-details-marker {
+    display: none;
+  }
+  .preview-download__list {
+    position: absolute;
+    right: 0;
+    z-index: 10;
+    margin-top: 0.375rem;
+    min-width: 12rem;
+    padding: 0.375rem;
+    border: 1px solid var(--color-rule, #e5e5e5);
+    border-radius: 0.75rem;
+    background: var(--color-paper, #fff);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+  }
+  .preview-download__list a {
+    display: block;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+  .preview-download__list a:hover {
+    background: rgb(0 0 0 / 0.05);
+  }
+</style>
+
+<script>
+  // Point the main button at the installer that matches the visitor's system.
+  // Without JS, or on phones, it keeps the default installer (macOS ARM) as the target.
+  function pickInstaller() {
+    const main = document.querySelector<HTMLAnchorElement>('[data-preview-download]')
+    if (!main || main.dataset.bound) return
+    main.dataset.bound = '1'
+
+    const ua = navigator.userAgent
+    let os: string | undefined
+    if (/Android|iPhone|iPad|iPod/i.test(ua)) os = undefined
+    else if (/Windows/i.test(ua)) os = 'windows'
+    else if (/Mac/i.test(ua)) os = 'macos'
+    else if (/Linux|X11/i.test(ua)) os = 'linux'
+    if (!os) return
+
+    const apply = (arch?: string) => {
+      const links = [...document.querySelectorAll<HTMLAnchorElement>('.preview-download__list a')]
+      const match =
+        links.find((a) => a.dataset.os === os && (!arch || a.dataset.arch === arch)) ??
+        links.find((a) => a.dataset.os === os)
+      if (!match) return
+      main.href = match.href
+      main.setAttribute('download', '')
+    }
+
+    apply(os === 'macos' ? 'arm' : undefined)
+    // Chromium can tell Intel from Apple Silicon; Safari always reports Intel, so ARM stays the default there
+    if (os === 'macos') {
+      const uaData = (navigator as any).userAgentData
+      uaData?.getHighEntropyValues?.(['architecture'])
+        .then((v: { architecture?: string }) => {
+          if (v.architecture === 'x86') apply('x64')
+        })
+        .catch(() => {})
+    }
+  }
+  document.addEventListener('astro:page-load', pickInstaller)
+</script>
