@@ -63,15 +63,24 @@ export async function listPreviews(locale: Locale): Promise<Release[]> {
 }
 
 /**
- * One entry per product: its newest preview, but only while that preview is the product's
- * newest release. Once a stable release or another preview is newer, the entry point goes away.
+ * One entry per product: its newest preview, but only while its version is higher than the
+ * newest stable release. A patch for the current line (1.1.2 next to 1.2.0-preview.0) keeps the
+ * entry point; the 1.2.0 stable release takes it away.
  */
 export async function listLatestPreviews(locale: Locale): Promise<Release[]> {
-  const newest = new Map<string, Release>()
-  for (const entry of await listVisibleReleases(locale)) {
-    if (!newest.has(entry.data.product)) newest.set(entry.data.product, entry)
+  const entries = await listVisibleReleases(locale)
+  const latest = new Map<string, Release>()
+  for (const entry of entries.filter((item) => item.data.prerelease)) {
+    const current = latest.get(entry.data.product)
+    if (!current || compareVersion(entry.data.version, current.data.version) < 0) {
+      latest.set(entry.data.product, entry)
+    }
   }
-  return [...newest.values()].filter((entry) => entry.data.prerelease)
+  return [...latest.values()].filter((preview) =>
+    entries
+      .filter((item) => !item.data.prerelease && item.data.product === preview.data.product)
+      .every((stable) => compareVersion(stable.data.version, preview.data.version) > 0),
+  )
 }
 
 /** MDX 文件名（不含扩展名）作为 URL 中的版本片段，保证与磁盘一致 */
