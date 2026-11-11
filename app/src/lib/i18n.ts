@@ -103,6 +103,7 @@ export const t = {
     'zh-HK': '暫未發佈對外更新日誌。',
     en: 'No release notes published yet.',
   },
+  tryPreview: { 'zh-CN': '体验预览版', 'zh-HK': '體驗預覽版', en: 'Try the preview' },
   draftBadge: { 'zh-CN': '草稿', 'zh-HK': '草稿', en: 'Draft' },
   prereleaseBadge: { 'zh-CN': '预览版', 'zh-HK': '預覽版', en: 'Preview' },
   draftNotice: {

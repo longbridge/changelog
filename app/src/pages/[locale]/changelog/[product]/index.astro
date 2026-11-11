@@ -1,12 +1,12 @@
 ---
 import type { GetStaticPaths } from 'astro'
 import BaseLayout from '@layouts/BaseLayout.astro'
-import { LOCALES, localePath, t, type Locale } from '@lib/i18n'
-import { homepageUrl, visibleProducts } from '@config/products.config'
+import { LOCALES, localePath, previewPath, t, type Locale } from '@lib/i18n'
+import { homepageUrl, majorOf, visibleProducts } from '@config/products.config'
 import MajorCard from '@components/MajorCard.astro'
 import ProductTabs from '@components/ProductTabs.astro'
 import { listProductMajors } from '@lib/majors'
-import { hasDrafts, productTitleId } from '@lib/releases'
+import { hasDrafts, listLatestPreviews, productTitleId, slugOf } from '@lib/releases'
 
 export const getStaticPaths = (() =>
   LOCALES.flatMap((locale) =>
@@ -20,6 +20,14 @@ const locale = Astro.params.locale as Locale
 const { product } = Astro.props
 // 列表这一层只到大版本，小版本收在大版本页里
 const majors = await listProductMajors(locale, product.id)
+
+// Previews stay out of the list; the product page only offers an entry button to the newest one
+const latestPreview = (await listLatestPreviews(locale)).find(
+  (release) => release.data.product === product.id,
+)
+const previewHref = latestPreview
+  ? previewPath(locale, product.id, majorOf(latestPreview.data.version), slugOf(latestPreview))
+  : undefined
 
 // 最新一个大版本占头条位，其余两列排开；日期每张卡片自己带
 const [featured, ...rest] = majors
@@ -55,11 +63,23 @@ const alternates = Object.fromEntries(
           {product.summary[locale]}
         </p>
       </div>
+      <div class="mt-1 flex shrink-0 items-center gap-2">
+      {
+        previewHref && (
+          <a
+            href={previewHref}
+            class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.8125rem] font-medium transition-opacity hover:opacity-80"
+            style="color:var(--accent);border-color:var(--accent)"
+          >
+            {t.tryPreview[locale]}
+          </a>
+        )
+      }
       {
         product.homepage && (
           <a
             href={homepageUrl(product, locale)}
-            class="mt-1 inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
+            class="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
             style="background:var(--accent)"
           >
             {t[product.homepageAction ?? 'download'][locale]}
@@ -67,6 +87,7 @@ const alternates = Object.fromEntries(
           </a>
         )
       }
+      </div>
     </div>
     <ProductTabs locale={locale} activeProduct={product.id} />
   </header>

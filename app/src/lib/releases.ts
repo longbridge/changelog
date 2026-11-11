@@ -36,7 +36,7 @@ export const compareReleases = (a: Release, b: Release) =>
   b.data.releasedAt.getTime() - a.data.releasedAt.getTime() ||
   compareVersion(a.data.version, b.data.version)
 
-/** Every visible release in a locale, unlisted previews included, newest first */
+/** Every visible release in a locale, previews included, newest first */
 async function listVisibleReleases(locale: Locale): Promise<Release[]> {
   const entries = await getCollection('releases', (entry) => entry.data.locale === locale)
   // hidden 的产品照常抓取、编辑，但生产站点任何地方都不露出：列表、大版本页、RSS 都从这里取。
@@ -49,37 +49,29 @@ async function listVisibleReleases(locale: Locale): Promise<Release[]> {
 }
 
 /**
- * A preview is listed only while it is its product's newest release. Once anything newer
- * ships (another preview or a stable release) it drops out of lists, major pages and feeds,
- * and is reachable only through its own page, see previewPath().
+ * Previews are never listed: lists, product pages, major pages and feeds only carry stable
+ * releases. A preview is reached through its own page, see previewPath(), and the home page
+ * links to the newest one, see listLatestPreviews().
  */
-function splitPreviews(entries: Release[]): { listed: Release[]; unlisted: Release[] } {
-  const newest = new Map<string, Release>()
-  for (const entry of entries) {
-    if (!newest.has(entry.data.product)) newest.set(entry.data.product, entry)
-  }
-  const listed: Release[] = []
-  const unlisted: Release[] = []
-  for (const entry of entries) {
-    const isListed = !entry.data.prerelease || newest.get(entry.data.product) === entry
-    ;(isListed ? listed : unlisted).push(entry)
-  }
-  return { listed, unlisted }
-}
-
-/** Listed releases in a locale, newest first: lists, major pages and feeds all read from here */
 export async function listReleases(locale: Locale): Promise<Release[]> {
-  return splitPreviews(await listVisibleReleases(locale)).listed
+  return (await listVisibleReleases(locale)).filter((entry) => !entry.data.prerelease)
 }
 
-/** Every visible preview in a locale, listed or not; each one gets its own page */
+/** Every visible preview in a locale, newest first; each one gets its own page */
 export async function listPreviews(locale: Locale): Promise<Release[]> {
   return (await listVisibleReleases(locale)).filter((entry) => entry.data.prerelease)
 }
 
-/** Previews no longer listed: their major page has no section for them, so old anchors forward to their own page */
-export async function listUnlistedPreviews(locale: Locale): Promise<Release[]> {
-  return splitPreviews(await listVisibleReleases(locale)).unlisted
+/**
+ * One entry per product: its newest preview, but only while that preview is the product's
+ * newest release. Once a stable release or another preview is newer, the entry point goes away.
+ */
+export async function listLatestPreviews(locale: Locale): Promise<Release[]> {
+  const newest = new Map<string, Release>()
+  for (const entry of await listVisibleReleases(locale)) {
+    if (!newest.has(entry.data.product)) newest.set(entry.data.product, entry)
+  }
+  return [...newest.values()].filter((entry) => entry.data.prerelease)
 }
 
 /** MDX 文件名（不含扩展名）作为 URL 中的版本片段，保证与磁盘一致 */
