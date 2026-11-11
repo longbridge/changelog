@@ -61,12 +61,8 @@ const { release, alternates } = Astro.props as {
 const product = getProduct(release.data.product)
 const productName = product?.name[locale] ?? release.data.product
 const { Content } = await render(release)
-const downloads = (product?.previewDownloads ?? []).map((item) => ({
-  ...item,
-  url: item.url.replace('{version}', release.data.version),
-}))
-// Used until the script picks the visitor's system, and when it can't (no JS, phones)
-const defaultDownload = downloads.find((item) => item.arch === 'arm') ?? downloads[0]
+const previewDownloads = product?.previewDownloads
+const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data.version)
 ---
 
 <BaseLayout
@@ -90,11 +86,15 @@ const defaultDownload = downloads.find((item) => item.arch === 'arm') ?? downloa
       >← {productName}</a
     >
     {
-      downloads.length > 0 ? (
-        <div class="preview-download">
+      previewDownloads ? (
+        <div
+          class="preview-download"
+          hidden
+          data-manifest={manifestUrl}
+          data-packages={JSON.stringify(previewDownloads.packages)}
+        >
           <a
-            href={defaultDownload?.url}
-            download
+            href="#"
             data-preview-download
             class="inline-flex shrink-0 items-center gap-1.5 rounded-l-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
             style="background:var(--accent)"
@@ -108,15 +108,7 @@ const defaultDownload = downloads.find((item) => item.arch === 'arm') ?? downloa
               aria-label={t.otherPackages[locale]}
               title={t.otherPackages[locale]}>▾</summary
             >
-            <ul class="preview-download__list">
-              {downloads.map((item) => (
-                <li>
-                  <a href={item.url} data-os={item.os} data-arch={item.arch} download>
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <ul class="preview-download__list" data-preview-list />
           </details>
         </div>
       ) : (
@@ -159,10 +151,13 @@ const defaultDownload = downloads.find((item) => item.arch === 'arm') ?? downloa
   </article>
 </BaseLayout>
 
-<style>
+<style is:global>
   .preview-download {
     position: relative;
     display: inline-flex;
+  }
+  .preview-download[hidden] {
+    display: none;
   }
   .preview-download__more summary::-webkit-details-marker {
     display: none;
@@ -192,12 +187,46 @@ const defaultDownload = downloads.find((item) => item.arch === 'arm') ?? downloa
 </style>
 
 <script>
-  // Point the main button at the installer that matches the visitor's system.
-  // Without JS, or on phones, it keeps the default installer (macOS ARM) as the target.
-  function pickInstaller() {
-    const main = document.querySelector<HTMLAnchorElement>('[data-preview-download]')
-    if (!main || main.dataset.bound) return
-    main.dataset.bound = '1'
+  // The installers' file names carry a build hash, so the real links come from the release
+  // manifest on the CDN. The button stays hidden until it resolves, never pointing at a guess.
+  type Asset = { name: string; url: string }
+  type Pkg = { os: string; arch?: string; label: string; suffix: string }
+
+  async function initPreviewDownload() {
+    const box = document.querySelector<HTMLElement>('.preview-download')
+    if (!box || box.dataset.bound) return
+    box.dataset.bound = '1'
+
+    let assets: Asset[]
+    try {
+      const res = await fetch(box.dataset.manifest!)
+      if (!res.ok) return
+      assets = (await res.json()).assets ?? []
+    } catch {
+      return
+    }
+
+    const packages: Pkg[] = JSON.parse(box.dataset.packages ?? '[]')
+    const resolved = packages
+      .map((pkg) => ({ pkg, asset: assets.find((a) => a.name.endsWith(pkg.suffix)) }))
+      .filter((item): item is { pkg: Pkg; asset: Asset } => !!item.asset)
+    if (resolved.length === 0) return
+
+    const list = box.querySelector('[data-preview-list]')!
+    for (const { pkg, asset } of resolved) {
+      const li = document.createElement('li')
+      const a = document.createElement('a')
+      a.href = asset.url
+      a.textContent = pkg.label
+      a.setAttribute('download', '')
+      li.append(a)
+      list.append(li)
+    }
+
+    const main = box.querySelector<HTMLAnchorElement>('[data-preview-download]')!
+    const pick = (os: string | undefined, arch?: string) =>
+      resolved.find((item) => item.pkg.os === os && (!arch || item.pkg.arch === arch)) ??
+      resolved.find((item) => item.pkg.os === os)
 
     const ua = navigator.userAgent
     let os: string | undefined
@@ -205,28 +234,25 @@ const defaultDownload = downloads.find((item) => item.arch === 'arm') ?? downloa
     else if (/Windows/i.test(ua)) os = 'windows'
     else if (/Mac/i.test(ua)) os = 'macos'
     else if (/Linux|X11/i.test(ua)) os = 'linux'
-    if (!os) return
 
-    const apply = (arch?: string) => {
-      const links = [...document.querySelectorAll<HTMLAnchorElement>('.preview-download__list a')]
-      const match =
-        links.find((a) => a.dataset.os === os && (!arch || a.dataset.arch === arch)) ??
-        links.find((a) => a.dataset.os === os)
-      if (!match) return
-      main.href = match.href
+    // Phones and unknown systems get macOS ARM, or the first package, as the default
+    const set = (item?: { asset: Asset }) => {
+      if (!item) return
+      main.href = item.asset.url
       main.setAttribute('download', '')
     }
+    set(pick(os, os === 'macos' ? 'arm' : undefined) ?? pick('macos', 'arm') ?? resolved[0])
+    box.hidden = false
 
-    apply(os === 'macos' ? 'arm' : undefined)
     // Chromium can tell Intel from Apple Silicon; Safari always reports Intel, so ARM stays the default there
     if (os === 'macos') {
       const uaData = (navigator as any).userAgentData
       uaData?.getHighEntropyValues?.(['architecture'])
         .then((v: { architecture?: string }) => {
-          if (v.architecture === 'x86') apply('x64')
+          if (v.architecture === 'x86') set(pick('macos', 'x64'))
         })
         .catch(() => {})
     }
   }
-  document.addEventListener('astro:page-load', pickInstaller)
+  document.addEventListener('astro:page-load', initPreviewDownload)
 </script>
