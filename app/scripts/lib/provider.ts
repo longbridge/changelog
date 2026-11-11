@@ -4,6 +4,7 @@ import type {
   AppStoreSource,
   GitSource,
   ReleaseApiSource,
+  ReleaseNotesJsonSource,
   RepoDocsSource,
   RepoSource,
 } from '../../config/products.config'
@@ -173,6 +174,8 @@ export async function fetchReleases(source: RepoSource): Promise<RawRelease[]> {
       return fetchAppStore(source)
     case 'release-api':
       return fetchReleaseApi(source)
+    case 'release-notes-json':
+      return fetchReleaseNotesJson(source)
   }
 }
 
@@ -370,6 +373,57 @@ async function fetchReleaseApi(source: ReleaseApiSource): Promise<RawRelease[]> 
       count += payload.data.release_notes.length
       cursor = payload.data.has_more ? payload.data.next_cursor : ''
     } while (cursor && count < limit)
+  }
+
+  return releases
+}
+
+// ---------- Release notes file published next to a product's installers ----------
+
+interface ReleaseNotesJsonEntry {
+  version?: unknown
+  published_at?: unknown
+  release_notes?: Record<string, unknown>
+}
+
+async function fetchReleaseNotesJson(source: ReleaseNotesJsonSource): Promise<RawRelease[]> {
+  const response = await fetch(source.url)
+  if (!response.ok) {
+    throw new ProviderError(`请求 ${source.url} 失败：${response.status} ${response.statusText}`)
+  }
+  const payload: unknown = await response.json().catch(() => null)
+  if (!Array.isArray(payload)) {
+    throw new ProviderError(`${source.url} 的内容不是版本数组，文件格式可能变了`)
+  }
+
+  const releases: RawRelease[] = []
+  for (const entry of (payload as ReleaseNotesJsonEntry[]).slice(0, source.limit ?? 50)) {
+    if (typeof entry?.version !== 'string' || typeof entry.published_at !== 'string') continue
+    const publishedTime = new Date(entry.published_at).getTime()
+    if (Number.isNaN(publishedTime)) continue
+    // The site works with release days (midnight UTC), like every other source: a time of day would
+    // break the "preview after stable on the same day" order. The day is taken in UTC+8, where the
+    // releases are made, so an evening release doesn't land on the previous day.
+    const day = new Date(publishedTime + 8 * 3600 * 1000).toISOString().slice(0, 10)
+    const tag = `v${entry.version.replace(/^v/i, '').trim()}`
+
+    for (const locale of source.locales) {
+      const body = entry.release_notes?.[locale]
+      // A locale without text is left out; transform then fills a placeholder marked for translation
+      if (typeof body !== 'string' || !body.trim()) continue
+      releases.push({
+        tag,
+        title: tag.slice(1),
+        body,
+        publishedAt: `${day}T00:00:00.000Z`,
+        // The file has no page per version; record the file itself so the source can be checked
+        url: source.url,
+        prerelease: source.prerelease ?? false,
+        draft: false,
+        locale,
+        curated: true,
+      })
+    }
   }
 
   return releases

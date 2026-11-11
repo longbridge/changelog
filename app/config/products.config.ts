@@ -6,8 +6,15 @@ import type { I18nText, Locale } from './site.config'
  *   repo-docs        读仓库里维护的更新日志目录（本身就是对外文案，按语言分目录）
  *   appstore         读 App Store 的版本更新说明，按商店区域区分语言
  *   release-api      读产品自己提供的版本说明接口（对外口径，按 Accept-Language 区分语言）
+ *   release-notes-json  reads the release notes file a product publishes next to its installers (all locales in one JSON)
  */
-export type Provider = 'gitlab' | 'github' | 'repo-docs' | 'appstore' | 'release-api'
+export type Provider =
+  | 'gitlab'
+  | 'github'
+  | 'repo-docs'
+  | 'appstore'
+  | 'release-api'
+  | 'release-notes-json'
 
 interface SourceBase {
   /**
@@ -94,19 +101,44 @@ export interface ReleaseApiSource extends SourceBase {
   acceptLanguage: Partial<Record<Locale, string>>
 }
 
-export type RepoSource = GitSource | RepoDocsSource | AppStoreSource | ReleaseApiSource
+/**
+ * The release notes file a product publishes together with its installers, for example
+ * https://assets.lbkrs.com/github/release/longbridge-desktop/stable/release-notes.json.
+ * It is a JSON array of `{ version, published_at, release_notes: { <locale>: markdown } }`, newest first,
+ * and only lists versions that are fully rolled out. The text is already public wording.
+ */
+export interface ReleaseNotesJsonSource extends SourceBase {
+  provider: 'release-notes-json'
+  /** Address of the JSON file */
+  url: string
+  /** Locales to read from each entry's `release_notes` */
+  locales: Locale[]
+  /**
+   * Every version in this file is a pre-release (a separate preview channel).
+   * Entries are marked prerelease and shown with the "Preview" badge; no need to set includePrerelease as well
+   */
+  prerelease?: boolean
+}
+
+export type RepoSource =
+  | GitSource
+  | RepoDocsSource
+  | AppStoreSource
+  | ReleaseApiSource
+  | ReleaseNotesJsonSource
 
 /** 内容是否已经是对外口径：是的话 transform 不会重组文案 */
 export const isCurated = (source: RepoSource): boolean =>
   source.provider === 'repo-docs' ||
   source.provider === 'appstore' ||
-  source.provider === 'release-api'
+  source.provider === 'release-api' ||
+  source.provider === 'release-notes-json'
 
 /** 来源标识，写进 frontmatter 的 source.repo 与抓取日志：没有仓库路径的来源各有各的写法 */
 export const sourceId = (source: RepoSource): string =>
   source.provider === 'appstore'
     ? `appstore:${source.appId}`
-    : source.provider === 'release-api'
+    : source.provider === 'release-api' || source.provider === 'release-notes-json'
       ? new URL(source.url).host + new URL(source.url).pathname
       : source.repo
 
@@ -115,6 +147,7 @@ export function sourceLocales(source: RepoSource): Locale[] {
   if (source.provider === 'repo-docs') return Object.keys(source.paths) as Locale[]
   if (source.provider === 'appstore') return Object.keys(source.storefronts) as Locale[]
   if (source.provider === 'release-api') return Object.keys(source.acceptLanguage) as Locale[]
+  if (source.provider === 'release-notes-json') return source.locales
   return [source.sourceLocale ?? 'zh-CN']
 }
 
@@ -159,7 +192,7 @@ export interface ProductConfig {
 
 /**
  * 产品清单：新增一个对外产品 = 在这里加一项，然后 `bun run fetch`。
- * 来源只用公开渠道（repo-docs / appstore / release-api）；没有公开来源的产品 sources 留空，内容走 PR 提交。
+ * 来源只用公开渠道（repo-docs / release-notes-json / appstore / release-api）；没有公开来源的产品 sources 留空，内容走 PR 提交。
  */
 export const products: ProductConfig[] = [
   {
@@ -190,37 +223,26 @@ export const products: ProductConfig[] = [
     },
     sources: [
       {
-        // 官网仓库里手写维护的更新日志，三语齐全且已是对外口径
-        provider: 'repo-docs',
-        repo: 'longbridge/longbridge-desktop-website',
-        ref: 'main',
-        paths: {
-          en: 'docs/release-notes',
-          'zh-CN': 'docs/zh-CN/release-notes',
-          'zh-HK': 'docs/zh-HK/release-notes',
-        },
-        filePattern: '^v(?<version>\\d+\\.\\d+\\.\\d+)\\.md$',
-        ignore: ['index.md'],
-        preferredSource: 'zh-CN',
+        // Published by the Longbridge Pro release pipeline next to the installers; the same file feeds the
+        // in-app release notes. Versions up to 1.1.2 were fetched from the website repository's docs and are
+        // already in releases/, so only newer ones are read from here.
+        provider: 'release-notes-json',
+        url: 'https://assets.lbkrs.com/github/release/longbridge-desktop/stable/release-notes.json',
+        locales: ['en', 'zh-CN', 'zh-HK'],
+        tagPattern: '^v(?<version>\\d+\\.\\d+\\.\\d+)$',
+        since: '2026-11-11',
         platforms: ['macOS', 'Windows', 'Linux'],
-        limit: 100,
       },
       {
-        // 同一个仓库的 preview 目录：预览版，正式版发布前先在这里公开
-        provider: 'repo-docs',
-        repo: 'longbridge/longbridge-desktop-website',
-        ref: 'main',
-        paths: {
-          en: 'docs/release-notes/preview',
-          'zh-CN': 'docs/zh-CN/release-notes/preview',
-          'zh-HK': 'docs/zh-HK/release-notes/preview',
-        },
-        filePattern: '^v(?<version>\\d+\\.\\d+\\.\\d+-preview\\.\\d+)\\.md$',
-        ignore: ['index.md'],
-        preferredSource: 'zh-CN',
+        // The preview channel: versions made public before the stable release.
+        // The file only keeps the most recent preview versions, so fetch regularly.
+        provider: 'release-notes-json',
+        url: 'https://assets.lbkrs.com/github/release/longbridge-desktop/preview/release-notes.json',
+        locales: ['en', 'zh-CN', 'zh-HK'],
+        tagPattern: '^v(?<version>\\d+\\.\\d+\\.\\d+-preview\\.\\d+)$',
+        since: '2026-11-11',
         prerelease: true,
         platforms: ['macOS', 'Windows', 'Linux'],
-        limit: 100,
       },
     ],
   },

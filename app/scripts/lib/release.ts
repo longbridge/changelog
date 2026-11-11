@@ -53,9 +53,11 @@ export function normalize(
   const include = compile(source.tagPattern)
   const exclude = compile(source.excludeTagPattern)
   const since = source.since ? new Date(source.since).getTime() : undefined
-  // 整个目录都是预发布版本的文档来源，配了 prerelease 就是要收它们
+  // 整个目录（或整个文件）都是预发布版本的来源，配了 prerelease 就是要收它们
   const includePrerelease =
-    source.includePrerelease ?? (source.provider === 'repo-docs' && source.prerelease === true)
+    source.includePrerelease ??
+    ((source.provider === 'repo-docs' || source.provider === 'release-notes-json') &&
+      source.prerelease === true)
 
   return releases
     .filter((release) => {

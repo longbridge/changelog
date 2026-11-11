@@ -45,7 +45,7 @@ bun run preview:build             # build with drafts + preview report, for prod
 - For a version to appear on the site, the release must be `published` and its major-version summary must be `published` in all three locales. `bun run check:assets` blocks half-done releases.
 - Locale files must be aligned by version: `src/content/releases/{zh-CN,zh-HK,en}/<product>/<tag>.mdx`. When a locale is missing, the locale switcher falls back to that locale's product page instead of a 404; `bun run check:assets` reports `published` entries that are missing a locale.
 - **Scripts never machine-translate.** When a curated source lacks a locale, transform fills in the closest locale as a placeholder, marks `translation.status: pending` and keeps it `draft`; `bun run i18n:todo` lists these. **Non-curated sources get no placeholders**; the `release-notes-mdx` skill creates the other two locales when it flips the entry to `published`.
-- `curated` sources (`repo-docs` / `appstore`) are already public wording. They're `published` straight after transform; don't rewrite the copy. Only releases written in internal wording need rewriting.
+- `curated` sources (`repo-docs` / `release-notes-json` / `appstore` / `release-api`) are already public wording. They're `published` straight after transform; don't rewrite the copy. Only releases written in internal wording need rewriting.
 - Write keyboard shortcuts as inline code (`` `Cmd + K` ``) and `src/lib/kbd-plugin.ts` renders them as keycaps. It matches "joined by + and contains a modifier" or "a single key name"; ordinary code is unaffected.
 - `highlights` are highlight phrases written by people / AI; `topics` are mechanically extracted module tags. Don't put module names in highlights.
 

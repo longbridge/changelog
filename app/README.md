@@ -33,7 +33,7 @@ releases/<product>/<version>.md           releases/<product>/<tag>.<locale>.md
 
 During transform:
 
-- Sources already written for the public (`repo-docs`, `appstore`, `release-api`) → format conversion only, `published` directly
+- Sources already written for the public (`repo-docs`, `release-notes-json`, `appstore`, `release-api`) → format conversion only, `published` directly
 - Sources in internal wording (`github` Releases) → cleaned up and grouped, left as `draft` for a skill to rewrite
 - A locale without a source → filled with the closest locale as a placeholder, marked `translation.status: pending` and kept `draft`.
   **No machine translation.** `bun run i18n:todo` lists the backlog; the `release-notes-mdx` skill does the translation
@@ -124,6 +124,7 @@ A product can have several `sources`; their results are merged into one timeline
 | provider | Reads | Requires |
 | --- | --- | --- |
 | `repo-docs` | Changelogs kept in a repository, one directory per locale (already public wording) | Nothing, public HTTP |
+| `release-notes-json` | The release notes file a product publishes next to its installers, all locales in one JSON (already public wording) | Nothing, public HTTP |
 | `appstore` | App Store release notes, locale by store region | Nothing, public HTTP |
 | `release-api` | A product's own public release notes API | Nothing, public HTTP |
 | `github` | Release bodies of a public repository | [`gh`](https://cli.github.com) |
@@ -133,7 +134,7 @@ A `repo-docs` configuration looks like this:
 ```ts
 {
   provider: 'repo-docs',
-  repo: 'longbridge/longbridge-desktop-website',
+  repo: '<owner>/<repo>',
   paths: {
     en: 'docs/release-notes',
     'zh-CN': 'docs/zh-CN/release-notes',
@@ -144,7 +145,20 @@ A `repo-docs` configuration looks like this:
 }
 ```
 
-Add `prerelease: true` for a directory that only holds preview builds (Longbridge Pro keeps them in `docs/<locale>/release-notes/preview/`): the entries are fetched, shown with a "Preview" badge and, within the same day, sorted after the stable release. `since: 'YYYY-MM-DD'` limits a source to versions released on or after that date.
+Longbridge Pro uses `release-notes-json`: its release pipeline publishes one file per channel next to the installers, a JSON array of `{ version, published_at, release_notes: { <locale>: markdown } }`, newest first. A version is listed once it is fully rolled out, and the preview file only keeps the most recent versions, so fetch regularly.
+
+```ts
+{
+  provider: 'release-notes-json',
+  url: 'https://assets.lbkrs.com/github/release/longbridge-desktop/stable/release-notes.json',
+  locales: ['en', 'zh-CN', 'zh-HK'],
+  tagPattern: '^v(?<version>\\d+\\.\\d+\\.\\d+)$',
+}
+```
+
+`published_at` is reduced to the release day (UTC+8). The file carries text only; screenshots and recordings are added in this repository with the `release-notes-media` skill.
+
+Add `prerelease: true` for a `repo-docs` directory or a `release-notes-json` file that only holds preview builds (Longbridge Pro's preview channel has its own file): the entries are fetched, shown with a "Preview" badge and, within the same day, sorted after the stable release. `since: 'YYYY-MM-DD'` limits a source to versions released on or after that date.
 
 `<video>` and `<img>` in the source are replaced with the site's `<Video>` / `<Figure>` components, and the source site's `<style>` and layout wrappers are dropped.
 Set `RELEASE_NOTES_GH_TOKEN` to raise the GitHub API rate limit; CI uses the workflow's built-in token.

@@ -117,7 +117,7 @@ When a locale is missing, the scripts behave in one of two ways, depending on wh
 
 | Source | When a locale is missing | Visible in `i18n:todo`? |
 | --- | --- | --- |
-| `repo-docs` / `appstore` / `release-api` | Generates a placeholder from the closest locale, marked `translation.status: pending` | Yes |
+| `repo-docs` / `release-notes-json` / `appstore` / `release-api` | Generates a placeholder from the closest locale, marked `translation.status: pending` | Yes |
 | `github` | **Generates nothing**; only the source-locale file exists | No |
 
 So for internal-voice sources (`github` Releases), after rewriting **you must create the other two locale files yourself**:
@@ -185,7 +185,7 @@ which makes them the most likely to come out sounding like AI:
   no slogans
 - No self-invented rhetoric or concepts: ✗ `越用越懂你` ("knows you better the more you use it") ✗ `Traceable financial data` ✗ `AI writes collaborative documents`
   — the source didn't say it, and readers wouldn't say it either
-- This applies especially to curated sources (`repo-docs` / `appstore` / `release-api`): the body was written by product, so
+- This applies especially to curated sources (`repo-docs` / `release-notes-json` / `appstore` / `release-api`): the body was written by product, so
   the fields you add should read as if written by the same person
 
 ## MDX capabilities
