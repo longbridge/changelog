@@ -20,9 +20,8 @@ import { listPreviews, slugOf, type Release } from '@lib/releases'
 const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd, LinkPreview, a: LinkPreview }
 
 /**
- * Every preview gets a page of its own, listed or not, so its URL works from the day it ships.
- * Lists and major pages only show the newest preview (see splitPreviews in @lib/releases);
- * older ones are reachable only through this URL.
+ * Every preview gets a page of its own so its URL works from the day it ships.
+ * Lists and major pages never show previews; the home page links to the newest one.
  */
 export const getStaticPaths = (async () => {
   const byLocale = new Map<Locale, Release[]>()

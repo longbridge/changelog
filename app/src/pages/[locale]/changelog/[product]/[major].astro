@@ -21,7 +21,7 @@ const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd,
 import { LOCALES, formatDate, localePath, majorPath, majorSegment, previewPath, t, type Locale } from '@lib/i18n'
 import { getProduct, majorOf } from '@config/products.config'
 import { listMajors, majorSlugOf, type MajorGroup } from '@lib/majors'
-import { listUnlistedPreviews, majorTitleId, slugOf } from '@lib/releases'
+import { listPreviews, majorTitleId, slugOf } from '@lib/releases'
 
 export const getStaticPaths = (async () => {
   const byLocale = new Map<Locale, MajorGroup[]>()
@@ -121,10 +121,9 @@ const rail: RailItem[] = siblings.flatMap((item) => {
   ]
 })
 
-// Previews a newer release has replaced have no section here any more; links to their
-// old anchors (/v1.0#v1.0.0-preview.4) are forwarded to the preview's own page
+// Previews have no section here; links to their old anchors (/v1.0#v1.0.0-preview.4) are forwarded to the preview's own page
 const movedPreviews = Object.fromEntries(
-  (await listUnlistedPreviews(locale))
+  (await listPreviews(locale))
     .filter(
       (release) =>
         release.data.product === group.product.id && majorOf(release.data.version) === major,
