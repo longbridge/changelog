@@ -1,0 +1,103 @@
+---
+product: longbridge-ai
+version: 1.8.0
+tag: v1.8.0
+locale: en
+title: "Follow each scheduled task's latest results"
+summary: "Each scheduled task takes one row in the conversation list with its unread count, and the web version can switch to Japanese."
+highlights:
+  - "Follow each scheduled task's latest results"
+  - "Switch to a Japanese interface"
+  - "Share a helpful Agent with friends"
+releasedAt: 2026-11-13T00:00:00.000Z
+platforms: [Web]
+status: published
+source:
+  provider: manual
+  repo: releases/longbridge-ai/1.8.0.md
+  url: https://longbridge.com
+---
+
+Unless otherwise noted, the following updates apply to the LongbridgeAI web version.
+
+## Highlights
+
+### Follow each scheduled task's latest results
+
+Each scheduled task takes one row in the conversation list with its latest run and unread count. You can group scheduled tasks or delete them from the sidebar. Note: Deleting a scheduled task also deletes the conversations from its runs, the share links of those conversations, and the long-term memories summarized from them, and cannot be undone.
+
+<Figure src="/assets/longbridge-ai/1.8.0/scheduled-task-rows-en.webp" alt="In the Scheduled tasks group of the sidebar, the US Market Brief task takes one row and shows 2 new results" caption="Each scheduled task takes one row, so new results are easy to spot" width={2400} height={1211} />
+
+### Switch to a Japanese interface
+
+In the account menu at the bottom left, open Language and select 日本語 to show the interface, error messages, and tool names in Japanese. Any text not yet translated appears in English.
+
+<Figure src="/assets/longbridge-ai/1.8.0/japanese-interface-en.webp" alt="In the Japanese interface, the account menu's language list is open with 日本語 selected" caption="Switch to Japanese from the account menu" width={2400} height={1211} />
+
+### Share a helpful Agent with friends
+
+After you like an answer or ask several follow-up questions in an Agent conversation, a prompt above the input box lets you recommend the Agent to friends. You can close the prompt or choose Don't show again; private Agents do not show it.
+
+<Figure src="/assets/longbridge-ai/1.8.0/agent-share-prompt-en.webp" alt="After liking an Agent's answer, a prompt asking whether Technical Analysis is useful appears above the input box" caption="Found a helpful Agent? Share it with friends directly" width={2400} height={1211} />
+
+## LongbridgeAI
+
+**New features:**
+
+1. **Ask AI from the watchlist page**: AI quick prompts on the watchlist page are now generally available. Tap one to see a watchlist summary and related news, add a stock to your watchlist in one step, or view a holdings card after buying. This applies across platforms in Hong Kong.
+
+2. **See today's watchlist activity in one question**: When you ask "How is my watchlist doing today?" or "Which of my holdings have news?", AI shows today's activity cards for your watchlist and holdings, sorted by importance, so you don't have to ask about each stock. This applies across platforms in Hong Kong.
+
+**Improvements:**
+
+1. **Find tools in connectors you have not connected yet**: When AI looks for available tools, it can also find tools in connectors you have not authorized and prompt you to authorize them first. Connectors show dark icons in dark mode.
+
+2. **Automatic renewal of Longbridge market and account authorization**: If your authorization expired because you had not used it for a long time, querying market data or your account now renews it automatically with basic permissions instead of asking you to authorize again. Note: Authorizations you revoked yourself are not renewed. This applies to the web and mobile web versions and the AI in the Longbridge App.
+
+3. **Direct answers to less specific questions**: When you name a stock without its market or use an abbreviation, AI answers based on the most likely interpretation and says which one it used, so you can ask from another angle at any time. AI shows option cards only when different interpretations lead to completely different answers, instead of asking you back in text. This applies across platforms in Hong Kong.
+
+4. **Action buttons for deposit and account opening questions**: When you ask questions such as "Can I deposit on the web?" or "How long does account opening take?", AI answers first and then adds the matching action button, so you don't need to look for the entry yourself. No button is added for questions about history or general concepts, or for services your current account can't use. This applies across platforms in Hong Kong.
+
+5. **App questions use the synced Help Center**: The Help Center articles AI refers to when answering App questions are now synced with the official website, including added and revised articles. This applies across platforms in Hong Kong.
+
+**Bug fixes:**
+
+1. **Stop generating works again**: Fixed an issue where an answer kept generating after you clicked Stop generating. This applies across platforms.
+
+2. **Retry prompt when an answer is cut off**: When an answer is interrupted midway, the cut-off text is no longer treated as a complete answer. Instead, you see "The model response was interrupted. Please try again later." and some cases retry automatically; scheduled tasks also retry in this situation. Note: When you see this message, simply ask again. This applies across platforms.
+
+3. **Answers resume after a connection drop**: When the connection drops, the answer status is checked immediately: finished answers appear right away and unfinished ones continue streaming, instead of staying on Generating. Clicking stop while reconnecting no longer sends you back to the generating state.
+
+4. **No sign-out when visiting from another region**: Opening the page with an account from another region no longer signs you out. You browse as a guest and are prompted to sign in on the site for your account's region.
+
+5. **Create recurring scheduled tasks in conversations**: Fixed an issue where asking AI to create a daily, weekly, or monthly scheduled task failed with some models. Note: Recreate any tasks that failed to be created before. This applies across platforms.
+
+6. **News sources shown in answers again**: When AI cites news, answers show source markers again, and you can open them to read the original article. This applies across platforms.
+
+7. **Calculated values in generated Excel files**: In Excel files generated by AI, formula cells no longer appear blank in preview, for example in trade record summary columns and statistics sheets. If you need a table that recalculates automatically, you can ask AI to keep the formulas. This applies across platforms in Hong Kong.
+
+8. **No more false "file not received" replies**: AI answers based on your attachment's content instead of mistakenly asking you to upload it again. AI doesn't edit the original file; when changes are needed, it generates a new file. You're asked to re-upload only when the attachment actually fails to load. This applies across platforms in Hong Kong.
+
+9. **Strategy signal lookup for individual stocks**: Fixed an issue where asking for a stock's strategy signals sometimes returned nothing. The stock's latest signals now return as expected. This applies across platforms in Hong Kong.
+
+**Usage changes:**
+
+1. **What guests can ask**: Without signing in, you can ask about quotes, fundamentals, financials, news, and using the App. Guest access does not search the web, open external links, or run code; when a question needs original announcements or earnings call transcripts, AI explains that it can't search the web and answers with available data. Claims from news include the source and date, and App questions include the title and link of the matching Help Center article. This applies to guest access in Hong Kong.
+
+## My Agents and workflow building
+
+**New features:**
+
+1. **Choose who can edit a locked Agent**: When you lock an Agent in the permission settings on its edit page, you can choose editors from workspace members who have edit permission. Chosen members can edit the Agent but cannot delete it or change its edit permissions; members who leave the workspace or lose edit permission are removed from the list automatically.
+
+2. **Save images generated in workflows to the community**: Use the Upload image to community CDN tool in a workflow tool node to turn images generated by an image model into permanent links for posting to the community. JPEG, PNG, GIF, and WebP files up to 20 MB are supported. Note: Anyone with the link can open an uploaded image, and the tool is available only in workflows, not to AI in conversations.
+
+3. **Use more Kimi and DeepSeek models**: When choosing a model for an Agent, you can select `kimi-k3.1-pro`, `kimi-k3.1-pro-highspeed`, and `kimi-k3` from Kimi's international platform, `kimi-k3` from Kimi's mainland China channel, and `DeepSeek-V4.1-Flash-1017` through Azure. Usage is charged at each model's model-card rates.
+
+**Improvements:**
+
+1. **See full error details from HTTP nodes**: When an HTTP node request returns a non-200 status, the error message includes the response body to help you troubleshoot, and requests follow the timeout configured on the node. Requests to OpenAI, Anthropic, xAI, OpenRouter, and Google Gemini APIs are no longer rejected because of the outbound region.
+
+**Bug fixes:**
+
+1. **Model parameters and tool calls**: Fixed some parameters for OpenAI, Claude, Gemini, and other models not taking effect or causing errors, such as structured-output errors and Gemini ignoring `temperature=0`. Sub-Agents can use Longbridge OpenAPI tools again and hand authorization requests back to the main Agent. Tool call errors have also been reduced.
