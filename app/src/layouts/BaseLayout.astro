@@ -51,7 +51,7 @@ const externalLinks = [
     <link rel="apple-touch-icon" href={siteConfig.logo} />
     {noindex && <meta name="robots" content="noindex" />}
 
-    {/* logo 与 favicon 都在这个 CDN 上，先把连接建起来 */}
+    {/* 顶栏 logo 与 favicon 所在的 CDN，先把连接建起来 */}
     {
       siteConfig.preconnect.map((origin) => (
         <>
@@ -87,7 +87,7 @@ const externalLinks = [
     <link rel="alternate" type="application/feed+json" title={siteConfig.name[locale]} href={localePath(locale, 'rss.json')} />
     <JsonLd locale={locale} breadcrumbs={breadcrumbs} />
 
-    {/* 客户端路由：页面间淡入淡出，标题做共享元素过渡（只在列表点进详情时，见下面的脚本） */}
+    {/* 客户端路由：页面间淡入淡出，导航栏保持不动 */}
     <ClientRouter />
     <script>
       // 在别名域名（如 longbridge.cn）上打开时，把指向主站的链接换成当前域名，见 siteConfig.domainAliases。
@@ -116,13 +116,6 @@ const externalLinks = [
       document.addEventListener('astro:page-load', localizeLinks)
     </script>
     <script>
-      /**
-       * 共享元素过渡只留给「列表 → 详情」这一步：点哪条，哪条的标题飞进详情页。
-       * 其余方向必须关掉——
-       *   列表之间（首页 ↔ 产品页）两边各有一整屏同名标题，滚动位置还不一样，
-       *   每个标题都会各自飞一段；详情回列表时目标条目多半在视口外，标题会径直飞出屏幕。
-       * 两种都表现为「一堆标题跟着滚」，而读者在新页面的首屏根本看不到它们。
-       */
       const BASE = import.meta.env.BASE_URL.replace(/\/$/, '')
 
       /** 路径去掉 base 后还剩四段（locale / changelog / product / major）的才是详情页 */
@@ -132,55 +125,28 @@ const externalLinks = [
         return rest.split('/').filter(Boolean).length >= 4
       }
 
-      /** 把来路那一条滚进视口，标题才有地方可落 */
-      function revealRow(detailPath: string) {
+      /**
+       * Back link from a detail page to a list: land on the card the reader came from instead of
+       * the top of the list. after-swap still runs inside startViewTransition, so the scroll is
+       * part of the new snapshot and the page fades in already in place, without a visible jump.
+       * Browser back restores the list's scroll position by itself.
+       */
+      document.addEventListener('astro:before-preparation', (event) => {
+        const { from, to, sourceElement } = event as unknown as {
+          from: URL
+          to: URL
+          sourceElement?: Element
+        }
+        if (!isDetail(from) || isDetail(to) || !sourceElement?.closest('[data-back-to-list]')) return
+
+        const detailPath = from.pathname.replace(/\/+$/, '')
         document.addEventListener(
           'astro:after-swap',
           () => {
             const link =
               document.querySelector(`.major-card a[href="${detailPath}"]`) ??
-              document.querySelector(`.major-card a[href="${detailPath.replace(/\/$/, '')}"]`)
+              document.querySelector(`.major-card a[href="${detailPath}/"]`)
             link?.closest('.major-card')?.scrollIntoView({ block: 'center', behavior: 'instant' })
-          },
-          // after-swap 仍在 startViewTransition 的回调里，这时滚动才会被算进新快照
-          { once: true },
-        )
-      }
-
-      document.addEventListener('astro:before-preparation', (event) => {
-        const { from, to, direction, sourceElement } = event as unknown as {
-          from: URL
-          to: URL
-          direction?: string
-          sourceElement?: Element
-        }
-        const fromDetail = isDetail(from)
-        const toDetail = isDetail(to)
-
-        // 列表 → 详情：点哪条，哪条的标题飞过去
-        if (!fromDetail && toDetail) return
-
-        if (fromDetail && !toDetail) {
-          // 顺着面包屑原路返回：把那一条滚回视野里，动画才落得下来
-          if (sourceElement?.closest('[data-back-to-list]')) {
-            revealRow(from.pathname)
-            return
-          }
-          // 浏览器后退：列表的滚动位置本来就会恢复，条目多半还在原处
-          if (direction === 'back') return
-        }
-
-        // 其余情况关掉：列表之间两边各有一屏同名标题，
-        // 从详情点导航去别处时目标条目也多半在视口外
-        // 标记走 CSS，而不是摘掉 scope 属性——属性摘了就回不来，
-        // 落地页面下一次点进详情就没有动画了
-        document.documentElement.dataset.noSharedTransition = ''
-        // 旧页面的快照在 swap 时才拍，新文档同样要带上标记，否则单边留名会各自进出场
-        document.addEventListener(
-          'astro:before-swap',
-          (swap) => {
-            const { newDocument } = swap as unknown as { newDocument: Document }
-            newDocument.documentElement.dataset.noSharedTransition = ''
           },
           { once: true },
         )
@@ -211,10 +177,7 @@ const externalLinks = [
         setTimeout(() => delete bar.dataset.state, 600)
       })
 
-      // 过渡走完就撤掉标记，不影响下一次导航
       document.addEventListener('astro:page-load', () => {
-        delete document.documentElement.dataset.noSharedTransition
-
         // 记下读者停在哪个列表页：详情页的返回链接照这个走，
         // 从「全部产品」点进去的就退回「全部产品」，而不是那个产品的列表
         if (!isDetail(location.href)) {
@@ -245,22 +208,20 @@ const externalLinks = [
         回源慢的时候点了像没反应。persist 让它跨页保留，结束动画才走得完 */}
     <div class="nav-progress" aria-hidden="true" transition:persist="nav-progress"></div>
     <header
-      class="sticky top-0 z-20 border-b border-rule/70 bg-paper/85 backdrop-blur-md"
+      class="site-header sticky top-0 z-20 border-b border-rule/70 bg-paper/85 backdrop-blur-md"
     >
       <div class="mx-auto flex h-14 max-w-5xl items-center gap-5 px-5">
         {/* 品牌位回主站，站内首页交给旁边的「全部更新日志」 */}
-        <a
-          href={siteConfig.brandUrl}
-          class="group flex shrink-0 items-center gap-2.5 text-[0.9375rem] font-semibold tracking-tight"
-        >
+        {/* Same sizes as the main site's header logo: 88px wide on phones, 145px from tablet up */}
+        <a href={siteConfig.brandUrl} class="flex shrink-0 items-center">
           <img
-            src={siteConfig.logo}
-            alt=""
-            width="24"
-            height="24"
-            class="h-6 w-6"
+            src={siteConfig.wordmark.src}
+            alt={siteConfig.brand}
+            width={siteConfig.wordmark.width}
+            height={siteConfig.wordmark.height}
+            class="h-auto w-[88px] md:w-[145px]"
+            fetchpriority="high"
           />
-          <span class="truncate">{siteConfig.brand}</span>
         </a>
 
         {/* 产品直接铺开：一共就这么几个，藏进下拉反而多一次点击 */}

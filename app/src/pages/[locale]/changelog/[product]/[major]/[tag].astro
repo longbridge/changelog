@@ -88,7 +88,7 @@ const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data
     {
       previewDownloads ? (
         <div
-          class="preview-download"
+          class="preview-download btn-split"
           hidden
           data-manifest={manifestUrl}
           data-packages={JSON.stringify(previewDownloads.packages)}
@@ -96,15 +96,13 @@ const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data
           <a
             href="#"
             data-preview-download
-            class="inline-flex shrink-0 items-center gap-1.5 rounded-l-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
-            style="background:var(--accent)"
+            class="btn btn--primary"
           >
             {t.downloadPreview[locale]}
           </a>
           <details class="preview-download__more">
             <summary
-              class="inline-flex cursor-pointer list-none items-center rounded-r-lg border-l border-white/40 px-2 py-1.5 text-[0.8125rem] text-white"
-              style="background:var(--accent)"
+              class="btn btn--primary btn--toggle list-none"
               aria-label={t.otherPackages[locale]}
               title={t.otherPackages[locale]}>▾</summary
             >
@@ -115,8 +113,7 @@ const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data
         product?.homepage && (
           <a
             href={homepageUrl(product, locale)}
-            class="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
-            style="background:var(--accent)"
+            class="btn btn--primary"
           >
             {t[product.homepageAction ?? 'download'][locale]}
             <span aria-hidden="true">↗</span>
@@ -154,7 +151,6 @@ const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data
 <style is:global>
   .preview-download {
     position: relative;
-    display: inline-flex;
   }
   .preview-download[hidden] {
     display: none;
@@ -170,15 +166,15 @@ const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data
     min-width: 12rem;
     padding: 0.375rem;
     border: 1px solid var(--color-rule, #e5e5e5);
-    border-radius: 0.75rem;
+    border-radius: 8px;
     background: var(--color-paper, #fff);
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
   }
   .preview-download__list a {
     display: block;
-    padding: 0.375rem 0.625rem;
-    border-radius: 0.5rem;
-    font-size: 0.8125rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
     white-space: nowrap;
   }
   .preview-download__list a:hover {

@@ -1,7 +1,6 @@
 ---
 import { formatDate, majorPath, t, type Locale } from '@lib/i18n'
 import { majorSlugOf, type MajorGroup } from '@lib/majors'
-import { majorTitleId } from '@lib/releases'
 
 interface Props {
   locale: Locale
@@ -16,6 +15,13 @@ const { locale, group, showProduct, featured } = Astro.props
 const product = group.product
 const slug = majorSlugOf(group.entry)
 const { title, summary, highlights = [], cover, coverAlt, status } = group.entry.data
+const href = majorPath(locale, product.id, slug)
+// The chip shows the newest version, the one readers see in the app; the footer lists the
+// older versions folded into the same page, with a long tail collapsing into "+N"
+const VERSION_LIMIT = 4
+const [latest, ...older] = group.releases.map((release) => release.data.version)
+const shownVersions = older.slice(0, VERSION_LIMIT)
+const hiddenVersions = older.length - shownVersions.length
 ---
 
 <article
@@ -23,13 +29,24 @@ const { title, summary, highlights = [], cover, coverAlt, status } = group.entry
   style={`--accent-default:${product.accent}`}
 >
   <div class="major-card__text">
-    <p class="major-card__date tnum">{formatDate(group.releasedAt, locale)}</p>
+    {/* Eyebrow: which product and which major version, then when. Readers scan this line first */}
+    <p class="major-card__eyebrow">
+      {
+        showProduct && (
+          <span class="major-card__product">
+            <img src={product.logo} alt="" width="16" height="16" loading="lazy" decoding="async" />
+            {product.name[locale]}
+          </span>
+        )
+      }
+      <span class="version-chip tnum">v{latest}</span>
+      <time class="major-card__date tnum" datetime={group.releasedAt.toISOString()}>
+        {formatDate(group.releasedAt, locale)}
+      </time>
+    </p>
 
-    <h2
-      class:list={['major-card__title', featured ? 'major-card__title--lg' : '']}
-      transition:name={majorTitleId(product.id, slug)}
-    >
-      <a href={majorPath(locale, product.id, slug)} class="after:absolute after:inset-0">
+    <h2 class:list={['major-card__title', featured ? 'major-card__title--lg' : '']}>
+      <a href={href} class="after:absolute after:inset-0">
         {title}
       </a>
     </h2>
@@ -50,16 +67,24 @@ const { title, summary, highlights = [], cover, coverAlt, status } = group.entry
       )
     }
 
-    <p class="major-card__meta">
-      {showProduct && <span>{product.name[locale]}</span>}
-      {
-        status === 'draft' && (
-          <span class="draft-badge rounded-md border px-1.5 py-0.5 text-[0.75rem]">
-            {t.draftBadge[locale]}
-          </span>
-        )
-      }
-    </p>
+    {
+      (shownVersions.length > 0 || status === 'draft') && (
+        <p class="major-card__meta">
+          {shownVersions.length > 0 && (
+            <span class="major-card__versions tnum">
+              <span>{t.alsoIncludes[locale]}</span>
+              {shownVersions.map((version) => <span>v{version}</span>)}
+              {hiddenVersions > 0 && <span>+{hiddenVersions}</span>}
+            </span>
+          )}
+          {status === 'draft' && (
+            <span class="draft-badge rounded-md border px-1.5 py-0.5 text-[0.75rem]">
+              {t.draftBadge[locale]}
+            </span>
+          )}
+        </p>
+      )
+    }
   </div>
 
   {

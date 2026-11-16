@@ -86,14 +86,3 @@ export async function listLatestPreviews(locale: Locale): Promise<Release[]> {
 /** MDX 文件名（不含扩展名）作为 URL 中的版本片段，保证与磁盘一致 */
 export const slugOf = (entry: Release): string => entry.id.split('/').pop() ?? entry.id
 
-/**
- * 跨页共享元素的过渡名。列表页与详情页的同一条目用同一个名字，
- * 浏览器会把标题从列表位置平移/缩放到详情位置。
- * view-transition-name 必须是合法 CSS ident，所以非 \w 字符统一换成 -
- */
-const ident = (value: string) => value.replace(/[^\w-]/g, '-')
-
-export const productTitleId = (productId: string) => ident(`product-title-${productId}`)
-
-export const majorTitleId = (productId: string, major: string) =>
-  ident(`major-title-${productId}-${major}`)
