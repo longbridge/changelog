@@ -93,6 +93,8 @@ export const t = {
   helpCenter: { 'zh-CN': '帮助中心', 'zh-HK': '幫助中心', en: 'Support' },
   latestRelease: { 'zh-CN': '最新版本', 'zh-HK': '最新版本', en: 'Latest release' },
   releaseHistory: { 'zh-CN': '历史版本', 'zh-HK': '歷史版本', en: 'Release history' },
+  alsoIncludes: { 'zh-CN': '另含', 'zh-HK': '另含', en: 'Also includes' },
+  versionsOnPage: { 'zh-CN': '本页版本', 'zh-HK': '本頁版本', en: 'On this page' },
   versions: { 'zh-CN': '个版本', 'zh-HK': '個版本', en: 'releases' },
   viewAll: { 'zh-CN': '查看全部版本', 'zh-HK': '查看全部版本', en: 'View all releases' },
   backToProduct: { 'zh-CN': '返回版本列表', 'zh-HK': '返回版本列表', en: 'Back to all releases' },

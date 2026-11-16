@@ -52,9 +52,22 @@ export const siteConfig = {
     locale === 'en' ? 'https://open.longbridge.com' : `https://open.longbridge.com/${locale}`,
   /** 顶栏的帮助中心外链。主站会再按地区跳到 /<region>/<locale>/support，这里不写死地区 */
   helpCenter: (locale: Locale) => `${BRAND_URL}/${locale}/support`,
+  /** Square brand mark: favicon, share card, structured data */
   logo: 'https://assets.wbrks.com/assets/logo/logo1.png',
-  /** 预连接的域名：logo 与 favicon 都在这个 CDN 上 */
-  preconnect: ['https://assets.wbrks.com'],
+  /**
+   * Header lockup: the brand mark plus the LONGBRIDGE wordmark, same artwork as the main site's
+   * header. The main site picks a per-region file that carries a region line ("Hong Kong",
+   * "Singapore"); the changelog serves every region, so this copy has that line removed and
+   * nothing else changed: the wordmark stays bottom-aligned with the mark, as in the original.
+   * 633×139, the same ratio as the main site's lockups
+   */
+  wordmark: {
+    src: 'https://assets.lbkrs.com/uploads/cee93d23-4ccd-417a-bb2b-95c29b82d239/logo-light.png',
+    width: 633,
+    height: 139,
+  },
+  /** 预连接的域名：顶栏 logo 与 favicon 所在的 CDN */
+  preconnect: ['https://assets.wbrks.com', 'https://assets.lbkrs.com'],
   /**
    * hreflang 展开的目标区域。longbridge.com 是单域名多 region，
    * 每个语言要按 BCP 47 的 language-REGION 展开成一组，覆盖各地定向。

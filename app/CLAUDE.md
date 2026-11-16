@@ -56,7 +56,7 @@ bun run preview:build             # build with drafts + preview report, for prod
 - Import Zod from `zod` directly, not the deprecated `z` from `astro:content`.
 - Path aliases: `@components/*` `@layouts/*` `@lib/*` `@config/*`, also usable in MDX.
 - The URL fragment equals the MDX filename (`content.config.ts` defines a custom `generateId`). Don't revert to default slugification, or `v1.19.0` becomes `v1190` and may collide.
-- Cross-page animations rely on `transition:name`; the same entry on the list page and the detail page must get the same name from `releaseTitleId()`.
+- Cross-page navigation is a plain page fade with the header held in place (`::view-transition-*` rules in `global.css`). There is no shared-element title transition; don't reintroduce `transition:name` on titles.
 - Styles use Tailwind v4 with colors from the `@theme` tokens in `src/styles/global.css`. The product accent color is injected via the `--accent` CSS variable; don't hard-code it.
 - MDX components are injected through `mdxComponents` on the detail page. Add new components to that map so MDX authors don't need imports.
 - Elements created by scripts (such as the Steps switcher buttons) don't get Astro's scoped styles; their styles must go in `global.css`.

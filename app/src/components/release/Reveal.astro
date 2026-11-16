@@ -19,8 +19,6 @@ const { locale } = Astro.props
 
 <script>
   const REVEAL_SELECTOR = '[data-reveal]'
-  /** 正文里这些元素自动获得进场动画，不用在 MDX 里手写 */
-  const PROSE_SELECTOR = '.prose > h2, .prose > h3, .prose > p, .prose > ul, .prose > ol, .prose > blockquote, .prose > table'
 
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -39,7 +37,6 @@ const { locale } = Astro.props
       return
     }
 
-    document.querySelectorAll(PROSE_SELECTOR).forEach((el) => el.setAttribute('data-reveal', ''))
 
     observer?.disconnect()
     observer = new IntersectionObserver(

@@ -21,7 +21,7 @@ const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd,
 import { LOCALES, formatDate, localePath, majorPath, majorSegment, previewPath, t, type Locale } from '@lib/i18n'
 import { getProduct, majorOf } from '@config/products.config'
 import { listMajors, majorSlugOf, type MajorGroup } from '@lib/majors'
-import { listPreviews, majorTitleId, slugOf } from '@lib/releases'
+import { listPreviews, slugOf } from '@lib/releases'
 
 export const getStaticPaths = (async () => {
   const byLocale = new Map<Locale, MajorGroup[]>()
@@ -175,10 +175,7 @@ const alternates = Object.fromEntries(
 
   <div class="detail-grid">
     <article>
-      <h1
-        class="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-[2rem]"
-        transition:name={majorTitleId(group.product.id, majorSlugOf(group.entry))}
-      >
+      <h1 class="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-[2rem]">
         {group.entry.data.title}
       </h1>
 
@@ -200,6 +197,20 @@ const alternates = Object.fromEntries(
         )
       }
 
+      {/* Narrow screens have no version rail: jump links to each version on this page */}
+      {
+        sections.length > 1 && (
+          <nav class="version-jump" aria-label={t.versionsOnPage[locale]}>
+            <span class="version-jump__label">{t.versionsOnPage[locale]}</span>
+            {sections.map(({ release, slug }) => (
+              <a href={`#${slug}`} class="version-jump__link tnum">
+                v{release.data.version}
+              </a>
+            ))}
+          </nav>
+        )
+      }
+
       <div class="prose mt-8">
         <Overview components={mdxComponents} />
       </div>
@@ -218,8 +229,8 @@ const alternates = Object.fromEntries(
             data-rail-title={`${release.data.title} · ${formatDate(release.data.releasedAt, locale)}`}
             data-rail-draft={release.data.status === 'draft' ? t.draftBadge[locale] : undefined}
           >
-            <h2 class="text-[1.25rem] font-semibold tracking-tight">{release.data.title}</h2>
-            <div class="mt-2">
+            {/* Version and date sit in their own column and stay pinned while this section scrolls */}
+            <div class="release-section__meta">
               <Meta
                 locale={locale}
                 version={release.data.version}
@@ -229,13 +240,16 @@ const alternates = Object.fromEntries(
                 prereleaseLabel={release.data.prerelease ? t.prereleaseBadge[locale] : undefined}
               />
             </div>
-            {release.data.summary && (
-              <p class="mt-3 text-[0.9375rem] leading-relaxed text-ink-soft">
-                {release.data.summary}
-              </p>
-            )}
-            <div class="prose mt-5">
-              <Content components={mdxComponents} />
+            <div class="release-section__body">
+              <h2 class="text-[1.25rem] font-semibold tracking-tight">{release.data.title}</h2>
+              {release.data.summary && (
+                <p class="mt-3 text-[0.9375rem] leading-relaxed text-ink-soft">
+                  {release.data.summary}
+                </p>
+              )}
+              <div class="prose mt-5">
+                <Content components={mdxComponents} />
+              </div>
             </div>
           </section>
         ))

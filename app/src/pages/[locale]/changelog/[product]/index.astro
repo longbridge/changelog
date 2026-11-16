@@ -6,7 +6,7 @@ import { homepageUrl, majorOf, visibleProducts } from '@config/products.config'
 import MajorCard from '@components/MajorCard.astro'
 import ProductTabs from '@components/ProductTabs.astro'
 import { listProductMajors } from '@lib/majors'
-import { hasDrafts, listLatestPreviews, productTitleId, slugOf } from '@lib/releases'
+import { hasDrafts, listLatestPreviews, slugOf } from '@lib/releases'
 
 export const getStaticPaths = (() =>
   LOCALES.flatMap((locale) =>
@@ -53,37 +53,32 @@ const alternates = Object.fromEntries(
         下载按钮靠右对齐到正文右边界，这一栏的宽度才看得出来 */}
     <div class="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
       <div class="max-w-2xl">
-        <h1
-          class="text-[1.875rem] leading-tight font-semibold tracking-tight sm:text-[2.25rem]"
-          transition:name={productTitleId(product.id)}
-        >
+        <h1 class="text-[1.875rem] leading-tight font-semibold tracking-tight sm:text-[2.25rem]">
           {product.name[locale]}
         </h1>
         <p class="mt-2.5 text-[1rem] leading-relaxed text-ink-soft">
           {product.summary[locale]}
         </p>
       </div>
-      <div class="mt-1 flex shrink-0 items-center gap-2">
-      {
-        previewHref && (
-          <a
-            href={previewHref}
-            class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.8125rem] font-medium transition-opacity hover:opacity-80"
-            style="color:var(--accent);border-color:var(--accent)"
-          >
-            {t.tryPreview[locale]}
-          </a>
-        )
-      }
+      <div class="mt-1 flex shrink-0 items-center gap-2 sm:flex-row-reverse">
       {
         product.homepage && (
           <a
             href={homepageUrl(product, locale)}
-            class="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
-            style="background:var(--accent)"
+            class="btn btn--primary"
           >
             {t[product.homepageAction ?? 'download'][locale]}
             <span aria-hidden="true">↗</span>
+          </a>
+        )
+      }
+      {
+        previewHref && (
+          <a
+            href={previewHref}
+            class="btn btn--outline"
+          >
+            {t.tryPreview[locale]}
           </a>
         )
       }
