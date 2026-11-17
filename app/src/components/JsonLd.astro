@@ -16,9 +16,19 @@ interface Props {
   locale: Locale
   /** 面包屑，从「全部产品」开始，不含站点根 */
   breadcrumbs?: Crumb[]
+  /** Release pages: an Article with dates, so search engines can show and weigh freshness */
+  article?: {
+    headline: string
+    description: string
+    url: string
+    publishedTime: Date
+    modifiedTime: Date
+    image?: string
+    about?: string
+  }
 }
 
-const { locale, breadcrumbs = [] } = Astro.props
+const { locale, breadcrumbs = [], article } = Astro.props
 const origin = (Astro.site ?? new URL(Astro.url.origin)).origin
 const abs = (path: string) => new URL(path, origin).href
 
@@ -40,6 +50,24 @@ const graph: Record<string, unknown>[] = [
     publisher: { '@id': `${origin}#organization` },
   },
 ]
+
+if (article) {
+  graph.push({
+    '@type': 'Article',
+    headline: article.headline,
+    description: article.description,
+    url: article.url,
+    mainEntityOfPage: article.url,
+    inLanguage: locale,
+    datePublished: article.publishedTime.toISOString(),
+    dateModified: article.modifiedTime.toISOString(),
+    image: article.image ?? siteConfig.logo,
+    author: { '@id': `${origin}#organization` },
+    publisher: { '@id': `${origin}#organization` },
+    isPartOf: { '@id': `${origin}#website` },
+    ...(article.about ? { about: { '@type': 'SoftwareApplication', name: article.about } } : {}),
+  })
+}
 
 if (breadcrumbs.length > 0) {
   graph.push({

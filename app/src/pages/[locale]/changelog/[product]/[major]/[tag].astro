@@ -68,6 +68,7 @@ const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data
 <BaseLayout
   locale={locale}
   title={`${productName} ${release.data.version} · ${release.data.title}`}
+  fullTitle
   description={release.data.summary || product?.summary[locale]}
   alternates={alternates}
   accent={product?.accent}
