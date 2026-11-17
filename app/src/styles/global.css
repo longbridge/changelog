@@ -267,6 +267,19 @@ body {
     background-color 150ms ease-out;
 }
 
+/* Phones: the nav sits on its own row; if a locale's labels ever outgrow it, it scrolls sideways */
+@media (max-width: 639px) {
+  .site-nav {
+    /* Block padding keeps the focus ring inside the scroll box, which would clip it */
+    padding-block: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .site-nav::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .site-nav-link:hover {
   transform: scale(1.02);
 }
@@ -994,6 +1007,13 @@ html:has(.lightbox[open]) {
   border-top: 1px solid var(--color-rule);
   /* 从侧边栏跳过来时别被吸顶的 header 盖住 */
   scroll-margin-top: 5rem;
+}
+
+/* Phones: the header is two rows tall (lockup, then nav) */
+@media (max-width: 639px) {
+  .release-section {
+    scroll-margin-top: 7rem;
+  }
 }
 
 /* Narrow screens: version and date sit above the title */
