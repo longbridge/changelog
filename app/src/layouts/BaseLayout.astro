@@ -210,7 +210,7 @@ const externalLinks = [
     <header
       class="site-header sticky top-0 z-20 border-b border-rule/70 bg-paper/85 backdrop-blur-md"
     >
-      <div class="mx-auto flex h-14 max-w-5xl items-center gap-5 px-5">
+      <div class="mx-auto flex h-14 max-w-5xl items-center gap-8 px-5">
         {/* 品牌位回主站，站内首页交给旁边的「全部更新日志」 */}
         {/* Same sizes as the main site's header logo: 88px wide on phones, 145px from tablet up */}
         <a href={siteConfig.brandUrl} class="flex shrink-0 items-center">
@@ -225,11 +225,12 @@ const externalLinks = [
         </a>
 
         {/* 产品直接铺开：一共就这么几个，藏进下拉反而多一次点击 */}
-        <nav class="hidden items-center gap-0.5 sm:flex" aria-label={t.allProducts[locale]}>
+        {/* Same size as the main site's header nav; shown from md up so it never collides with the 145px lockup */}
+        <nav class="hidden items-center gap-1 md:flex" aria-label={t.allProducts[locale]}>
           <a
             href={localePath(locale)}
             aria-current={activeProduct ? undefined : 'page'}
-            class="nav-link rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-ink transition-colors hover:bg-rule/50"
+            class="site-nav-link"
           >
             {t.allReleaseNotes[locale]}
           </a>
@@ -239,7 +240,7 @@ const externalLinks = [
               href={href}
               target="_blank"
               rel="noopener"
-              class="nav-link inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.8125rem] text-ink transition-colors hover:bg-rule/50"
+              class="site-nav-link"
             >
               {label}
               {arrow && (
