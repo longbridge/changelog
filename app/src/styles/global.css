@@ -246,6 +246,51 @@ body {
 }
 
 /* 小版本节的版本号：等宽小字，和日期并排，与侧栏里的版本号对得上 */
+/* Header nav items match the main site's header (longbridge.com): 16px medium text in a 40px pill,
+   a slight grow on hover and a press-in on click, no hover fill; the current section gets a light
+   pill, as the main site shows for its active item */
+.site-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 2.5rem;
+  padding-inline: 1rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  color: var(--color-ink);
+  white-space: nowrap;
+  transform-origin: center;
+  transition:
+    transform 150ms ease-out,
+    background-color 150ms ease-out;
+}
+
+.site-nav-link:hover {
+  transform: scale(1.02);
+}
+
+.site-nav-link:active {
+  transform: scale(0.95);
+}
+
+.site-nav-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.site-nav-link[aria-current='page'] {
+  background: var(--color-paper-raised);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav-link:hover,
+  .site-nav-link:active {
+    transform: none;
+  }
+}
+
 /* Buttons follow the company component library (@web/ui Button): 8px radius, 500 weight,
    36px tall (28px for --sm); hover takes the fill to 90%, press to 80% with an inset shadow
    and a 0.98 scale; keyboard focus gets a 2px ring offset by 2px. The fill is the product
