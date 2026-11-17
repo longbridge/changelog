@@ -267,15 +267,42 @@ body {
     background-color 150ms ease-out;
 }
 
-/* Phones: the nav sits on its own row; if a locale's labels ever outgrow it, it scrolls sideways */
-@media (max-width: 639px) {
-  .site-nav {
-    /* Block padding keeps the focus ring inside the scroll box, which would clip it */
-    padding-block: 0.25rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .site-nav::-webkit-scrollbar {
+/* Phones: header nav links in a popover under the menu button (same look as the language menu) */
+.site-menu-toggle {
+  padding-inline: 0.625rem;
+}
+.site-menu {
+  position: fixed;
+  inset: 3.25rem 1.25rem auto auto;
+  margin: 0;
+  min-width: 11rem;
+  padding: 0.25rem 0;
+  border: 1px solid var(--color-rule);
+  border-radius: 0.75rem;
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+}
+.site-menu a {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+  transition: background-color 150ms ease-out;
+}
+.site-menu a:hover {
+  background: color-mix(in srgb, var(--color-rule) 50%, transparent);
+}
+.site-menu a[aria-current='page'] {
+  font-weight: 500;
+  color: var(--color-ink);
+}
+@media (min-width: 40rem) {
+  /* Not sm:hidden: .site-nav-link's display would win over the utility */
+  .site-menu-toggle,
+  .site-menu:popover-open {
     display: none;
   }
 }
@@ -1007,13 +1034,6 @@ html:has(.lightbox[open]) {
   border-top: 1px solid var(--color-rule);
   /* 从侧边栏跳过来时别被吸顶的 header 盖住 */
   scroll-margin-top: 5rem;
-}
-
-/* Phones: the header is two rows tall (lockup, then nav) */
-@media (max-width: 639px) {
-  .release-section {
-    scroll-margin-top: 7rem;
-  }
 }
 
 /* Narrow screens: version and date sit above the title */
