@@ -262,8 +262,8 @@ const externalLinks = [
         </a>
 
         {/* 产品直接铺开：一共就这么几个，藏进下拉反而多一次点击 */}
-        {/* Same size as the main site's header nav; shown from md up so it never collides with the 145px lockup */}
-        <nav class="hidden items-center gap-1 md:flex" aria-label={t.allProducts[locale]}>
+        {/* Same style as the main site's header nav. Shown from sm up: below md the lockup is 88px wide, so it fits */}
+        <nav class="hidden items-center gap-1 sm:flex" aria-label={t.allProducts[locale]}>
           <a
             href={localePath(locale)}
             aria-current={activeProduct ? undefined : 'page'}
