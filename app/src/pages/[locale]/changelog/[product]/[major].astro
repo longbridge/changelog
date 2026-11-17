@@ -22,6 +22,7 @@ import { LOCALES, formatDate, localePath, majorPath, majorSegment, previewPath, 
 import { getProduct, majorOf } from '@config/products.config'
 import { listMajors, majorSlugOf, type MajorGroup } from '@lib/majors'
 import { listPreviews, slugOf } from '@lib/releases'
+import { firstImage } from '@lib/share-image'
 
 export const getStaticPaths = (async () => {
   const byLocale = new Map<Locale, MajorGroup[]>()
@@ -137,6 +138,9 @@ const movedPreviews = Object.fromEntries(
 // 页签与分享卡片要能认出是哪一版
 const seoTitle = `${product?.name[locale] ?? group.product.id} ${major} · ${group.entry.data.title}`
 
+// Share card: the first screenshot on the page (overview first, then the releases newest first)
+const shareImage = firstImage([group.entry.body, ...group.releases.map((release) => release.body)], Astro.site)
+
 // 缺某个语言时回落到产品页，而不是指向一个不存在的页面
 const alternates = Object.fromEntries(
   LOCALES.map((item) => [
@@ -152,7 +156,14 @@ const alternates = Object.fromEntries(
 <BaseLayout
   locale={locale}
   title={seoTitle}
+  fullTitle
   description={group.entry.data.summary || product?.summary[locale]}
+  ogImage={shareImage}
+  article={{
+    publishedTime: group.startedAt,
+    modifiedTime: group.releasedAt,
+    about: product?.name[locale],
+  }}
   alternates={alternates}
   accent={product?.accent}
   activeProduct={group.product.id}

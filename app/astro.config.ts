@@ -5,6 +5,10 @@ import tailwindcss from '@tailwindcss/vite'
 import { DEFAULT_LOCALE, LOCALES, SITE_SEGMENT, siteConfig } from './config/site.config'
 import { satteri } from '@astrojs/markdown-satteri'
 import { kbdPlugin } from './src/lib/kbd-plugin'
+import { releaseLastmod } from './config/sitemap-lastmod'
+
+// The sitemap is only written by `astro build`; drafts count when the build shows them (preview builds)
+const lastmod = releaseLastmod(process.env.SHOW_DRAFTS === '1')
 
 export default defineConfig({
   site: siteConfig.url,
@@ -30,8 +34,14 @@ export default defineConfig({
         !new RegExp(`/${SITE_SEGMENT}/[^/]+/\\d[^/]*/?$`).test(new URL(page).pathname) &&
         // Preview pages are reachable by link only, see previewPath()
         !new RegExp(`/${SITE_SEGMENT}/[^/]+/v[^/]+/[^/]+/?$`).test(new URL(page).pathname),
-      // 地址统一成不带尾斜杠
-      serialize: (item) => ({ ...item, url: item.url.replace(/\/$/, '') }),
+      // 地址统一成不带尾斜杠；lastmod 取这一页上最新一次发布的时间，没有发布的页面不写
+      serialize: (item) => {
+        const url = item.url.replace(/\/$/, '')
+        const base = siteConfig.base.replace(/\/$/, '')
+        const path = new URL(url).pathname.slice(base.length) || '/'
+        const date = lastmod.get(path)
+        return { ...item, url, ...(date ? { lastmod: date.toISOString() } : {}) }
+      },
       i18n: {
         defaultLocale: DEFAULT_LOCALE,
         locales: Object.fromEntries(LOCALES.map((locale) => [locale, locale])),
