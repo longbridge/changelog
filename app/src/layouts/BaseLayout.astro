@@ -21,11 +21,29 @@ interface Props {
   activeProduct?: string
   /** 结构化数据里的面包屑 */
   breadcrumbs?: { name: string; path?: string }[]
+  /**
+   * The title already names the product and version: don't append the site name. Keeps release
+   * pages within what search results show (the brand is already at the start)
+   */
+  fullTitle?: boolean
+  /** Share image (absolute URL). Shown as a large card; without it the square brand mark is used */
+  ogImage?: string
+  /** Release pages: published as an Article with dates, for search results and freshness */
+  article?: {
+    /** First release in this page */
+    publishedTime: Date
+    /** Latest release in this page */
+    modifiedTime: Date
+    /** What the article is about, e.g. the product name */
+    about?: string
+  }
 }
 
-const { locale, title, description, alternates, accent, noindex, activeProduct, breadcrumbs } = Astro.props
+const { locale, title, description, alternates, accent, noindex, activeProduct, breadcrumbs, fullTitle, ogImage, article } =
+  Astro.props
 const meta = LOCALE_META[locale]
-const pageTitle = title === siteConfig.name[locale] ? title : `${title} · ${siteConfig.name[locale]}`
+const pageTitle =
+  fullTitle || title === siteConfig.name[locale] ? title : `${title} · ${siteConfig.name[locale]}`
 const pageDescription = description || siteConfig.description[locale]
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
 /** 顶栏的站外入口，顺序即展示顺序。arrow 标记要不要带「离开本站」的小箭头 */
@@ -63,17 +81,20 @@ const externalLinks = [
 
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    {article && <meta property="article:published_time" content={article.publishedTime.toISOString()} />}
+    {article && <meta property="article:modified_time" content={article.modifiedTime.toISOString()} />}
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={siteConfig.name[locale]} />
-    <meta property="og:image" content={siteConfig.logo} />
+    <meta property="og:image" content={ogImage ?? siteConfig.logo} />
     <meta property="og:locale" content={ogLocale(locale)} />
     {
       LOCALES.filter((alt) => alt !== locale).map((alt) => (
         <meta property="og:locale:alternate" content={ogLocale(alt)} />
       ))
     }
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
     {
       LOCALES.flatMap((alt) =>
         alternates?.[alt]
@@ -83,9 +104,25 @@ const externalLinks = [
           : [],
       )
     }
+    {/* Visitors whose language and region match none of the above get the English page */}
+    {
+      alternates?.en && (
+        <link rel="alternate" hreflang="x-default" href={new URL(alternates.en, Astro.site ?? Astro.url.origin)} />
+      )
+    }
     <link rel="alternate" type="application/rss+xml" title={siteConfig.name[locale]} href={localePath(locale, 'rss.xml')} />
     <link rel="alternate" type="application/feed+json" title={siteConfig.name[locale]} href={localePath(locale, 'rss.json')} />
-    <JsonLd locale={locale} breadcrumbs={breadcrumbs} />
+    <JsonLd
+      locale={locale}
+      breadcrumbs={breadcrumbs}
+      article={article && {
+        ...article,
+        headline: title,
+        description: pageDescription,
+        url: canonical.href,
+        image: ogImage,
+      }}
+    />
 
     {/* 客户端路由：页面间淡入淡出，标题做共享元素过渡（只在列表点进详情时，见下面的脚本） */}
     <ClientRouter />
