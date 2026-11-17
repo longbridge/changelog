@@ -247,10 +247,10 @@ const externalLinks = [
     <header
       class="site-header sticky top-0 z-20 border-b border-rule/70 bg-paper/85 backdrop-blur-md"
     >
-      <div class="mx-auto flex h-14 max-w-5xl items-center gap-8 px-5">
+      <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-8 px-5 sm:h-14 sm:flex-nowrap">
         {/* 品牌位回主站，站内首页交给旁边的「全部更新日志」 */}
         {/* Same sizes as the main site's header logo: 88px wide on phones, 145px from tablet up */}
-        <a href={siteConfig.brandUrl} class="flex shrink-0 items-center">
+        <a href={siteConfig.brandUrl} class="flex h-14 shrink-0 items-center sm:h-auto">
           <img
             src={siteConfig.wordmark.src}
             alt={siteConfig.brand}
@@ -262,8 +262,8 @@ const externalLinks = [
         </a>
 
         {/* 产品直接铺开：一共就这么几个，藏进下拉反而多一次点击 */}
-        {/* Same style as the main site's header nav. Shown from sm up: below md the lockup is 88px wide, so it fits */}
-        <nav class="hidden items-center gap-1 sm:flex" aria-label={t.allProducts[locale]}>
+        {/* Same style as the main site's header nav. Always shown: on phones it drops to its own row under the lockup */}
+        <nav class="site-nav order-last -mx-3 flex w-[calc(100%+1.5rem)] min-w-0 items-center gap-1 pb-1.5 sm:order-none sm:mx-0 sm:w-auto sm:pb-0" aria-label={t.allProducts[locale]}>
           <a
             href={localePath(locale)}
             aria-current={activeProduct ? undefined : 'page'}
@@ -287,7 +287,7 @@ const externalLinks = [
           ))}
         </nav>
 
-        <div class="ml-auto flex items-center gap-1.5">
+        <div class="ml-auto flex shrink-0 items-center gap-1.5">
           <LocaleSwitcher locale={locale} alternates={alternates} />
         </div>
       </div>
