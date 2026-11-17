@@ -307,10 +307,6 @@ body {
   }
 }
 
-.site-nav-link:hover {
-  transform: scale(1.02);
-}
-
 .site-nav-link:active {
   transform: scale(0.95);
 }
@@ -325,7 +321,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .site-nav-link:hover,
   .site-nav-link:active {
     transform: none;
   }
