@@ -88,6 +88,7 @@ type Dict = Record<Locale, string>
 /** 界面文案。正文内容来自 MDX，这里只放 UI 壳的字。 */
 export const t = {
   allProducts: { 'zh-CN': '全部产品', 'zh-HK': '全部產品', en: 'All products' },
+  menu: { 'zh-CN': '菜单', 'zh-HK': '選單', en: 'Menu' },
   allReleaseNotes: { 'zh-CN': '全部更新日志', 'zh-HK': '全部更新日誌', en: 'All release notes' },
   developers: { 'zh-CN': '开发者平台', 'zh-HK': '開發者平台', en: 'Developers' },
   helpCenter: { 'zh-CN': '帮助中心', 'zh-HK': '幫助中心', en: 'Support' },
