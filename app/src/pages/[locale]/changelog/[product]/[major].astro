@@ -21,7 +21,7 @@ const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd,
 import { LOCALES, formatDate, localePath, majorPath, majorSegment, previewPath, t, type Locale } from '@lib/i18n'
 import { getProduct, majorOf } from '@config/products.config'
 import { listMajors, majorSlugOf, type MajorGroup } from '@lib/majors'
-import { listPreviews, slugOf } from '@lib/releases'
+import { listStandalone, slugOf } from '@lib/releases'
 import { firstImage } from '@lib/share-image'
 
 export const getStaticPaths = (async () => {
@@ -60,17 +60,62 @@ export const getStaticPaths = (async () => {
       props: { redirectTo: majorPath(locale, group.product.id, majorSlugOf(group.entry)) },
     })),
   )
-  return [...pages, ...legacy]
+  // A major without a listed release yet (1.2 while it only has previews, or while 1.2.0 is still
+  // unlisted) has no page of its own. Both of its addresses forward instead of ending in a 404:
+  // with the anchor of one of its releases (#v1.2.0, which is how the desktop client links here)
+  // to that release's own page, otherwise to the newest preview, or the product page when there
+  // is none. An unlisted release is only ever reached through its own anchor.
+  const unlistedMajors = (
+    await Promise.all(
+      LOCALES.map(async (locale) => {
+        const majors = new Map<
+          string,
+          { product: string; major: string; fallback?: string; byAnchor: Record<string, string> }
+        >()
+        // Newest first, so the first preview seen for a major is the one to fall back to
+        for (const release of await listStandalone(locale)) {
+          const product = release.data.product
+          const major = majorOf(release.data.version)
+          const listed = (byLocale.get(locale) ?? []).some(
+            (group) => group.product.id === product && majorSlugOf(group.entry) === major,
+          )
+          if (listed) continue
+          const key = `${product}/${major}`
+          const item = majors.get(key) ?? { product, major, byAnchor: {} }
+          const slug = slugOf(release)
+          const to = previewPath(locale, product, major, slug)
+          item.byAnchor[slug] = to
+          if (!release.data.unlisted) item.fallback ??= to
+          majors.set(key, item)
+        }
+        return [...majors.values()].flatMap(({ product, major, fallback, byAnchor }) =>
+          [majorSegment(major), major].map((segment) => ({
+            params: { locale, product, major: segment },
+            props: { redirectTo: fallback ?? localePath(locale, product), byAnchor },
+          })),
+        )
+      }),
+    )
+  ).flat()
+  return [...pages, ...legacy, ...unlistedMajors]
 }) satisfies GetStaticPaths
 
 // 跳转页自己写：Astro.redirect 的 meta refresh 会丢掉 #v1.4.1 这样的小版本锚点
 if ('redirectTo' in Astro.props) {
   const to = Astro.props.redirectTo as string
+  const byAnchor = 'byAnchor' in Astro.props ? (Astro.props.byAnchor as Record<string, string>) : undefined
   const canonical = new URL(to, Astro.site).toString()
+  // With anchors to resolve, the script decides where to go; the meta refresh is then only the
+  // fallback for readers without scripts, behind <noscript> so it can't win the race.
+  const refresh = `<meta http-equiv="refresh" content="0;url=${to}">`
+  const script = byAnchor
+    ? `var a=${JSON.stringify(byAnchor)},h=decodeURIComponent(location.hash.slice(1));` +
+      `location.replace(Object.prototype.hasOwnProperty.call(a,h)?a[h]:${JSON.stringify(to)})`
+    : `location.replace(${JSON.stringify(to)} + location.hash)`
   return new Response(
     `<!doctype html><meta charset="utf-8"><title>Redirecting…</title><meta name="robots" content="noindex">` +
-      `<link rel="canonical" href="${canonical}"><meta http-equiv="refresh" content="0;url=${to}">` +
-      `<script>location.replace(${JSON.stringify(to)} + location.hash)</script><a href="${to}">${canonical}</a>`,
+      `<link rel="canonical" href="${canonical}">${byAnchor ? `<noscript>${refresh}</noscript>` : refresh}` +
+      `<script>${script}</script><a href="${to}">${canonical}</a>`,
     { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
   )
 }
@@ -122,9 +167,9 @@ const rail: RailItem[] = siblings.flatMap((item) => {
   ]
 })
 
-// Previews have no section here; links to their old anchors (/v1.0#v1.0.0-preview.4) are forwarded to the preview's own page
+// Previews and unlisted releases have no section here; links to their old anchors (/v1.0#v1.0.0-preview.4) are forwarded to the preview's own page
 const movedPreviews = Object.fromEntries(
-  (await listPreviews(locale))
+  (await listStandalone(locale))
     .filter(
       (release) =>
         release.data.product === group.product.id && majorOf(release.data.version) === major,

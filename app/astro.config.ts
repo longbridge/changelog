@@ -33,7 +33,12 @@ export default defineConfig({
         // 不带 v 的旧大版本地址只是跳转页
         !new RegExp(`/${SITE_SEGMENT}/[^/]+/\\d[^/]*/?$`).test(new URL(page).pathname) &&
         // Preview pages are reachable by link only, see previewPath()
-        !new RegExp(`/${SITE_SEGMENT}/[^/]+/v[^/]+/[^/]+/?$`).test(new URL(page).pathname),
+        !new RegExp(`/${SITE_SEGMENT}/[^/]+/v[^/]+/[^/]+/?$`).test(new URL(page).pathname) &&
+        // A major without a listed release only has a forwarding page at its address
+        (!new RegExp(`/${SITE_SEGMENT}/[^/]+/v[^/]+/?$`).test(new URL(page).pathname) ||
+          lastmod.has(
+            new URL(page).pathname.replace(/\/$/, '').slice(siteConfig.base.replace(/\/$/, '').length),
+          )),
       // 地址统一成不带尾斜杠；lastmod 取这一页上最新一次发布的时间，没有发布的页面不写
       serialize: (item) => {
         const url = item.url.replace(/\/$/, '')

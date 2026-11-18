@@ -39,6 +39,7 @@ interface Meta {
   status: 'draft' | 'published' | 'skipped'
   releasedAt: string
   prerelease?: boolean
+  unlisted?: boolean
 }
 
 interface Entry {
@@ -243,8 +244,8 @@ if (linksFile) {
         const links = LOCALES.map((locale) => {
           const entry = group.byLocale[locale]
           if (!entry) return `~~${locale}~~`
-          // Previews have their own page, which works whether or not the preview is still listed
-          const href = entry.meta.prerelease
+          // Previews and unlisted releases have their own page
+          const href = entry.meta.prerelease || entry.meta.unlisted
             ? `${site}/${locale}/${SITE_SEGMENT}/${group.product}/v${major}/${entry.slug}`
             : `${site}/${locale}/${SITE_SEGMENT}/${group.product}/v${major}#${entry.slug}`
           return `[${locale}](${href})`
@@ -271,7 +272,7 @@ const rows = report
     const links = LOCALES.map((locale) => {
       const entry = group.byLocale[locale]
       if (!entry) return `<span class="lang lang--missing">${locale}</span>`
-      const href = entry.meta.prerelease
+      const href = entry.meta.prerelease || entry.meta.unlisted
         ? `../${locale}/${SITE_SEGMENT}/${group.product}/v${major}/${entry.slug}/index.html`
         : `../${locale}/${SITE_SEGMENT}/${group.product}/v${major}/index.html#${entry.slug}`
       return `<a class="lang" href="${href}">${locale}</a>`
