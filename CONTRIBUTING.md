@@ -62,7 +62,7 @@ Then follow [Publishing release notes](README.md#publishing-release-notes). The 
 
 - Cut one branch per release from `main`: `release/<product>-<version>`, and open a PR to `main`.
 - Every PR gets a preview on Cloudflare Pages; the link is commented on the PR and stays the same as you push.
-- To go live, click **Enable auto-merge** on the PR (the agent does this when you say "go live"). The code owner (see [`.github/CODEOWNERS`](.github/CODEOWNERS)) gets a Slack message, approves it under **Files changed** → **Review changes** → **Approve**, and the PR merges and deploys production by itself.
+- To go live, click **Enable auto-merge** on the PR (the agent does this when you say "go live"). The approver gets a Slack message, approves it under **Files changed** → **Review changes** → **Approve**, and the PR merges and deploys production by itself.
 - A new push dismisses earlier approvals. Never push to `main` directly.
 
 ### Commit messages

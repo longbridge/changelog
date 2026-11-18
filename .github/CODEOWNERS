@@ -1,2 +1,3 @@
-# Every PR to main needs an approval from a code owner before it can be merged.
-* @tzyito @ylinwind @madcodelife
+# Default owner of the repository. Merging into main needs one approval from
+# anyone with write access; code owners are not required to approve.
+* @tzyito

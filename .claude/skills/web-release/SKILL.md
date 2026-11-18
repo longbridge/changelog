@@ -191,13 +191,13 @@ gh pr create --base main --title "feat(<product>): release notes for <version>"
 Wait for `check` and `preview` (`gh pr checks --watch`). The preview bot comments the link on the PR; review at `https://pr-<number>.<project>.pages.dev` and `https://pr-<number>.<project>.pages.dev/<locale>/changelog/<product>/v<major>#<tag>`. The project is the repo variable `CLOUDFLARE_PAGES_PROJECT`, currently `longbridge-changelog`.
 If something's wrong, keep pushing to this branch; the preview URL stays the same. When the PR is closed or merged, the `cleanup` job deletes its previews and the link returns 404.
 
-Merge only after the user explicitly says to go live. `main` needs an approval from a code owner (`.github/CODEOWNERS`); `--auto` merges as soon as it's approved:
+Merge only after the user explicitly says to go live. `main` needs one approval from someone with write access (not the PR author); `--auto` merges as soon as it's approved:
 
 ```bash
 gh pr merge <number> --auto --merge --delete-branch
 ```
 
-Enabling auto-merge (this command, or **Enable auto-merge** on the PR page) sends the code owner a Slack message with the preview and PR links. Tell the user the PR is waiting for that approval; the approver opens the PR → **Files changed** → **Review changes** → **Approve**, and it merges itself. Don't bypass the review. Pushing after the approval dismisses it.
+Enabling auto-merge (this command, or **Enable auto-merge** on the PR page) sends the approver a Slack message with the preview and PR links. Tell the user the PR is waiting for that approval; the approver opens the PR → **Files changed** → **Review changes** → **Approve**, and it merges itself. Don't bypass the review. Pushing after the approval dismisses it.
 
 Never push to `main` directly. If the `production` environment requires approval, point the user to the Actions page; never bypass it.
 
