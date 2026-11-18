@@ -48,27 +48,33 @@ async function listVisibleReleases(locale: Locale): Promise<Release[]> {
     .sort(compareReleases)
 }
 
+/** Previews and unlisted releases are kept out of every list and get a page of their own instead */
+export const isStandalone = (entry: Release): boolean =>
+  entry.data.prerelease || entry.data.unlisted
+
 /**
  * Previews are never listed: lists, product pages, major pages and feeds only carry stable
  * releases. A preview is reached through its own page, see previewPath(), and the home page
- * links to the newest one, see listLatestPreviews().
+ * links to the newest one, see listLatestPreviews(). The same goes for a release marked
+ * `unlisted` (still rolling out), except that nothing links to it.
  */
 export async function listReleases(locale: Locale): Promise<Release[]> {
-  return (await listVisibleReleases(locale)).filter((entry) => !entry.data.prerelease)
+  return (await listVisibleReleases(locale)).filter((entry) => !isStandalone(entry))
 }
 
-/** Every visible preview in a locale, newest first; each one gets its own page */
-export async function listPreviews(locale: Locale): Promise<Release[]> {
-  return (await listVisibleReleases(locale)).filter((entry) => entry.data.prerelease)
+/** Every visible preview or unlisted release in a locale, newest first; each one gets its own page */
+export async function listStandalone(locale: Locale): Promise<Release[]> {
+  return (await listVisibleReleases(locale)).filter(isStandalone)
 }
 
 /**
  * One entry per product: its newest preview, but only while its version is higher than the
  * newest stable release. A patch for the current line (1.1.2 next to 1.2.0-preview.0) keeps the
- * entry point; the 1.2.0 stable release takes it away.
+ * entry point; the 1.2.0 stable release takes it away. An unlisted release counts as not there
+ * yet: it neither gets the entry point nor takes it away from the preview before it.
  */
 export async function listLatestPreviews(locale: Locale): Promise<Release[]> {
-  const entries = await listVisibleReleases(locale)
+  const entries = (await listVisibleReleases(locale)).filter((entry) => !entry.data.unlisted)
   const latest = new Map<string, Release>()
   for (const entry of entries.filter((item) => item.data.prerelease)) {
     const current = latest.get(entry.data.product)

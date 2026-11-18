@@ -24,6 +24,7 @@ interface Frontmatter {
   releasedAt?: string | Date
   status?: string
   prerelease?: boolean
+  unlisted?: boolean
 }
 
 /** Page path (without base, no trailing slash) → newest release date on that page */
@@ -54,7 +55,7 @@ export function releaseLastmod(showDrafts: boolean): Map<string, Date> {
         if (!match) continue
         const data = parse(match[1]) as Frontmatter
         const visible = data.status === 'published' || (showDrafts && data.status === 'draft')
-        if (!visible || data.prerelease || !data.version || !data.releasedAt) continue
+        if (!visible || data.prerelease || data.unlisted || !data.version || !data.releasedAt) continue
         const date = new Date(data.releasedAt)
         if (Number.isNaN(date.getTime())) continue
 

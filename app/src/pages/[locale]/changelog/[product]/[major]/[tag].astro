@@ -12,9 +12,10 @@ import Step from '@components/release/Step.astro'
 import Demo from '@components/release/Demo.astro'
 import Kbd from '@components/release/Kbd.astro'
 import LinkPreview from '@components/release/LinkPreview.astro'
-import { LOCALES, localePath, majorSegment, previewPath, t, type Locale } from '@lib/i18n'
+import { LOCALES, localePath, majorPath, majorSegment, previewPath, t, type Locale } from '@lib/i18n'
 import { getProduct, homepageUrl, majorOf } from '@config/products.config'
-import { listPreviews, slugOf, type Release } from '@lib/releases'
+import { listMajors } from '@lib/majors'
+import { listStandalone, slugOf, type Release } from '@lib/releases'
 
 /** Same map as the major page, so preview MDX renders the same here */
 const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd, LinkPreview, a: LinkPreview }
@@ -22,12 +23,35 @@ const mdxComponents = { Callout, Figure, Video, Compare, Steps, Step, Demo, Kbd,
 /**
  * Every preview gets a page of its own so its URL works from the day it ships.
  * Lists and major pages never show previews; the home page links to the newest one.
+ * A release marked `unlisted` gets the same kind of page, with nothing linking to it.
+ * Listed releases get a forwarding page at the same address, so a link shared while a release
+ * was unlisted keeps working once it moves into its major page.
  */
 export const getStaticPaths = (async () => {
   const byLocale = new Map<Locale, Release[]>()
-  for (const locale of LOCALES) byLocale.set(locale, await listPreviews(locale))
+  for (const locale of LOCALES) byLocale.set(locale, await listStandalone(locale))
 
-  return LOCALES.flatMap((locale) =>
+  const forwarded = (
+    await Promise.all(
+      LOCALES.map(async (locale) =>
+        (await listMajors(locale)).flatMap((group) =>
+          group.releases.map((release) => ({
+            params: {
+              locale,
+              product: group.product.id,
+              major: majorSegment(group.entry.data.major),
+              tag: slugOf(release),
+            },
+            props: {
+              redirectTo: `${majorPath(locale, group.product.id, group.entry.data.major)}#${slugOf(release)}`,
+            },
+          })),
+        ),
+      ),
+    )
+  ).flat()
+
+  const pages = LOCALES.flatMap((locale) =>
     (byLocale.get(locale) ?? []).map((release) => {
       const slug = slugOf(release)
       const major = majorOf(release.data.version)
@@ -51,7 +75,20 @@ export const getStaticPaths = (async () => {
       }
     }),
   )
+  return [...pages, ...forwarded]
 }) satisfies GetStaticPaths
+
+// Written by hand like the legacy major URLs: Astro.redirect's meta refresh can't carry the #<tag> anchor reliably
+if ('redirectTo' in Astro.props) {
+  const to = Astro.props.redirectTo as string
+  const canonical = new URL(to, Astro.site).toString()
+  return new Response(
+    `<!doctype html><meta charset="utf-8"><title>Redirecting…</title><meta name="robots" content="noindex">` +
+      `<link rel="canonical" href="${canonical}"><meta http-equiv="refresh" content="0;url=${to}">` +
+      `<script>location.replace(${JSON.stringify(to)})</script><a href="${to}">${canonical}</a>`,
+    { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+  )
+}
 
 const locale = Astro.params.locale as Locale
 const { release, alternates } = Astro.props as {
@@ -61,7 +98,8 @@ const { release, alternates } = Astro.props as {
 const product = getProduct(release.data.product)
 const productName = product?.name[locale] ?? release.data.product
 const { Content } = await render(release)
-const previewDownloads = product?.previewDownloads
+// An unlisted stable release is not a preview build: no preview badge, no preview installers
+const previewDownloads = release.data.prerelease ? product?.previewDownloads : undefined
 const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data.version)
 ---
 
@@ -135,7 +173,7 @@ const manifestUrl = previewDownloads?.manifest.replace('{version}', release.data
         releasedAt={release.data.releasedAt}
         isDraft={release.data.status === 'draft'}
         draftLabel={t.draftBadge[locale]}
-        prereleaseLabel={t.prereleaseBadge[locale]}
+        prereleaseLabel={release.data.prerelease ? t.prereleaseBadge[locale] : undefined}
       />
     </div>
     {
