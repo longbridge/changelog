@@ -114,6 +114,12 @@ gh pr merge <number> --auto --merge --delete-branch
 Merging deploys production automatically. If the `production` environment requires approval, tell the user to find the approver on the Actions page. Never bypass it.
 After the deploy finishes, give the production URL. The task is done.
 
+## Link-only releases (staged rollout)
+
+When a version is still rolling out and the user wants a page they can share by link but that isn't shown on the site yet, add `unlisted: true` to the release frontmatter in all three locales (keep `status: published`). The page is then only reachable at `https://longbridge.com/<locale>/changelog/<product>/v<major>/<tag>`; lists, major pages, feeds and the sitemap leave it out. The desktop client's own release-notes link for that version also lands on it. This goes through the same gates and PR as any release.
+
+When the user says the rollout is complete, remove `unlisted` in a second PR. The link shared earlier keeps working and forwards to the release's section on the major page. Tell the user that link-only is not access control: anyone with the link can read it, and the repository itself is public.
+
 ## Assets
 
 Images and videos live in the repository and are deployed together with the site. No upload step.

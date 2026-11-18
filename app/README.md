@@ -160,6 +160,8 @@ Longbridge Pro uses `release-notes-json`: its release pipeline publishes one fil
 
 Add `prerelease: true` for a `repo-docs` directory or a `release-notes-json` file that only holds preview builds (Longbridge Pro's preview channel has its own file): the entries are fetched, shown with a "Preview" badge and, within the same day, sorted after the stable release. `since: 'YYYY-MM-DD'` limits a source to versions released on or after that date.
 
+Add `unlisted: true` to a release's frontmatter (all three locales) to publish it as a link-only page while the version is still rolling out: `/<locale>/changelog/<product>/v<major>/<tag>` is built and marked noindex, and the release stays out of lists, major pages, feeds and the sitemap. While its major has no listed release, the major's address with the release's anchor (`/v<major>#<tag>`, also the old form without `v`, which is where the desktop client's release-notes links arrive) forwards to that page; without an anchor it goes to the newest preview. Remove the flag when the rollout is complete; the same URLs then lead to the release's section on its major page.
+
 `<video>` and `<img>` in the source are replaced with the site's `<Video>` / `<Figure>` components, and the source site's `<style>` and layout wrappers are dropped.
 Set `RELEASE_NOTES_GH_TOKEN` to raise the GitHub API rate limit; CI uses the workflow's built-in token.
 
