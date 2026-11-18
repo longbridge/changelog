@@ -1,0 +1,56 @@
+---
+product: longbridge-pro
+version: 1.2.0
+tag: v1.2.0
+locale: zh-HK
+title: "社區、訊息中心與自選股匯入匯出"
+summary: "新增社區和訊息中心，自選股支援用 CSV / Excel 匯入和匯出，個股詳情新增「相關 ETF」。"
+highlights: []
+topics:
+  - 社區
+  - 訊息中心
+  - 個股詳情
+  - 圖表
+  - 財報日曆
+releasedAt: 2026-11-18T00:00:00.000Z
+platforms:
+  - macOS
+  - Windows
+  - Linux
+status: published
+source:
+  provider: release-notes-json
+  repo: assets.lbkrs.com/github/release/longbridge-desktop/stable/release-notes.json
+  url: https://assets.lbkrs.com/github/release/longbridge-desktop/stable/release-notes.json
+---
+
+## 新增
+
+**社區與訊息**
+
+- **社區**：新增個股討論面板和社區視窗，可瀏覽最新 / 熱門 / 達人帖子，並直接發帖、評論、點讚和轉發。
+<Video src="/assets/longbridge-pro/1.2.0/community.mp4" width={1600} height={1000} label="在個股討論面板瀏覽帖子，再打開社區視窗查看社區動態" />
+- **訊息中心**：新增訊息中心，資金變動、社區看點、互動、資訊等通知分類匯總，重要訊息不再錯過。
+<Video src="/assets/longbridge-pro/1.2.0/message-center.mp4" width={1600} height={1000} label="打開訊息中心，按分類查看通知" />
+
+**看盤與研究**
+
+- **個股詳情**：新增「相關 ETF」模組，匯總與該股相關的 ETF，做多、做空、被動持有三類一鍵切換查看。
+- **圖表**：分時圖標出當日最高價和最低價；水平線畫線在價格軸上顯示對應價格；歷史分時的成交量副圖加高，並可拖動調整高度。
+- **財報日曆**：支援按行業和財報類型篩選，並顯示按年變化，快速找到關注板塊的財報。
+- **LongbridgeAI**：打開對話時自動 @ 當前查看的標的，提問無需再手動輸入代碼。
+
+**自選與訂單**
+
+- **自選股**：支援用 CSV / Excel 匯入和匯出自選股，匯入前可預覽變更，方便從其他平台遷移或備份分組。
+<Video src="/assets/longbridge-pro/1.2.0/watchlist-import-export.mp4" width={1600} height={1000} label="用 CSV 檔案匯入自選股，預覽變更後確認，再匯出自選股" />
+- **訂單**：訂單詳情全新改版，委託、成交與費用資訊一目了然，訂單記錄按時間線展示。
+
+## 優化
+
+- 修復了部分正股組成組合期權時，持倉表重複計算這部分正股市值和盈虧的問題。
+- 修復了主單成交後，止盈止損附加單在 K 線上消失、無法拖動改價的問題。
+- 支援用滑鼠側鍵前進 / 後退；所有獨立視窗都可用 `cmd-w` / `ctrl-w` 關閉。
+- 點擊「更新」後直接在標題列顯示下載進度，下載完成一鍵重新啟動，不再彈出進度視窗。
+- 自選列表的價格閃爍預設關閉，需要時可在設定中開啟。
+- 修復了 Windows 上系統喚醒後、以及部分機器啟動時崩潰的問題；重複打開應用時喚起已有視窗，不再多開。
