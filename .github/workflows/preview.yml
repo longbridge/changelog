@@ -36,7 +36,7 @@ defaults:
 jobs:
   preview:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["public","Linux","X64"]') }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
