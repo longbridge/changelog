@@ -25,7 +25,7 @@ defaults:
 
 jobs:
   deploy:
-    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["public","Linux","X64"]') }}
     environment: production
     env:
       OSS_BUCKET: ${{ vars.OSS_BUCKET }}

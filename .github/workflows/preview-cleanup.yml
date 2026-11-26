@@ -20,7 +20,7 @@ jobs:
     concurrency:
       group: preview-pr-${{ github.event.number }}
       cancel-in-progress: false
-    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["public","Linux","X64"]') }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
