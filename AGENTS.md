@@ -18,7 +18,7 @@ app/                              All code; run commands here (cd app)
   config/products.config.ts       Single source of truth for product IDs
   CLAUDE.md                       Code conventions; read before changing anything in app/ other than content
 .claude/skills/                   Four skills with the detailed writing instructions
-.github/workflows/                check (PR checks), preview (Cloudflare Pages preview per PR), deploy (main), sync (scheduled fetch that opens a PR)
+.github/workflows/                check (PR checks), preview* (Cloudflare Pages preview per PR, forks included), deploy (main), sync (scheduled fetch that opens a PR)
 ```
 
 **md is input, mdx is output.** The md is the product manager's own words in one language; the mdx is your rewritten public copy in three locales, with components such as `<Video>` and `<Figure>`.
