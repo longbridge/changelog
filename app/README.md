@@ -63,7 +63,10 @@ Workflows live in `../.github/workflows/`:
 | File | Trigger | What it does |
 | --- | --- | --- |
 | `check.yml` | PR to `main` | `check` + `check:assets`; must pass to merge |
-| `preview.yml` | PR to `main` | Build with drafts → Cloudflare Pages → sticky PR comment with the link to the site root. When the PR is closed or merged, deletes all of its preview deployments |
+| `preview.yml` | PR to `main` from a branch of this repository | Build with drafts → Cloudflare Pages → sticky PR comment with the links |
+| `preview-fork-build.yml` | PR to `main` from a fork | Build with drafts on a GitHub-hosted runner, no secrets; uploads the site as an artifact. First-time contributors need a maintainer to approve the run |
+| `preview-fork-deploy.yml` | `preview-fork-build` finished | Runs the version on `main`: deploys the artifact to Cloudflare Pages (static files only) and comments the links. Runs no code from the PR |
+| `preview-cleanup.yml` | PR closed or merged | Deletes all of the PR's preview deployments, for branches and forks alike. Runs no code from the PR |
 | `notify.yml` | PR set to auto-merge | Posts a Slack message asking the approver to approve, with the preview and PR links. Needs the `SLACK_WEBHOOK_URL` secret (optional `SLACK_APPROVER_ID` to @mention) |
 | `deploy.yml` | Push to `main` | Check → build → upload to OSS with `bun run deploy` |
 | `sync.yml` | Daily schedule, or manual | Fetch + transform; if anything changed, open (or update) a PR from the `sync/releases` branch. Never auto-merges |

@@ -1,0 +1,65 @@
+# When a PR is closed or merged, delete all of its preview deployments, so the links stop working.
+# Covers previews from both preview.yml (branches of this repository) and preview-fork-deploy.yml (forks).
+#
+# pull_request_target runs this file as it is on main, with secrets, also for PRs from forks.
+# That is only safe because nothing here checks out or runs code from the PR. Keep it that way.
+name: preview-cleanup
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  # Management API calls are free; the rate limit is 1200 requests per 5 minutes.
+  cleanup:
+    # Shared with preview-fork-deploy.yml, so a fork preview that is still being deployed is deleted after it lands
+    concurrency:
+      group: preview-pr-${{ github.event.number }}
+      cancel-in-progress: false
+    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+      BRANCH: pr-${{ github.event.number }}
+    steps:
+      - name: Delete preview deployments
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT/deployments"
+          auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
+
+          # Collect first, delete afterwards: deleting while paging would shift the pages
+          ids=()
+          page=1
+          while :; do
+            body=$(curl -fsS "${auth[@]}" "$api?env=preview&per_page=25&page=$page")
+            count=$(jq '.result | length' <<<"$body")
+            [ "$count" -eq 0 ] && break
+            while read -r id; do ids+=("$id"); done < <(jq -r --arg b "$BRANCH" \
+              '.result[] | select(.deployment_trigger.metadata.branch == $b) | .id' <<<"$body")
+            page=$((page + 1))
+          done
+
+          echo "Deleting ${#ids[@]} deployment(s) of $BRANCH"
+          [ "${#ids[@]}" -eq 0 ] && exit 0
+          for id in "${ids[@]}"; do
+            # force: the latest deployment of a branch holds the alias and can't be deleted otherwise
+            curl -fsS -X DELETE "${auth[@]}" "$api/$id?force=true" >/dev/null
+          done
+      # only_update: PRs that never had a preview (e.g. from the sync workflow) get no comment
+      - name: Update the preview comment
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
+        with:
+          header: preview
+          only_update: true
+          message: |
+            ### Preview
+
+            Removed when the PR was closed.
