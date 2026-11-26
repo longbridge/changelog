@@ -1,7 +1,7 @@
 # Every PR to main gets a preview on Cloudflare Pages, with drafts included, and a sticky comment with the links.
 # The URL stays the same for the life of the PR: https://pr-<number>.<project>.pages.dev
 # Preview deployments on pages.dev are served with X-Robots-Tag: noindex.
-# When the PR is closed or merged, the cleanup job deletes all of its deployments, so the links stop working.
+# When the PR is closed or merged, preview-cleanup.yml deletes all of its deployments, so the links stop working.
 #
 # One-time setup in Settings → Secrets and variables → Actions:
 #   Secret    CLOUDFLARE_API_TOKEN       API token with the "Cloudflare Pages: Edit" permission
@@ -10,14 +10,15 @@
 #                                        bunx wrangler pages project create <name> --production-branch=main
 # Without the token the job builds but skips the deployment.
 #
-# PRs from forks don't get secrets, and PRs opened by the sync workflow with GITHUB_TOKEN
-# don't trigger workflows, so neither gets a preview.
+# PRs from forks don't get secrets, so they are built by preview-fork-build.yml and deployed by
+# preview-fork-deploy.yml instead. PRs opened by the sync workflow with GITHUB_TOKEN don't trigger
+# workflows, so they get no preview.
 name: preview
 
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -34,7 +35,7 @@ defaults:
 
 jobs:
   preview:
-    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -96,49 +97,3 @@ jobs:
 
             Drafts are included. This link always shows the latest commit of this PR and stops working when the PR is closed.
             This commit only: ${{ steps.deploy.outputs.deployment-url }} (built from ${{ github.event.pull_request.head.sha }})
-
-  # Management API calls are free; the rate limit is 1200 requests per 5 minutes.
-  cleanup:
-    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
-      BRANCH: pr-${{ github.event.number }}
-    steps:
-      - name: Delete preview deployments
-        if: env.CLOUDFLARE_API_TOKEN != ''
-        working-directory: .
-        run: |
-          set -euo pipefail
-          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT/deployments"
-          auth=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")
-
-          # Collect first, delete afterwards: deleting while paging would shift the pages
-          ids=()
-          page=1
-          while :; do
-            body=$(curl -fsS "${auth[@]}" "$api?env=preview&per_page=25&page=$page")
-            count=$(jq '.result | length' <<<"$body")
-            [ "$count" -eq 0 ] && break
-            while read -r id; do ids+=("$id"); done < <(jq -r --arg b "$BRANCH" \
-              '.result[] | select(.deployment_trigger.metadata.branch == $b) | .id' <<<"$body")
-            page=$((page + 1))
-          done
-
-          echo "Deleting ${#ids[@]} deployment(s) of $BRANCH"
-          [ "${#ids[@]}" -eq 0 ] && exit 0
-          for id in "${ids[@]}"; do
-            # force: the latest deployment of a branch holds the alias and can't be deleted otherwise
-            curl -fsS -X DELETE "${auth[@]}" "$api/$id?force=true" >/dev/null
-          done
-      - name: Update the preview comment
-        if: env.CLOUDFLARE_API_TOKEN != ''
-        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
-        with:
-          header: preview
-          message: |
-            ### Preview
-
-            Removed when the PR was closed.
