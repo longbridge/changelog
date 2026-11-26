@@ -16,6 +16,10 @@ permissions:
 jobs:
   # Management API calls are free; the rate limit is 1200 requests per 5 minutes.
   cleanup:
+    # Shared with preview-fork-deploy.yml, so a fork preview that is still being deployed is deleted after it lands
+    concurrency:
+      group: preview-pr-${{ github.event.number }}
+      cancel-in-progress: false
     runs-on: ${{ fromJSON(vars.LINUX_RUNNER || '["self-hosted","Linux","X64"]') }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
