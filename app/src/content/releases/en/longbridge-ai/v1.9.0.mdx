@@ -1,0 +1,77 @@
+---
+product: longbridge-ai
+version: 1.9.0
+tag: v1.9.0
+locale: en
+title: "Get reminded before you run out of usage"
+summary: "A reminder now appears above the input box before usage runs out, you can delete several chats at once, and agents can use gpt-6.2 and qwen4-max."
+highlights:
+  - "Get reminded before you run out of usage"
+  - "Delete several chats at once"
+  - "Choose gpt-6.2 and qwen4-max models"
+releasedAt: 2026-11-26T00:00:00.000Z
+platforms: [Web]
+status: published
+source:
+  provider: manual
+  repo: releases/longbridge-ai/1.9.0.md
+  url: https://longbridge.com
+---
+
+Unless otherwise noted, the following updates apply to the LongbridgeAI web version.
+
+## Highlights
+
+### Get reminded before you run out of usage
+
+When you reach 80% and 90% of this week's usage, a reminder with the remaining share appears above the input box once each, after an answer finishes. You can view usage details or upgrade your plan, and decide what to ask next. When usage runs out, the notice shows when it resets, so you no longer have to find the reason in a rejected message. Note: Shown only when you are signed in. After you close the remaining-usage reminder, it will not appear again in the current period.
+
+<Figure src="/assets/longbridge-ai/1.9.0/usage-reminder-en.webp" alt="Reminder above the input box showing the share of this week's usage left" caption="When usage is running low, a reminder appears after an answer" width={2400} height={1285} />
+
+### Delete several chats at once
+
+When tidying the sidebar, hold Shift and click each chat you want to select, then right-click to delete them together. Double-click a chat title to rename it directly. Note: You will be asked to confirm before deletion, and deleted chats cannot be recovered.
+
+<Figure src="/assets/longbridge-ai/1.9.0/bulk-delete-chats-en.webp" alt="Delete menu after selecting several chats in the sidebar" caption="Hold Shift to select chats, then right-click to delete them together" width={2400} height={1285} />
+
+### Choose gpt-6.2 and qwen4-max models
+
+When choosing a model for an agent, you can now select OpenAI's `gpt-6.2-astra` and `gpt-6.2-sol`, and Alibaba Cloud's `qwen4-max` with a 1-million-token context. Usage is billed at each model's model card price. Note: Thinking cannot be turned off for either gpt-6.2 model.
+
+<Figure src="/assets/longbridge-ai/1.9.0/new-models-en.webp" alt="Searching the agent model list for gpt-6.2 shows gpt-6.2-astra and gpt-6.2-sol under two providers" caption="New models are available when choosing a model for an agent" width={2400} height={1285} />
+
+## LongbridgeAI
+
+**Improvements:**
+
+1. **Scheduled tasks no longer stop to wait for your reply**: When a scheduled task runs into something unclear, the AI continues with the most reasonable interpretation and tries another approach if one fails, so the task gets done. If it truly cannot continue, it first gives you what it has, then asks one question that you can answer later in the same chat. This applies to all versions.
+
+2. **See why a connector authorization failed**: When connecting a connector does not succeed, you are told the reason, for example that the account limit has been reached, the account is already connected, you signed in with a different account from the one being reconnected, or the authorization has expired, so you know what to fix.
+
+**Bug fixes:**
+
+1. **Plans and agreements match your account's region**: After you sign in, the plans page and agreements follow the region of your account, rather than showing the wrong plans because you earlier opened a promotion link for another region.
+
+2. **Dark mode and long text display**: In dark mode, the trading password dialog now follows the page theme. Hover over text cut off with an ellipsis to see it in full. On a first visit with no theme set, the interface shows the light theme by default.
+
+**Usage changes:**
+
+1. **Shared chats no longer show trading cards**: When others open a chat you shared, they will not see order, account or other trading cards.
+
+## My Agents and workflow building
+
+**New features:**
+
+1. **Upload files in HTTP nodes**: In a workflow's HTTP node, requests can now carry files: choose a file variable, or a text variable holding base64, a data URL or a link, to send the file directly to an external service.
+
+**Improvements:**
+
+1. **Automatic retry with another provider after a content review refusal**: When an agent or workflow answer is refused by a model provider's content safety review, it is retried once with another provider instead of failing. Note: This works only when the selected model is set up with more than one provider. A successful retry is billed by the model that actually answered.
+
+2. **Large tool results no longer fail outright**: When an agent calls tools in batch and the results exceed 64 KiB, the longest lists and text are left out first, with a note on what was omitted, and the rest goes to the AI as usual. It fails only if the results are still too large, and the AI can then narrow its query.
+
+**Bug fixes:**
+
+1. **Workflow variables, iterations and branches**: Appending to a variable keeps its array type. Resuming after a pause for input no longer repeats completed assignments. Iteration nodes skip failed items according to the configured error handling instead of stopping the whole iteration. Parallel branches that output at the same time no longer repeat the answer. Nodes with only one outgoing edge now check its condition as usual.
+
+2. **Knowledge base chunk preview and run log navigation**: Chunk preview in knowledge bases works again. Opening the run log from a message link now jumps straight to that message.
